@@ -1,5 +1,5 @@
 import numpy as np
-from .base import MetricEvaluator
+from rail.evaluation.evaluator import MetricEvaluator
 from rail.evaluation.metric_utils import stat_and_pval
 
 
