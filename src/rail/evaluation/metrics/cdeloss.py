@@ -1,9 +1,9 @@
 import numpy as np
-from rail.evaluation.evaluator import MetricEvaluator
+from rail.evaluation._legacy import _MetricEvaluator
 from rail.evaluation.metric_utils import stat_and_pval
 
 
-class CDELoss(MetricEvaluator):
+class CDELoss(_MetricEvaluator):
     """ Conditional density loss """
     def __init__(self, qp_ens, zgrid, ztrue):
         """Class constructor"""

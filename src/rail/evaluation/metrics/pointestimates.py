@@ -1,8 +1,8 @@
 import numpy as np
 
-from .base import MetricEvaluator
+from rail.evaluation._legacy import _MetricEvaluator
 
-class PointStatsEz(MetricEvaluator):
+class PointStatsEz(_MetricEvaluator):
     """Copied from PZDC1paper repo. Adapted to remove the cut based on
     magnitude."""
 
