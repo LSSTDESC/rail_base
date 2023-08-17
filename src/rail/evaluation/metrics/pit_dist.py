@@ -14,10 +14,10 @@ from qp.metrics.pit import PIT
 from rail.evaluation.metrics.pointestimates import PointSigmaIQR, PointBias, PointOutlierRate, PointSigmaMAD
 
 
-class Evaluator(RailStage):
+class _MetaEvaluator(RailStage):
     """Evaluate the performance of a photo-Z estimator """
 
-    name = 'Evaluator'
+    name = 'MetaEvaluator'
     config_options = RailStage.config_options.copy()
     config_options.update(zmin=Param(float, 0., msg="min z for grid"),
                           zmax=Param(float, 3.0, msg="max z for grid"),
