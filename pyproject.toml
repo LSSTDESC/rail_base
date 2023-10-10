@@ -1,5 +1,6 @@
 [project]
 name = "pz-rail-base"
+requires-python = ">=3.9"
 license = {file = "LICENSE"}
 readme = "README.md"
 authors = [
@@ -25,6 +26,8 @@ dependencies = [
 ]
 
 
+dependencies = []
+
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
 dev = [
@@ -49,8 +52,8 @@ build-backend = "setuptools.build_meta"
 [tool.setuptools_scm]
 write_to = "src/rail/core/_version.py"
 
-[tools.setuptools.packages.find]
-where = ["."]
+[tool.setuptools.packages.find]
+where = ["src"]
 include = ["rail"]
 namespaces = true
 

@@ -1,3 +1,4 @@
+fail_fast: true
 repos:
 
     # Clear output from jupyter notebooks so that only the input cells are committed.
