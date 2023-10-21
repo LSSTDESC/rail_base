@@ -326,16 +326,14 @@ class RailStage(PipelineStage):
             These will be passed to the Handle's iterator method
         """
         handle = self.get_handle(tag, allow_missing=True)
-        try:
-            self._input_length = handle.size(groupname=self.config.hdf5_groupname)
-        except:
-            self._input_length = handle.size()
 
         try:
             self.config.hdf5_groupname
         except:
             self.config.hdf5_groupname = None
-        if handle.path:
+        self._input_length = handle.size(groupname=self.config.hdf5_groupname)
+
+        if handle.path and handle.path!='None':
             total_chunks_needed = ceil(self._input_length/self.config.chunk_size)
             # If the number of process is larger than we need, we wemove some of them
             if total_chunks_needed < self.size:  #pragma: no cover
