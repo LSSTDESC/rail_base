@@ -326,10 +326,19 @@ class RailStage(PipelineStage):
             These will be passed to the Handle's iterator method
         """
         handle = self.get_handle(tag, allow_missing=True)
-        if self.config.hdf5_groupname and handle.path: 
+        try:
             self._input_length = handle.size(groupname=self.config.hdf5_groupname)
+        except:
+            self._input_length = handle.size()
+
+        try:
+            self.config.hdf5_groupname
+        except:
+            self.config.hdf5_groupname = None
+        if handle.path:
             total_chunks_needed = ceil(self._input_length/self.config.chunk_size)
-            if total_chunks_needed<self.size:  #pragma: no cover
+            # If the number of process is larger than we need, we wemove some of them
+            if total_chunks_needed < self.size:  #pragma: no cover
                 color = self.rank+1 <= total_chunks_needed
                 newcomm = self.comm.Split(color=color,key=self.rank)
                 if color:
@@ -342,17 +351,15 @@ class RailStage(PipelineStage):
                           parallel_size=self.size)
             kwcopy.update(**kwargs)
             return handle.iterator(**kwcopy)
-                # If data is in memory and not in a file, it means is small enough to process it
-                # in a single chunk.
+        # If data is in memory and not in a file, it means is small enough to process it
+        # in a single chunk.
         else:  #pragma: no cover
             if self.config.hdf5_groupname:
                 test_data = self.get_data('input')[self.config.hdf5_groupname]
             else:
                 test_data = self.get_data('input')
             s = 0
-            e = len(list(test_data.items())[0][1])
-            self._input_length=e
-            iterator=[[s, e, test_data]]
+            iterator=[[s, self._input_length, test_data]]
             return iterator
 
     def connect_input(self, other, inputTag=None, outputTag=None):

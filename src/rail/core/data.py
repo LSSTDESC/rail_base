@@ -35,6 +35,7 @@ class DataHandle:
         self.fileObj = None
         self.groups = None
         self.partial = False
+        self.lenght = None
 
     def open(self, **kwargs):
         """Open and return the associated file
@@ -309,6 +310,17 @@ class QPHandle(DataHandle):
         if not isinstance(data, qp.Ensemble):
             raise TypeError(f"Expected `data` to be a `qp.Ensemble`, but {type(data)} was provided. Perhaps you meant to use `TableHandle`?")
 
+    # @classmethod
+    def _size(cls, path, **kwargs):
+        if path == 'None':
+            return cls.data.npdf
+        return tables_io.io.getInputDataLengthHdf5(path, groupname='data')
+
+    @classmethod
+    def _iterator(cls, path, **kwargs):
+        """Iterate over the data"""
+        kwargs.pop('groupname','None')
+        return qp.iterator(path, **kwargs)
 
 def default_model_read(modelfile):
     """Default function to read model files, simply used pickle.load"""
