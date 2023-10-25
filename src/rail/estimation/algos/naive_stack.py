@@ -35,6 +35,7 @@ class NaiveStackSummarizer(PZSummarizer):
                           nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
                           seed=Param(int, 87, msg="random seed"),
                           nsamples=Param(int, 1000, msg="Number of sample distributions to create"))
+    inputs = [('input', QPHandle)]
     outputs = [('output', QPHandle),
                ('single_NZ', QPHandle)]
 

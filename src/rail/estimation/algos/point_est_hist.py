@@ -37,6 +37,7 @@ class PointEstHistSummarizer(PZSummarizer):
                           seed=Param(int, 87, msg="random seed"),
                           point_estimate=Param(str, 'zmode', msg="Which point estimate to use"),
                           nsamples=Param(int, 1000, msg="Number of sample distributions to return"))
+    input = [('input', QPHandle)]
     outputs = [('output', QPHandle),
                ('single_NZ', QPHandle)]
 
