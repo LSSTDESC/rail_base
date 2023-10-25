@@ -55,6 +55,7 @@ class VarInfStackSummarizer(PZSummarizer):
                           seed=Param(int, 87, msg="random seed"),
                           niter=Param(int, 100, msg="The number of iterations in the variational inference"),
                           nsamples=Param(int, 500, msg="The number of samples used in dirichlet uncertainty"))
+    inputs = [('input', QPHandle)]
     outputs = [('output', QPHandle),
                ('single_NZ', QPHandle)]
 
