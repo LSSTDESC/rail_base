@@ -107,7 +107,7 @@ def test_pq_handle():
 
 
 def test_qp_handle():
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.fits")
+    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5")
     handle = do_data_handle(datapath, QPHandle)
     qpfile = handle.open()
     assert qpfile
