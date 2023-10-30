@@ -285,6 +285,8 @@ class RailStage(PipelineStage):
         else:
             if path is None:
                 arg_data = data
+            elif not os.path.isfile(path):
+                raise FileNotFoundError(f"Unable to find file: {path}")
             else:
                 arg_data = None
 
