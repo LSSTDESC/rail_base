@@ -287,3 +287,30 @@ def test_common_params():
     assert par.default == 0.1
     assert par.value == 0.1
     assert par.dtype == float
+
+
+def test_set_data_nonexistent_file():
+    """Create an instance of a child class of RailStage. Exercise the `set_data`
+    method and pass in a path to a nonexistent file. A `FileNotFound` exception
+    should be raised.
+    """
+
+    col_map = ColumnMapper.make_stage(name="col_map", columns={})
+    with pytest.raises(FileNotFoundError) as err:
+        col_map.set_data("model", None, path="./bad_directory/no_file.py")
+        assert "Unable to find file" in err.context
+
+def test_set_data_real_file():
+    """Create an instance of a child class of RailStage. Exercise the `set_data`
+    method and pass in a path to model. The output of set_data should be `None`.
+    """
+    DS = RailStage.data_store
+    DS.clear()
+    model_path = os.path.join(RAILDIR, "rail", "examples_data", "estimation_data", "data", "CWW_HDFN_prior.pkl")
+    DS.add_data("model", None, ModelHandle, path=model_path)
+
+    col_map = ColumnMapper.make_stage(name="col_map", columns={})
+
+    ret_val = col_map.set_data("model", None, path=model_path, do_read=False)
+
+    assert ret_val is None
