@@ -35,7 +35,7 @@ class DataHandle:
         self.fileObj = None
         self.groups = None
         self.partial = False
-        self.lenght = None
+        self.length = None
 
     def open(self, **kwargs):
         """Open and return the associated file
@@ -90,14 +90,14 @@ class DataHandle:
     def _write(cls, data, path, **kwargs):
         raise NotImplementedError("DataHandle._write")  #pragma: no cover
 
-    def initialize_write(self, data_lenght, **kwargs):
+    def initialize_write(self, data_length, **kwargs):
         """Initialize file to be written by chunks"""
         if self.path is None:  #pragma: no cover
             raise ValueError("TableHandle.write() called but path has not been specified")
-        self.groups, self.fileObj = self._initialize_write(self.data, os.path.expandvars(self.path), data_lenght, **kwargs)
+        self.groups, self.fileObj = self._initialize_write(self.data, os.path.expandvars(self.path), data_length, **kwargs)
 
     @classmethod
-    def _initialize_write(cls, data, path, data_lenght, **kwargs):
+    def _initialize_write(cls, data, path, data_length, **kwargs):
         raise NotImplementedError("DataHandle._initialize_write") #pragma: no cover
 
     def write_chunk(self, start, end, **kwargs):
@@ -233,18 +233,18 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
     suffix = 'hdf5'
 
     @classmethod
-    def _initialize_write(cls, data, path, data_lenght, **kwargs):
-        initial_dict = cls._get_allocation_kwds(data, data_lenght)
+    def _initialize_write(cls, data, path, data_length, **kwargs):
+        initial_dict = cls._get_allocation_kwds(data, data_length)
         comm = kwargs.get('communicator', None)
         group, fout = tables_io.io.initializeHdf5WriteSingle(path, groupname=None, comm=comm, **initial_dict)
         return group, fout
 
     @classmethod
-    def _get_allocation_kwds(cls, data, data_lenght):
+    def _get_allocation_kwds(cls, data, data_length):
         keywords = {}
         for key, array in data.items():
             shape = list(array.shape)
-            shape[0] = data_lenght
+            shape[0] = data_length
             keywords[key] = (shape, array.dtype)
         return keywords
 
@@ -293,9 +293,9 @@ class QPHandle(DataHandle):
         return data.write_to(path)
 
     @classmethod
-    def _initialize_write(cls, data, path, data_lenght, **kwargs):
+    def _initialize_write(cls, data, path, data_length, **kwargs):
         comm = kwargs.get('communicator', None)
-        return data.initializeHdf5Write(path, data_lenght, comm)
+        return data.initializeHdf5Write(path, data_length, comm)
 
     @classmethod
     def _write_chunk(cls, data, fileObj, groups, start, end, **kwargs):
