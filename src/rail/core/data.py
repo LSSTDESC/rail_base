@@ -359,7 +359,7 @@ class ModelDict(dict):
         """Write the model, this default implementation uses pickle"""
         if writer is None:
             writer = default_model_write
-        if force or path not in self:
+        if force or path not in self or not os.path.exists(path):
             self.__setitem__(path, model)
             writer(model, path)
 
