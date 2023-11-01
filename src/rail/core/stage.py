@@ -358,7 +358,10 @@ class RailStage(PipelineStage):
                 test_data = self.get_data('input')[self.config.hdf5_groupname]
             else:
                 test_data = self.get_data('input')
-            self._input_length = len(test_data)
+            max_l = 0
+            for k, v in test_data.items():
+                max_l = max(max_l, len(v))
+            self._input_length = max_l
             s = 0
             iterator=[[s, self._input_length, test_data]]
             return iterator
