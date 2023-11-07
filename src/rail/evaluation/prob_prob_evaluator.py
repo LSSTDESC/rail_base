@@ -22,15 +22,15 @@ class ProbProbEvaluator(Evaluator):
 
     def __init__(self, args, comm=None):
         Evaluator.__init__(self, args, comm=comm)
+        self._output_handle = None
 
     def run(self):
-        out_table = {}
         print(f"Requested metrics: {self.config.metrics}")
 
         estimate_iterator = self.input_iterator('input')
-        
+
         #! Correct the following line to be 'truth' !!!
-        # comparison_iterator = self.input_iterator('input') 
+        # comparison_iterator = self.input_iterator('input')
 
         #! Need to implement something to ensure that the iterators are aligned.
 
@@ -40,9 +40,7 @@ class ProbProbEvaluator(Evaluator):
             self._process_chunk(s, e, data, first)
             first = False
 
-
-        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
-        self.add_data('output', data=out_table_to_write)
+        self._output_handle.finalize_write()
 
     def _process_chunk(self, start, end, data, first):
         out_table = {}
@@ -53,9 +51,10 @@ class ProbProbEvaluator(Evaluator):
             except KeyError:
                 print(f"User requested unrecognized metric: {metric} - Skipping.")
 
+        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
+
         if first:
-            # Need to determine how to correctly initialize this
-            pass
-        else:
-            # Remove the "else", but figure out the correct "non-first" logic.
-            pass
+            self._output_handle = self.add_handle('output', data=out_table_to_write)
+            self._output_handle.initialize_write(self._input_length, communicator=self.comm)
+        self._output_handle.set_data(out_table_to_write, partial=True)
+        self._output_handle.write_chunk(start, end)
