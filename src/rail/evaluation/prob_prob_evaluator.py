@@ -1,7 +1,7 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics import calculate_goodness_of_fit
+from qp.metrics import calculate_goodness_of_fit, calculate_kld
 
 from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
@@ -14,7 +14,9 @@ class ProbProbEvaluator(Evaluator):
     config_options = RailStage.config_options.copy()
     config_options.update(
         metrics=Param(list, [], msg="The metrics you want to evaluate."),
-        chunk_size=Param(int, 1000, msg="The default number of PDFs to evaluate per loop.")
+        chunk_size=Param(int, 1000, msg="The default number of PDFs to evaluate per loop."),
+        limits=Param(tuple, (0.0, 3.0), msg="The default end points for calculating metrics on a grid."),
+        dx=Param(float, 0.01, msg="The default step size when calculating metrics on a grid."),
     )
     inputs = [('input', QPHandle),
               ('truth', QPHandle)]
@@ -50,6 +52,8 @@ class ProbProbEvaluator(Evaluator):
                 out_table[metric] = calculate_goodness_of_fit(data, data, fit_metric=metric)
             except KeyError:
                 print(f"User requested unrecognized metric: {metric} - Skipping.")
+                if metric == 'kld':
+                    out_table[metric] = calculate_kld(data, data, self.config.limits, self.config.dx)
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
