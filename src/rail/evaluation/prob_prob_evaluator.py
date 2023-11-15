@@ -1,11 +1,16 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics import calculate_goodness_of_fit, calculate_kld
+from qp.metrics.concrete_metric_classes import DistToDistMetric
 
 from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.evaluator import Evaluator
+
+# dynamically build a dictionary of all available metrics of the appropriate type
+METRIC_DICT = {}
+for subcls in DistToDistMetric.__subclasses__():
+    METRIC_DICT[subcls.metric_name] = subcls
 
 class ProbProbEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference PDFs"""
@@ -13,10 +18,18 @@ class ProbProbEvaluator(Evaluator):
     name = 'ProbProbEvaluator'
     config_options = RailStage.config_options.copy()
     config_options.update(
-        metrics=Param(list, [], msg="The metrics you want to evaluate."),
-        chunk_size=Param(int, 1000, msg="The default number of PDFs to evaluate per loop."),
-        limits=Param(tuple, (0.0, 3.0), msg="The default end points for calculating metrics on a grid."),
-        dx=Param(float, 0.01, msg="The default step size when calculating metrics on a grid."),
+        metrics=Param(list, [], required=False,
+            msg="The metrics you want to evaluate."),
+        chunk_size=Param(int, 1000, required=False,
+            msg="The default number of PDFs to evaluate per loop."),
+        limits=Param(tuple, (0.0, 3.0), required=False,
+            msg="The default end points for calculating metrics on a grid."),
+        dx=Param(float, 0.01, required=False,
+            msg="The default step size when calculating metrics on a grid."),
+        num_samples=Param(int, 100, required=False,
+            msg="The number of random samples to select for certain metrics."),
+        _random_state=Param(float, default=None, required=False,
+            msg="Random seed value to use for reproducible results."),
     )
     inputs = [('input', QPHandle),
               ('truth', QPHandle)]
@@ -47,13 +60,15 @@ class ProbProbEvaluator(Evaluator):
     def _process_chunk(self, start, end, data, first):
         out_table = {}
         for metric in self.config.metrics:
-            try:
-                #! Fix the next line since it's just data vs. data !!!
-                out_table[metric] = calculate_goodness_of_fit(data, data, fit_metric=metric)
-            except KeyError:
-                print(f"User requested unrecognized metric: {metric} - Skipping.")
-                if metric == 'kld':
-                    out_table[metric] = calculate_kld(data, data, self.config.limits, self.config.dx)
+            if metric not in METRIC_DICT:
+                #! Make the following a logged error instead of bailing out of the stage.
+                # raise ValueError(
+                # f"Unsupported metric requested: '{metric}'.
+                # Available metrics are: {METRIC_DICT.keys()}")
+                continue
+
+            this_metric = METRIC_DICT[metric](**self.config.to_dict())
+            out_table[metric] = this_metric.evaluate(data, data)
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
