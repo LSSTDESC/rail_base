@@ -28,7 +28,7 @@ class RailEnv:
     @classmethod
     def print_rail_packages(cls):
         """Print all the packages that are available in the RAIL ecosystem"""
-        if not cls.PACKAGES:
+        if not cls.PACKAGES:  # pragma: no cover
             cls.list_rail_packages()
         for pkg_name, pkg in cls.PACKAGES.items():
             print(f"{pkg_name} @ {pkg[0].path}")
