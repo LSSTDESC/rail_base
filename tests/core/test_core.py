@@ -17,7 +17,7 @@ from rail.core.data import (
     TableHandle,
 )
 from rail.core.stage import RailStage
-from rail.core.utils import RAILDIR
+from rail.core.utils import RAILDIR, find_rail_file
 from rail.core.util_stages import (
     ColumnMapper,
     RowSelector,
@@ -28,6 +28,12 @@ from rail.core.util_stages import (
 # def test_data_file():
 #    with pytest.raises(ValueError) as errinfo:
 #        df = DataFile('dummy', 'x')
+
+def test_find_rail_file():
+    afile = find_rail_file(os.path.join("examples_data", "testdata", "test_dc2_training_9816.pq"))
+    assert afile
+    with pytest.raises(ValueError):
+        _not_a_file = find_rail_file("not_a_file")
 
 
 def test_util_stages():
