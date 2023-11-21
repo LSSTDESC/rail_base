@@ -6,10 +6,10 @@ N (z) of the training set.
 """
 
 import numpy as np
-from ceci.config import StageParameter as Param
-from rail.estimation.estimator import CatEstimator, CatInformer
-from rail.core.common_params import SHARED_PARAMS
 import qp
+from rail.estimation.estimator import CatEstimator
+from rail.estimation.informer import CatInformer
+from rail.core.common_params import SHARED_PARAMS
 
 
 class trainZmodel:
@@ -17,6 +17,7 @@ class trainZmodel:
     Temporary class to store the single trainZ pdf for trained model.
     Given how simple this is to compute, this seems like overkill.
     """
+
     def __init__(self, zgrid, pdf, zmode):
         self.zgrid = zgrid
         self.pdf = pdf
@@ -24,24 +25,25 @@ class trainZmodel:
 
 
 class TrainZInformer(CatInformer):
-    """Train an Estimator which returns a global PDF for all galaxies
-    """
+    """Train an Estimator which returns a global PDF for all galaxies"""
 
-    name = 'TrainZInformer'
+    name = "TrainZInformer"
     config_options = CatInformer.config_options.copy()
-    config_options.update(zmin=SHARED_PARAMS,
-                          zmax=SHARED_PARAMS,
-                          nzbins=SHARED_PARAMS,
-                          redshift_col=SHARED_PARAMS)
+    config_options.update(
+        zmin=SHARED_PARAMS,
+        zmax=SHARED_PARAMS,
+        nzbins=SHARED_PARAMS,
+        redshift_col=SHARED_PARAMS,
+    )
 
     def __init__(self, args, comm=None):
         CatInformer.__init__(self, args, comm=comm)
 
     def run(self):
         if self.config.hdf5_groupname:
-            training_data = self.get_data('input')[self.config.hdf5_groupname]
+            training_data = self.get_data("input")[self.config.hdf5_groupname]
         else:  # pragma: no cover
-            training_data = self.get_data('input')
+            training_data = self.get_data("input")
         zbins = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins + 1)
         speczs = np.sort(training_data[self.config.redshift_col])
         train_pdf, _ = np.histogram(speczs, zbins)
@@ -53,18 +55,15 @@ class TrainZInformer(CatInformer):
         train_pdf = train_pdf / norm
         zgrid = midpoints
         self.model = trainZmodel(zgrid, train_pdf, zmode)
-        self.add_data('model', self.model)
+        self.add_data("model", self.model)
 
 
 class TrainZEstimator(CatEstimator):
-    """CatEstimator which returns a global PDF for all galaxies
-    """
+    """CatEstimator which returns a global PDF for all galaxies"""
 
-    name = 'TrainZEstimator'
+    name = "TrainZEstimator"
     config_options = CatEstimator.config_options.copy()
-    config_options.update(zmin=SHARED_PARAMS,
-                          zmax=SHARED_PARAMS,
-                          nzbins=SHARED_PARAMS)
+    config_options.update(zmin=SHARED_PARAMS, zmax=SHARED_PARAMS, nzbins=SHARED_PARAMS)
 
     def __init__(self, args, comm=None):
         self.zgrid = None
@@ -83,7 +82,9 @@ class TrainZEstimator(CatEstimator):
     def _process_chunk(self, start, end, data, first):
         test_size = end - start
         zmode = np.repeat(self.zmode, test_size)
-        qp_d = qp.Ensemble(qp.interp,
-                           data=dict(xvals=self.zgrid, yvals=np.tile(self.train_pdf, (test_size, 1))))
+        qp_d = qp.Ensemble(
+            qp.interp,
+            data=dict(xvals=self.zgrid, yvals=np.tile(self.train_pdf, (test_size, 1))),
+        )
         qp_d.set_ancil(dict(zmode=zmode))
         self._do_chunk_output(qp_d, start, end, first)

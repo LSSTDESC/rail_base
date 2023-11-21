@@ -1,12 +1,12 @@
 """ Base class for PipelineStages in Rail """
 
 import os
+from math import ceil
 
 from ceci import PipelineStage, MiniPipeline
 from ceci.config import StageParameter as Param
 from rail.core.data import DATA_STORE, DataHandle
 
-from math import ceil
 
 class StageIO:
     """A small utility class for Stage Input/ Output
@@ -20,6 +20,7 @@ class StageIO:
 
     This allows users to be more concise when writing pipelines.
     """
+
     def __init__(self, parent):
         self._parent = parent
 
@@ -42,6 +43,7 @@ class RailStageBuild:
     a_stage = StageClass.make_stage(..)
     a_pipe.add_stage(a_stage)
     """
+
     def __init__(self, stage_class, **kwargs):
         self.stage_class = stage_class
         self._kwargs = kwargs
@@ -76,7 +78,7 @@ class RailPipeline(MiniPipeline):
     """
 
     def __init__(self):
-        MiniPipeline.__init__(self, [], dict(name='mini'))
+        MiniPipeline.__init__(self, [], dict(name="mini"))
 
     def __setattr__(self, name, value):
         if isinstance(value, RailStageBuild):
@@ -127,14 +129,15 @@ class RailStage(PipelineStage):
     `self.set_data(inputTag, other.get_handle(outputTag, allow_missing=True), do_read=False)`
     """
 
-    config_options = dict(output_mode=Param(str, 'default',
-                                            msg="What to do with the outputs"))
+    config_options = dict(
+        output_mode=Param(str, "default", msg="What to do with the outputs")
+    )
 
     data_store = DATA_STORE()
 
     def __init__(self, args, comm=None):
-        """ Constructor:
-        Do RailStage specific initialization """
+        """Constructor:
+        Do RailStage specific initialization"""
         PipelineStage.__init__(self, args, comm=comm)
         self._input_length = None
         self.io = StageIO(self)
@@ -156,7 +159,7 @@ class RailStage(PipelineStage):
         -------
         A stage
         """
-        connections = kwargs.pop('connections', {})
+        connections = kwargs.pop("connections", {})
         stage = cls.make_stage(**kwargs)
         for key, val in connections.items():
             stage.set_data(key, val, do_read=False)
@@ -188,7 +191,9 @@ class RailStage(PipelineStage):
         handle = self.data_store.get(aliased_tag)
         if handle is None:
             if not allow_missing:
-                raise KeyError(f'{self.instance_name} failed to get data by handle {aliased_tag}, associated to {tag}')
+                raise KeyError(
+                    f"{self.instance_name} failed to get data by handle {aliased_tag}, associated to {tag}"
+                )
             handle = self.add_handle(tag, path=path)
         return handle
 
@@ -218,8 +223,12 @@ class RailStage(PipelineStage):
             if path is None:
                 path = self.get_output(aliased_tag)
             handle_type = self.get_output_type(tag)
-        handle = handle_type(aliased_tag, path=path, data=data, creator=self.instance_name)
-        print(f"Inserting handle into data store.  {aliased_tag}: {handle.path}, {handle.creator}")
+        handle = handle_type(
+            aliased_tag, path=path, data=data, creator=self.instance_name
+        )
+        print(
+            f"Inserting handle into data store.  {aliased_tag}: {handle.path}, {handle.creator}"
+        )
         self.data_store[aliased_tag] = handle
         return handle
 
@@ -331,39 +340,43 @@ class RailStage(PipelineStage):
 
         try:
             self.config.hdf5_groupname
-        except:
+        except Exception:
             self.config.hdf5_groupname = None
 
-        if handle.path and handle.path!='None':
+        if handle.path and handle.path != "None":   # pylint: disable=no-else-return
             self._input_length = handle.size(groupname=self.config.hdf5_groupname)
-            total_chunks_needed = ceil(self._input_length/self.config.chunk_size)
+            total_chunks_needed = ceil(self._input_length / self.config.chunk_size)
             # If the number of process is larger than we need, we wemove some of them
-            if total_chunks_needed < self.size:  #pragma: no cover
-                color = self.rank+1 <= total_chunks_needed
-                newcomm = self.comm.Split(color=color,key=self.rank)
+            if total_chunks_needed < self.size:  # pragma: no cover
+                color = self.rank + 1 <= total_chunks_needed
+                newcomm = self.comm.Split(color=color, key=self.rank)
                 if color:
                     self.setup_mpi(newcomm)
                 else:
                     quit()
-            kwcopy = dict(groupname=self.config.hdf5_groupname,
-                          chunk_size=self.config.chunk_size,
-                          rank=self.rank,
-                          parallel_size=self.size)
+            kwcopy = dict(
+                groupname=self.config.hdf5_groupname,
+                chunk_size=self.config.chunk_size,
+                rank=self.rank,
+                parallel_size=self.size,
+            )
             kwcopy.update(**kwargs)
             return handle.iterator(**kwcopy)
+
+
         # If data is in memory and not in a file, it means is small enough to process it
         # in a single chunk.
-        else:  #pragma: no cover
+        else:  # pragma: no cover
             if self.config.hdf5_groupname:
-                test_data = self.get_data('input')[self.config.hdf5_groupname]
+                test_data = self.get_data("input")[self.config.hdf5_groupname]
             else:
-                test_data = self.get_data('input')
+                test_data = self.get_data("input")
             max_l = 0
-            for k, v in test_data.items():
+            for _k, v in test_data.items():
                 max_l = max(max_l, len(v))
             self._input_length = max_l
             s = 0
-            iterator=[[s, self._input_length, test_data]]
+            iterator = [[s, self._input_length, test_data]]
             return iterator
 
     def connect_input(self, other, inputTag=None, outputTag=None):
@@ -383,7 +396,7 @@ class RailStage(PipelineStage):
         handle : The input handle for this stage
         """
         if inputTag is None:
-            inputTag = self.inputs[0][0]  #pylint: disable=no-member
+            inputTag = self.inputs[0][0]  # pylint: disable=no-member
         if outputTag is None:
             outputTag = other.outputs[0][0]
         handle = other.get_handle(outputTag, allow_missing=True)
@@ -395,7 +408,7 @@ class RailStage(PipelineStage):
         This can be overridden by sub-classes for more complicated behavior
         """
         handle = self.get_handle(tag, allow_missing=True)
-        if self.config.output_mode == 'default':
+        if self.config.output_mode == "default":
             if not os.path.exists(handle.path):
                 handle.write()
         final_name = PipelineStage._finalize_tag(self, tag)

@@ -1,6 +1,4 @@
-import sys
 import os
-import glob
 import yaml
 
 import rail.stages
@@ -9,8 +7,7 @@ from rail.cli.options import GitMode
 from rail.core.utils import RAILDIR
 
 
-def render_nb(outdir, clear_output, dry_run, inputs, skip, **kwargs):
-
+def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
     command = "jupyter nbconvert"
     options = "--to html"
 
@@ -19,10 +16,10 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **kwargs):
     for nb_file in inputs:
         if nb_file in skip:
             continue
-        subdir = os.path.dirname(nb_file).split('/')[-1]
+        subdir = os.path.dirname(nb_file).split("/")[-1]
         basename = os.path.splitext(os.path.basename(nb_file))[0]
-        outfile = os.path.join('..', '..', outdir, f"{subdir}/{basename}.html")
-        relpath = os.path.join(outdir, f'{subdir}')
+        outfile = os.path.join("..", "..", outdir, f"{subdir}/{basename}.html")
+        relpath = os.path.join(outdir, f"{subdir}")
 
         try:
             print(relpath)
@@ -50,18 +47,17 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **kwargs):
 
     if failed_notebooks:
         raise ValueError(f"The following notebooks failed {str(failed_notebooks)}")
-        
+
 
 def clone_source(outdir, git_mode, dry_run, package_file):
-
-    with open(package_file) as pfile:
+    with open(package_file, encoding='utf-8') as pfile:
         package_dict = yaml.safe_load(pfile)
 
-    for key, val in package_dict.items():
+    for key, _val in package_dict.items():
         if os.path.exists(f"{outdir}/{key}"):
             print(f"Skipping existing {outdir}/{key}")
             continue
-            
+
         if git_mode == GitMode.ssh:
             com_line = f"git clone https://github.com/LSSTDESC/{key}.git {outdir}/{key}"
         elif git_mode == GitMode.https:
@@ -74,43 +70,40 @@ def clone_source(outdir, git_mode, dry_run, package_file):
         else:
             os.system(com_line)
 
-            
-def update_source(outdir, dry_run, package_file):
 
-    with open(package_file) as pfile:
+def update_source(outdir, dry_run, package_file):
+    with open(package_file, encoding='utf-8') as pfile:
         package_dict = yaml.safe_load(pfile)
 
-    currentpath = os.path.abspath('.')    
-    for key, val in package_dict.items():
+    currentpath = os.path.abspath(".")
+    for key, _val in package_dict.items():
         abspath = os.path.abspath(f"{outdir}/{key}")
 
         if os.path.exists(f"{outdir}/{key}") is not True:
             print(f"Package {outdir}/{key} does not exist!")
-            continue            
-                
+            continue
+
         com_line = f"cd {abspath} && git pull && cd {currentpath}"
 
         if dry_run:
             print(com_line)
         else:
             os.system(com_line)
-            
+
 
 def install(outdir, from_source, dry_run, package_file):
-
-    with open(package_file) as pfile:
+    with open(package_file, encoding='utf-8') as pfile:
         package_dict = yaml.safe_load(pfile)
 
     for key, val in package_dict.items():
-
         if not from_source:
             com_line = f"pip install {val}"
-        else:            
+        else:
             if not os.path.exists(f"{outdir}/{key}"):
                 print(f"Skipping missing {outdir}/{key}")
                 continue
             com_line = f"pip install -e {outdir}/{key}"
-        
+
         if dry_run:
             print(com_line)
         else:
@@ -118,27 +111,26 @@ def install(outdir, from_source, dry_run, package_file):
 
 
 def info(**kwargs):
-    
     rail.stages.import_and_attach_all()
 
-    print_all = kwargs.get('print_all', False)
-    if kwargs.get('print_packages') or print_all:
+    print_all = kwargs.get("print_all", False)
+    if kwargs.get("print_packages") or print_all:
         print("======= Printing RAIL packages ==============")
         RailEnv.print_rail_packages()
         print("\n\n")
-    if kwargs.get('print_namespaces') or print_all:
+    if kwargs.get("print_namespaces") or print_all:
         print("======= Printing RAIL namespaces ==============")
         RailEnv.print_rail_namespaces()
         print("\n\n")
-    if kwargs.get('print_modules') or print_all:
+    if kwargs.get("print_modules") or print_all:
         print("======= Printing RAIL modules ==============")
         RailEnv.print_rail_modules()
         print("\n\n")
-    if kwargs.get('print_tree') or print_all:
+    if kwargs.get("print_tree") or print_all:
         print("======= Printing RAIL source tree ==============")
         RailEnv.print_rail_namespace_tree()
         print("\n\n")
-    if kwargs.get('print_stages') or print_all:
+    if kwargs.get("print_stages") or print_all:
         print("======= Printing RAIL stages ==============")
         RailEnv.print_rail_stage_dict()
         print("\n\n")
@@ -168,7 +160,7 @@ def get_data(verbose, **kwargs):  # pragma: no cover
 
     data_files = standard_data_files
     if kwargs.get("bpz_demo_data"):
-        # The bpz demo data is quarantined into its own flag, as it contains some 
+        # The bpz demo data is quarantined into its own flag, as it contains some
         # non-physical features that would add systematics if run on any real data.
         # This data should NOT be used for any science with real data!
         data_files = bpz_data_files

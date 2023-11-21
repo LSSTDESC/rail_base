@@ -9,8 +9,9 @@ be used for their corresponding Estimator, Summarizer, or Classifier stages.
 from rail.core.data import TableHandle, QPHandle, ModelHandle
 from rail.core.stage import RailStage
 
+
 class CatInformer(RailStage):
-    """The base class for informing models used to make photo-z data products  
+    """The base class for informing models used to make photo-z data products
     from catalog-like inputs (i.e., tables with fluxes in photometric bands among
     the set of columns).
 
@@ -26,13 +27,13 @@ class CatInformer(RailStage):
     They take as "input" catalog-like tabular data, which is used to "inform" the model.
     """
 
-    name = 'CatInformer'
+    name = "CatInformer"
     config_options = RailStage.config_options.copy()
-    inputs = [('input', TableHandle)]
-    outputs = [('model', ModelHandle)]
+    inputs = [("input", TableHandle)]
+    outputs = [("model", ModelHandle)]
 
     def __init__(self, args, comm=None):
-        """Initialize Informer that can inform models for redshift estimation """
+        """Initialize Informer that can inform models for redshift estimation"""
         RailStage.__init__(self, args, comm=comm)
         self.model = None
 
@@ -60,10 +61,11 @@ class CatInformer(RailStage):
         model : ModelHandle
             Handle providing access to trained model
         """
-        self.set_data('input', training_data)
+        self.set_data("input", training_data)
         self.run()
         self.finalize()
-        return self.get_handle('model')
+        return self.get_handle("model")
+
 
 class PzInformer(RailStage):
     """The base class for informing models used to make photo-z data products from
@@ -81,13 +83,13 @@ class PzInformer(RailStage):
     They take as "input" a qp.Ensemble of per-galaxy p(z) data, which is used to "inform" the model.
     """
 
-    name = 'PzInformer'
+    name = "PzInformer"
     config_options = RailStage.config_options.copy()
-    inputs = [('input', QPHandle)]
-    outputs = [('model', ModelHandle)]
+    inputs = [("input", QPHandle)]
+    outputs = [("model", ModelHandle)]
 
     def __init__(self, args, comm=None):
-        """Initialize Informer that can inform models for redshift estimation """
+        """Initialize Informer that can inform models for redshift estimation"""
         RailStage.__init__(self, args, comm=comm)
         self.model = None
 
@@ -115,7 +117,7 @@ class PzInformer(RailStage):
         model : ModelHandle
             Handle providing access to trained model
         """
-        self.set_data('input', training_data)
+        self.set_data("input", training_data)
         self.run()
         self.finalize()
-        return self.get_handle('model')
+        return self.get_handle("model")
