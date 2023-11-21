@@ -2,6 +2,7 @@
 
 import os
 import pickle
+import enum
 import tables_io
 import qp
 
@@ -367,6 +368,79 @@ class QPHandle(DataHandle):
         """Iterate over the data"""
         kwargs.pop("groupname", "None")
         return qp.iterator(path, **kwargs)
+
+
+class QPOrTableHandle(QPHandle, Hdf5Handle):
+    """DataHandle that should work with either qp.ensembles or tables
+    """
+    suffix = 'hdf5'
+
+    class PdfOrValue(enum.Enum):
+
+        unknown = -1
+        distritubion = 0
+        point_estimate = 1
+        both = 2
+
+
+    @classmethod
+    def _open(cls, path, **kwargs):
+        """Open and return the associated file
+
+        Notes
+        -----
+        This will simply open the file and return a file-like object to the caller.
+        It will not read or cache the data
+        """
+        return tables_io.io.io_open(path, **kwargs)  #pylint: disable=no-member
+
+    @classmethod
+    def _read(cls, path, **kwargs):
+        """Read and return the data from the associated file """
+        if qp.is_qp_file(path):
+            return QPHandle._read(path)
+        return Hdf5Handle._read(path)
+
+    @classmethod
+    def _write(cls, data, path, **kwargs):
+        """Write the data to the associatied file """
+        if isinstance(data, qp.Ensemble):
+            return QPHandle._write(data, path, **kwargs)
+        return Hdf5Handle._write(data, path, **kwargs)
+
+    @classmethod
+    def _initialize_write(cls, data, path, data_length, **kwargs):
+        if isinstance(data, qp.Ensemble):
+            return QPHandle._initialize_write(data, path, data_length, **kwargs)
+        return Hdf5Handle._initialize_write(data, path, data_length, **kwargs)
+
+    @classmethod
+    def _write_chunk(cls, data, fileObj, groups, start, end, **kwargs):
+        if isinstance(data, qp.Ensemble):
+            return QPHandle._write_chunk(data, fileObj, groups, start, end, **kwargs)
+        return Hdf5Handle._write_chunk(data, fileObj, groups, start, end, **kwargs)
+
+    @classmethod
+    def _finalize_write(cls, data, fileObj, **kwargs):
+        if isinstance(data, qp.Ensemble):
+            return QPHandle._finalize_write(data, fileObj, **kwargs)
+        return Hdf5Handle._finalize_write(data, fileObj, **kwargs)
+
+    @classmethod
+    def _validate_data(cls, data):
+        pass
+
+    def _size(self, path, **kwargs):
+        if qp.is_qp_file(path):
+            return QPHandle._size(self, path, **kwargs)
+        return Hdf5Handle._size(self, path, **kwargs)
+
+    @classmethod
+    def _iterator(cls, path, **kwargs):
+        """Iterate over the data"""
+        if qp.is_qp_file(path):
+            return QPHandle._iterator(path, **kwargs)
+        return Hdf5Handle._iterator(path, **kwargs)
 
 
 def default_model_read(modelfile):
