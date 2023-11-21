@@ -1,6 +1,4 @@
 import tempfile
-import pkgutil
-import setuptools
 
 import rail
 from rail.core import RailEnv
@@ -11,7 +9,7 @@ import rail.stages
 def test_print_rail_packages():
     RailEnv.print_rail_packages()
 
-    
+
 def test_print_rail_namespaces():
     RailEnv.print_rail_namespaces()
 

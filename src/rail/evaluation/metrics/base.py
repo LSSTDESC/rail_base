@@ -1,5 +1,6 @@
 class MetricEvaluator:
-    """ A superclass for metrics evaluations"""
+    """A superclass for metrics evaluations"""
+
     def __init__(self, qp_ens):
         """Class constructor.
         Parameters
@@ -9,7 +10,7 @@ class MetricEvaluator:
         """
         self._qp_ens = qp_ens
 
-    def evaluate(self):  #pragma: no cover
+    def evaluate(self):  # pragma: no cover
         """
         Evaluates the metric a function of the truth and prediction
 

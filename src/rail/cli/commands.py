@@ -11,50 +11,50 @@ def cli() -> None:
 
 
 @cli.command()
-@options.outdir(default='docs')
+@options.outdir(default="docs")
 @options.clear_output()
 @options.dry_run()
 @options.inputs()
 @options.skip()
-def render_nb(outdir, clear_output, dry_run, inputs, skip, **kwargs):
+def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
     """Render jupyter notebooks"""
     return scripts.render_nb(outdir, clear_output, dry_run, inputs, skip)
 
 
 @cli.command()
-@options.outdir(default='..')
+@options.outdir(default="..")
 @options.git_mode()
 @options.dry_run()
 @options.package_file()
-def clone_source(outdir, git_mode, dry_run, package_file, **kwargs):
+def clone_source(outdir, git_mode, dry_run, package_file, **_kwargs):
     """Install packages from source"""
     scripts.clone_source(outdir, git_mode, dry_run, package_file)
     return 0
-   
-    
+
+
 @cli.command()
-@options.outdir(default='..')
+@options.outdir(default="..")
 @options.dry_run()
 @options.package_file()
-def update_source(outdir, dry_run, package_file, **kwargs):
+def update_source(outdir, dry_run, package_file, **_kwargs):
     """Update packages from source"""
     scripts.update_source(outdir, dry_run, package_file)
     return 0
-    
-    
+
+
 @cli.command()
-@options.outdir(default='..')
+@options.outdir(default="..")
 @options.dry_run()
 @options.from_source()
 @options.package_file()
-def install(outdir, dry_run, from_source, package_file, **kwargs):
+def install(outdir, dry_run, from_source, package_file, **_kwargs):
     """Install rail packages one by one, to be fault tolerant"""
     scripts.install(outdir, from_source, dry_run, package_file)
     return 0
-    
+
 
 @cli.command()
-@options.outdir(default='..')
+@options.outdir(default="..")
 @options.print_all()
 @options.print_packages()
 @options.print_namespaces()

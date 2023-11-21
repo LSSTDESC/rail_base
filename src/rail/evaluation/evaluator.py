@@ -12,22 +12,29 @@ from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
 from rail.core.common_params import SHARED_PARAMS
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import PointSigmaIQR, PointBias, PointOutlierRate, PointSigmaMAD
+from rail.evaluation.metrics.pointestimates import (
+    PointSigmaIQR,
+    PointBias,
+    PointOutlierRate,
+    PointSigmaMAD,
+)
 
 
 class Evaluator(RailStage):
-    """Evaluate the performance of a photo-Z estimator """
+    """Evaluate the performance of a photo-Z estimator"""
 
-    name = 'Evaluator'
+    name = "Evaluator"
     config_options = RailStage.config_options.copy()
-    config_options.update(zmin=Param(float, 0., msg="min z for grid"),
-                          zmax=Param(float, 3.0, msg="max z for grid"),
-                          nzbins=Param(int, 301, msg="# of bins in zgrid"),
-                          pit_metrics=Param(str, 'all', msg='PIT-based metrics to include'),
-                          point_metrics=Param(str, 'all', msg='Point-estimate metrics to include'),
-                          hdf5_groupname=Param(str, '', msg='Name of group in hdf5 where redshift data is located'),
-                          do_cde=Param(bool, True, msg='Evaluate CDE Metric'),
-                          redshift_col=SHARED_PARAMS)
+    config_options.update(
+        zmin=Param(float, 0., msg="min z for grid"),
+        zmax=Param(float, 3.0, msg="max z for grid"),
+        nzbins=Param(int, 301, msg="# of bins in zgrid"),
+        pit_metrics=Param(str, 'all', msg='PIT-based metrics to include'),
+        point_metrics=Param(str, 'all', msg='Point-estimate metrics to include'),
+        hdf5_groupname=Param(str, '', msg='Name of group in hdf5 where redshift data is located'),
+        do_cde=Param(bool, True, msg='Evaluate CDE Metric'),
+        redshift_col=SHARED_PARAMS,
+    )
     inputs = [('input', QPHandle),
               ('truth', Hdf5Handle)]
     outputs = [('output', Hdf5Handle)]
@@ -61,14 +68,14 @@ class Evaluator(RailStage):
             The evaluation metrics
         """
 
-        self.set_data('input', data)
-        self.set_data('truth', truth)
+        self.set_data("input", data)
+        self.set_data("truth", truth)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
 
     def run(self):
-        """ Run method
+        """Run method
 
         Evaluate all the metrics and put them into a table
 
@@ -93,16 +100,16 @@ class Evaluator(RailStage):
 
         # Build reference dictionary of the PIT meta-metrics from this PIT instance
         PIT_METRICS = dict(
-            AD=getattr(pitobj, 'evaluate_PIT_anderson_ksamp'),
-            CvM=getattr(pitobj, 'evaluate_PIT_CvM'),
-            KS=getattr(pitobj, 'evaluate_PIT_KS'),
-            OutRate=getattr(pitobj, 'evaluate_PIT_outlier_rate'),
+            AD=getattr(pitobj, "evaluate_PIT_anderson_ksamp"),
+            CvM=getattr(pitobj, "evaluate_PIT_CvM"),
+            KS=getattr(pitobj, "evaluate_PIT_KS"),
+            OutRate=getattr(pitobj, "evaluate_PIT_outlier_rate"),
         )
 
         # Parse the input configuration to determine which meta-metrics should be calculated
-        if self.config.pit_metrics == 'all':
+        if self.config.pit_metrics == "all":
             pit_metrics = list(PIT_METRICS.keys())
-        else:  #pragma: no cover
+        else:  # pragma: no cover
             pit_metrics = self.config.pit_metrics.split()
 
         # Evaluate each of the requested meta-metrics, and store the result in `out_table`
@@ -113,20 +120,25 @@ class Evaluator(RailStage):
             # The result objects of some meta-metrics are bespoke scipy objects with inconsistent fields.
             # Here we do our best to store the relevant fields in `out_table`.
             if isinstance(value, list):  # pragma: no cover
-                out_table[f'PIT_{pit_metric}'] = value
+                out_table[f"PIT_{pit_metric}"] = value
             else:
-                out_table[f'PIT_{pit_metric}_stat'] = [getattr(value, 'statistic', None)]
-                out_table[f'PIT_{pit_metric}_pval'] = [getattr(value, 'p_value', None)]
-                out_table[f'PIT_{pit_metric}_significance_level'] = \
-                    [getattr(value, 'significance_level', None)]
+                out_table[f"PIT_{pit_metric}_stat"] = [
+                    getattr(value, "statistic", None)
+                ]
+                out_table[f"PIT_{pit_metric}_pval"] = [getattr(value, "p_value", None)]
+                out_table[f"PIT_{pit_metric}_significance_level"] = [
+                    getattr(value, "significance_level", None)
+                ]
 
-        POINT_METRICS = dict(SimgaIQR=PointSigmaIQR,
-                             Bias=PointBias,
-                             OutlierRate=PointOutlierRate,
-                             SigmaMAD=PointSigmaMAD)
-        if self.config.point_metrics == 'all':
+        POINT_METRICS = dict(
+            SimgaIQR=PointSigmaIQR,
+            Bias=PointBias,
+            OutlierRate=PointOutlierRate,
+            SigmaMAD=PointSigmaMAD,
+        )
+        if self.config.point_metrics == "all":
             point_metrics = list(POINT_METRICS.keys())
-        else:  #pragma: no cover
+        else:  # pragma: no cover
             point_metrics = self.config.point_metrics.split()
 
         z_mode = None
@@ -134,13 +146,15 @@ class Evaluator(RailStage):
             if z_mode is None:
                 z_mode = np.squeeze(pz_data.mode(grid=zgrid))
             value = POINT_METRICS[point_metric](z_mode, z_true).evaluate()
-            out_table[f'POINT_{point_metric}'] = [value]
+            out_table[f"POINT_{point_metric}"] = [value]
 
         if self.config.do_cde:
             value = CDELoss(pz_data, zgrid, z_true).evaluate()
-            out_table['CDE_stat'] = [value.statistic]
-            out_table['CDE_pval'] = [value.p_value]
+            out_table["CDE_stat"] = [value.statistic]
+            out_table["CDE_pval"] = [value.p_value]
 
-	# Converting any possible None to NaN to write it
-        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
-        self.add_data('output', out_table_to_write)
+        # Converting any possible None to NaN to write it
+        out_table_to_write = {
+            key: np.array(val).astype(float) for key, val in out_table.items()
+        }
+        self.add_data("output", out_table_to_write)
