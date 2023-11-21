@@ -7,7 +7,6 @@ import rail.evaluation.metrics.pointestimates as pe
 from rail.core.data import QPHandle, TableHandle
 from rail.core.stage import RailStage
 from rail.evaluation.evaluator import Evaluator
-from rail.evaluation.metrics.cdeloss import CDELoss
 
 # values for metrics
 OUTRATE = 0.0
@@ -30,7 +29,7 @@ def construct_test_ensemble():
     locs = np.expand_dims(true_zs + np.random.normal(0.0, 0.01, NPDF), -1)
     true_ez = (locs.flatten() - true_zs) / (1.0 + true_zs)
     scales = np.ones((NPDF, 1)) * 0.1 + np.random.uniform(size=(NPDF, 1)) * 0.05
-    n_ens = qp.Ensemble(qp.stats.norm, data=dict(loc=locs, scale=scales))
+    n_ens = qp.Ensemble(qp.stats.norm, data=dict(loc=locs, scale=scales))  # pylint: disable=no-member
     zgrid = np.linspace(0, nmax, 301)
     grid_ens = n_ens.convert_to(qp.interp_gen, xvals=zgrid)
     return zgrid, true_zs, grid_ens, true_ez
@@ -59,11 +58,13 @@ def test_point_metrics():
 
 def test_evaluation_stage():
     DS = RailStage.data_store
-    zgrid, zspec, pdf_ens, true_ez = construct_test_ensemble()
+    _zgrid, zspec, pdf_ens, _true_ez = construct_test_ensemble()
     pdf = DS.add_data("pdf", pdf_ens, QPHandle)
     truth_table = dict(redshift=zspec)
     truth = DS.add_data("truth", truth_table, TableHandle)
     evaluator = Evaluator.make_stage(name="Eval")
     evaluator.evaluate(pdf, truth)
 
-    os.remove(evaluator.get_output(evaluator.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        evaluator.get_output(evaluator.get_aliased_tag("output"), final_name=True)
+    )

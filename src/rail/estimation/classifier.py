@@ -5,33 +5,31 @@ from rail.core.data import QPHandle, TableHandle, ModelHandle
 from rail.core.stage import RailStage
 
 
-class CatClassifier(RailStage):  #pragma: no cover
+class CatClassifier(RailStage):  # pragma: no cover
     """The base class for assigning classes to catalogue-like table.
 
     Classifier uses a generic "model", the details of which depends on the sub-class.
 
     CatClassifier take as "input" a catalogue-like table, assign each object into
-    a tomographic bin, and provide as "output" a tabular data which can be appended 
+    a tomographic bin, and provide as "output" a tabular data which can be appended
     to the catalogue.
     """
-    
-    name='CatClassifier'
+
+    name = "CatClassifier"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=10000, hdf5_groupname=str)
-    inputs = [('model', ModelHandle),
-              ('input', TableHandle)]
-    outputs = [('output', TableHandle)]
-    
+    inputs = [("model", ModelHandle), ("input", TableHandle)]
+    outputs = [("output", TableHandle)]
+
     def __init__(self, args, comm=None):
         """Initialize Classifier"""
         RailStage.__init__(self, args, comm=comm)
         self._output_handle = None
         self.model = None
-        if not isinstance(args, dict):  #pragma: no cover
+        if not isinstance(args, dict):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
-        
-    
+
     def open_model(self, **kwargs):
         """Load the model and/or attach it to this Classifier
 
@@ -47,21 +45,20 @@ class CatClassifier(RailStage):  #pragma: no cover
         self.model : `object`
             The object encapsulating the trained model.
         """
-        model = kwargs.get('model', None)
-        if model is None or model == 'None':
+        model = kwargs.get("model", None)
+        if model is None or model == "None":
             self.model = None
             return self.model
         if isinstance(model, str):
-            self.model = self.set_data('model', data=None, path=model)
-            self.config['model'] = model
+            self.model = self.set_data("model", data=None, path=model)
+            self.config["model"] = model
             return self.model
         if isinstance(model, ModelHandle):
             if model.has_path:
-                self.config['model'] = model.path
-        self.model = self.set_data('model', model)
+                self.config["model"] = model.path
+        self.model = self.set_data("model", model)
         return self.model
-        
-        
+
     def classify(self, input_data):
         """The main run method for the classifier, should be implemented
         in the specific subclass.
@@ -87,30 +84,29 @@ class CatClassifier(RailStage):  #pragma: no cover
         output: `dict`
             Class assignment for each galaxy.
         """
-        self.set_data('input', input_data)
+        self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
-    
+        return self.get_handle("output")
 
-    
+
 class PZClassifier(RailStage):
     """The base class for assigning classes (tomographic bins) to per-galaxy PZ estimates
 
     PZClassifier take as "input" a `qp.Ensemble` with per-galaxy PDFs, and
     provide as "output" a tabular data which can be appended to the catalogue.
     """
-    
-    name='PZClassifier'
+
+    name = "PZClassifier"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=10000)
-    inputs = [('input', QPHandle)]
-    outputs = [('output', TableHandle)]
-    
+    inputs = [("input", QPHandle)]
+    outputs = [("output", TableHandle)]
+
     def __init__(self, args, comm=None):
         """Initialize Classifier"""
         RailStage.__init__(self, args, comm=comm)
-        
+
     def classify(self, input_data):
         """The main run method for the classifier, should be implemented
         in the specific subclass.
@@ -136,7 +132,7 @@ class PZClassifier(RailStage):
         output: `dict`
             Class assignment for each galaxy.
         """
-        self.set_data('input', input_data)
+        self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
