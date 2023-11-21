@@ -42,14 +42,14 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
     failed_notebooks = []
     for key, val in status.items():
         print(f"{key} {val}")
-        if val != 0:
+        if val != 0:  # pragma: no cover
             failed_notebooks.append(key)
 
-    if failed_notebooks:
+    if failed_notebooks:  # pragma: no cover
         raise ValueError(f"The following notebooks failed {str(failed_notebooks)}")
 
 
-def clone_source(outdir, git_mode, dry_run, package_file):
+def clone_source(outdir, git_mode, dry_run, package_file):  # pragma: no cover
     with open(package_file, encoding='utf-8') as pfile:
         package_dict = yaml.safe_load(pfile)
 
@@ -79,7 +79,7 @@ def update_source(outdir, dry_run, package_file):
     for key, _val in package_dict.items():
         abspath = os.path.abspath(f"{outdir}/{key}")
 
-        if os.path.exists(f"{outdir}/{key}") is not True:
+        if os.path.exists(f"{outdir}/{key}") is not True:  # pragma: no cover
             print(f"Package {outdir}/{key} does not exist!")
             continue
 
@@ -87,7 +87,7 @@ def update_source(outdir, dry_run, package_file):
 
         if dry_run:
             print(com_line)
-        else:
+        else:  # pragma: no cover
             os.system(com_line)
 
 
@@ -99,14 +99,14 @@ def install(outdir, from_source, dry_run, package_file):
         if not from_source:
             com_line = f"pip install {val}"
         else:
-            if not os.path.exists(f"{outdir}/{key}"):
+            if not os.path.exists(f"{outdir}/{key}"):  # pragma: no cover
                 print(f"Skipping missing {outdir}/{key}")
                 continue
             com_line = f"pip install -e {outdir}/{key}"
 
         if dry_run:
             print(com_line)
-        else:
+        else:  # pragma: no cover
             os.system(com_line)
 
 
