@@ -1,7 +1,4 @@
 """ Stages that implement utility functions """
-import os
-import numpy as np
-
 import tables_io
 
 from rail.core.stage import RailStage
@@ -20,21 +17,22 @@ class ColumnMapper(RailStage):
     `output_data = input_data.rename(columns=self.config.columns, inplace=self.config.inplace)`
 
     """
-    name = 'ColumnMapper'
+
+    name = "ColumnMapper"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=100_000, columns=dict, inplace=False)
-    inputs = [('input', PqHandle)]
-    outputs = [('output', PqHandle)]
+    inputs = [("input", PqHandle)]
+    outputs = [("output", PqHandle)]
 
     def __init__(self, args, comm=None):
         RailStage.__init__(self, args, comm=comm)
 
     def run(self):
-        data = self.get_data('input', allow_missing=True)
+        data = self.get_data("input", allow_missing=True)
         out_data = data.rename(columns=self.config.columns, inplace=self.config.inplace)
-        if self.config.inplace:  #pragma: no cover
+        if self.config.inplace:  # pragma: no cover
             out_data = data
-        self.add_data('output', out_data)
+        self.add_data("output", out_data)
 
     def __repr__(self):  # pragma: no cover
         printMsg = "Stage that applies remaps the following column names in a pandas DataFrame:\n"
@@ -54,10 +52,10 @@ class ColumnMapper(RailStage):
         table : Table-like
             The degraded sample
         """
-        self.set_data('input', data)
+        self.set_data("input", data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
 
 
 class RowSelector(RailStage):
@@ -71,19 +69,20 @@ class RowSelector(RailStage):
     `output_data = input_data[self.config.start:self.config.stop]`
 
     """
-    name = 'RowSelector'
+
+    name = "RowSelector"
     config_options = RailStage.config_options.copy()
     config_options.update(start=int, stop=int)
-    inputs = [('input', PqHandle)]
-    outputs = [('output', PqHandle)]
+    inputs = [("input", PqHandle)]
+    outputs = [("output", PqHandle)]
 
     def __init__(self, args, comm=None):
         RailStage.__init__(self, args, comm=comm)
 
     def run(self):
-        data = self.get_data('input', allow_missing=True)
-        out_data = data.iloc[self.config.start:self.config.stop]
-        self.add_data('output', out_data)
+        data = self.get_data("input", allow_missing=True)
+        out_data = data.iloc[self.config.start : self.config.stop]
+        self.add_data("output", out_data)
 
     def __repr__(self):  # pragma: no cover
         printMsg = "Stage that applies remaps the following column names in a pandas DataFrame:\n"
@@ -103,10 +102,10 @@ class RowSelector(RailStage):
         table : table-like
             The degraded sample
         """
-        self.set_data('input', data)
+        self.set_data("input", data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
 
 
 class TableConverter(RailStage):
@@ -115,20 +114,21 @@ class TableConverter(RailStage):
     FIXME, this is hardwired to convert parquet tables to Hdf5Tables.
     It would be nice to have more options here.
     """
-    name = 'TableConverter'
+
+    name = "TableConverter"
     config_options = RailStage.config_options.copy()
     config_options.update(output_format=str)
-    inputs = [('input', PqHandle)]
-    outputs = [('output', Hdf5Handle)]
+    inputs = [("input", PqHandle)]
+    outputs = [("output", Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         RailStage.__init__(self, args, comm=comm)
 
     def run(self):
-        data = self.get_data('input', allow_missing=True)
+        data = self.get_data("input", allow_missing=True)
         out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[self.config.output_format]
         out_data = tables_io.convert(data, out_fmt)
-        self.add_data('output', out_data)
+        self.add_data("output", out_data)
 
     def __call__(self, data):
         """Return a converted table
@@ -143,7 +143,7 @@ class TableConverter(RailStage):
         out_data : table-like
             The converted version of the table
         """
-        self.set_data('input', data)
+        self.set_data("input", data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")

@@ -23,18 +23,24 @@ def test_random_pz():
         "model": "None",
         "seed": 42,
     }
-    zb_expected = np.array([2.322, 1.317, 2.576, 2.092, 0.283, 2.927, 2.283, 2.358, 0.384, 1.351])
+    zb_expected = np.array(
+        [2.322, 1.317, 2.576, 2.092, 0.283, 2.927, 2.283, 2.358, 0.384, 1.351]
+    )
     train_algo = random_gauss.RandomGaussInformer
     pz_algo = random_gauss.RandomGaussEstimator
     results, _, _ = one_algo(
         "RandomPZ", train_algo, pz_algo, train_config_dict, estim_config_dict
     )
-    assert np.isclose(results.ancil['zmode'], zb_expected).all()
+    assert np.isclose(results.ancil["zmode"], zb_expected).all()
 
 
 def test_train_pz():
     train_config_dict = dict(
-        zmin=0.0, zmax=3.0, nzbins=301, hdf5_groupname="photometry", model="model_train_z.tmp"
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+        hdf5_groupname="photometry",
+        model="model_train_z.tmp",
     )
     estim_config_dict = dict(hdf5_groupname="photometry", model="model_train_z.tmp")
 

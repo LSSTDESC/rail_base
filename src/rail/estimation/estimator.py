@@ -7,9 +7,10 @@ from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import TableHandle, QPHandle, ModelHandle
 from rail.core.stage import RailStage
 
-from rail.estimation.informer import CatInformer
 from rail.core.point_estimation import PointEstimationMixin
-# for backwards compatibility
+
+# for backwards compatibility, to avoid break stuff that imports it from here
+from rail.estimation.informer import CatInformer  # pylint: disable=unused-import
 
 
 class CatEstimator(RailStage, PointEstimationMixin):
@@ -23,15 +24,15 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
     """
 
-    name = 'CatEstimator'
+    name = "CatEstimator"
     config_options = RailStage.config_options.copy()
     config_options.update(
         chunk_size=10000,
-        hdf5_groupname=SHARED_PARAMS['hdf5_groupname'],
-        calculated_point_estimates=SHARED_PARAMS['calculated_point_estimates'])
-    inputs = [('model', ModelHandle),
-              ('input', TableHandle)]
-    outputs = [('output', QPHandle)]
+        hdf5_groupname=SHARED_PARAMS["hdf5_groupname"],
+        calculated_point_estimates=SHARED_PARAMS["calculated_point_estimates"],
+    )
+    inputs = [("model", ModelHandle), ("input", TableHandle)]
+    outputs = [("output", QPHandle)]
 
     def __init__(self, args, comm=None):
         """Initialize Estimator"""
@@ -54,18 +55,18 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self.model : ``object``
             The object encapsulating the trained model.
         """
-        model = kwargs.get('model', None)
-        if model is None or model == 'None':
+        model = kwargs.get("model", None)
+        if model is None or model == "None":
             self.model = None
             return self.model
         if isinstance(model, str):
-            self.model = self.set_data('model', data=None, path=model)
-            self.config['model'] = model
+            self.model = self.set_data("model", data=None, path=model)
+            self.config["model"] = model
             return self.model
         if isinstance(model, ModelHandle):
             if model.has_path:
-                self.config['model'] = model.path
-        self.model = self.set_data('model', model)
+                self.config["model"] = model.path
+        self.model = self.set_data("model", model)
         return self.model
 
     def estimate(self, input_data):
@@ -92,16 +93,15 @@ class CatEstimator(RailStage, PointEstimationMixin):
         output: ``QPHandle``
             Handle providing access to QP ensemble with output data
         """
-        self.set_data('input', input_data)
+        self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
 
     def run(self):
-
         self.open_model(**self.config)
 
-        iterator = self.input_iterator('input')
+        iterator = self.input_iterator("input")
         first = True
         self._initialize_run()
         self._output_handle = None
@@ -121,12 +121,16 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self._output_handle.finalize_write()
 
     def _process_chunk(self, start, end, data, first):
-        raise NotImplementedError(f"{self.name}._process_chunk is not implemented")  # pragma: no cover
+        raise NotImplementedError(
+            f"{self.name}._process_chunk is not implemented"
+        )  # pragma: no cover
 
     def _do_chunk_output(self, qp_dstn, start, end, first):
         qp_dstn = self.calculate_point_estimates(qp_dstn)
         if first:
-            self._output_handle = self.add_handle('output', data=qp_dstn)
-            self._output_handle.initialize_write(self._input_length, communicator=self.comm)
+            self._output_handle = self.add_handle("output", data=qp_dstn)
+            self._output_handle.initialize_write(
+                self._input_length, communicator=self.comm
+            )
         self._output_handle.set_data(qp_dstn, partial=True)
         self._output_handle.write_chunk(start, end)

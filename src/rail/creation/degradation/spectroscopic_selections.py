@@ -3,9 +3,9 @@
 import os
 
 import numpy as np
+from scipy.interpolate import interp1d
 from ceci.config import StageParameter as Param
 from rail.creation.degrader import Degrader
-from scipy.interpolate import interp1d
 from rail.core.utils import RAILDIR
 
 
@@ -48,7 +48,8 @@ class SpecSelection(Degrader):
         ),
         success_rate_dir=Param(
             str,
-            os.path.join(RAILDIR,
+            os.path.join(
+                RAILDIR,
                 "rail/examples_data/creation_data/data/success_rate_data",
             ),
             msg="The path to the directory containing success rate files.",
@@ -60,9 +61,10 @@ class SpecSelection(Degrader):
                 **{band: "mag_" + band + "_lsst" for band in "ugrizy"},
                 **{"redshift": "redshift"},
             },
-            msg="a dictionary that includes necessary columns\
-                         (magnitudes, colors and redshift) for selection. For magnitudes, the keys are ugrizy; for colors, the keys are, \
-                         for example, gr standing for g-r; for redshift, the key is 'redshift'",
+            msg="a dictionary that includes necessary columns"
+            "(magnitudes, colors and redshift) for selection."
+            "For magnitudes, the keys are ugrizy; for colors, the keys are,"
+            "for example, gr standing for g-r; for redshift, the key is 'redshift'",
         ),
         random_seed=Param(int, 42, msg="random seed for reproducibility"),
     )
@@ -77,7 +79,7 @@ class SpecSelection(Degrader):
         """Validate all the settings."""
         if self.config.N_tot < 0:
             raise ValueError(
-                "Total number of selected sources must be a " "positive integer."
+                "Total number of selected sources must be a positive integer."
             )
         if os.path.exists(self.config.success_rate_dir) is not True:
             raise ValueError(
@@ -100,9 +102,9 @@ class SpecSelection(Degrader):
         if check is not True:
             raise ValueError(
                 "Columns in the data are not enough for the selection."
-                + "The data should contain "
-                + str(list(colnames))
-                + ". \n"
+                "The data should contain " +
+                str(list(colnames)) +
+                ". \n"
             )
 
     def selection(self, data):
@@ -130,7 +132,7 @@ class SpecSelection(Degrader):
         """
         N_tot = self.config.N_tot
         N_selected = np.count_nonzero(self.mask)
-        if N_tot > N_selected:
+        if N_tot > N_selected:  # pylint: disable=no-else-return
             print(
                 "Warning: N_tot is greater than the size of spec-selected "
                 + "sample ("

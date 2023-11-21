@@ -3,12 +3,9 @@ import pickle
 from types import GeneratorType
 
 import numpy as np
-import pandas as pd
 import pytest
-import tempfile
 
-import rail
-from rail.core.common_params import SHARED_PARAMS, copy_param, set_param_default
+from rail.core.common_params import copy_param, set_param_default
 from rail.core.data import (
     DataHandle,
     DataStore,
@@ -26,7 +23,7 @@ from rail.core.util_stages import (
     RowSelector,
     TableConverter,
 )
-    
+
 
 # def test_data_file():
 #    with pytest.raises(ValueError) as errinfo:
@@ -36,39 +33,43 @@ from rail.core.util_stages import (
 def test_util_stages():
     DS = RailStage.data_store
     DS.clear()
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq")
-    
-    data = DS.read_file('data', TableHandle, datapath)
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
+
+    data = DS.read_file("data", TableHandle, datapath)
 
     table_conv = TableConverter.make_stage(name="conv", output_format="numpyDict")
     col_map = ColumnMapper.make_stage(name="col_map", columns={})
     row_sel = RowSelector.make_stage(name="row_sel", start=1, stop=15)
 
-    with pytest.raises(KeyError) as errinfo:
+    with pytest.raises(KeyError) as _errinfo:
         table_conv.get_handle("nope", allow_missing=False)
 
-    conv_data = table_conv(data)
+    _conv_data = table_conv(data)
     mapped_data = col_map(data)
-    sel_data = row_sel(mapped_data)
+    _sel_data = row_sel(mapped_data)
 
     row_sel_2 = RowSelector.make_stage(name="row_sel_2", start=1, stop=15)
     row_sel_2.set_data("input", mapped_data.data)
     handle = row_sel_2.get_handle("input")
 
-    row_sel_3 = RowSelector.make_stage(name="row_sel_3", input=handle.path, start=1, stop=15)
+    row_sel_3 = RowSelector.make_stage(
+        name="row_sel_3", input=handle.path, start=1, stop=15
+    )
     row_sel_3.set_data("input", None, do_read=True)
 
-    
+
 def do_data_handle(datapath, handle_class):
-    DS = RailStage.data_store
+    _DS = RailStage.data_store
 
     th = handle_class("data", path=datapath)
 
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         th.write()
 
     assert not th.has_data
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         th.write_chunk(0, 1)
     assert th.has_path
     assert th.is_written
@@ -83,11 +84,11 @@ def do_data_handle(datapath, handle_class):
     assert th2.has_data
     assert not th2.has_path
     assert not th2.is_written
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         th2.open()
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         th2.write()
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         th2.write_chunk(0, 1)
 
     assert th2.make_name("data2") == f"data2.{handle_class.suffix}"
@@ -97,7 +98,9 @@ def do_data_handle(datapath, handle_class):
 
 
 def test_pq_handle():
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq")
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
     handle = do_data_handle(datapath, PqHandle)
     pqfile = handle.open()
     assert pqfile
@@ -107,7 +110,9 @@ def test_pq_handle():
 
 
 def test_qp_handle():
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5")
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5"
+    )
     handle = do_data_handle(datapath, QPHandle)
     qpfile = handle.open()
     assert qpfile
@@ -115,21 +120,30 @@ def test_qp_handle():
     handle.close()
     assert handle.fileObj is None
 
-    with pytest.raises(TypeError) as errInfo:
-        bad_dh = QPHandle(data="this is not an Ensemble")
+    with pytest.raises(TypeError) as _errInfo:
+        _bad_dh = QPHandle(tag="bad_tag", data="this is not an Ensemble")
 
 
 def test_hdf5_handle():
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5")
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
+    )
     handle = do_data_handle(datapath, Hdf5Handle)
     with handle.open(mode="r") as f:
         assert f
         assert handle.fileObj is not None
     datapath_chunked = os.path.join(
-      RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816_chunked.hdf5"
+        RAILDIR,
+        "rail",
+        "examples_data",
+        "testdata",
+        "test_dc2_training_9816_chunked.hdf5",
     )
     handle_chunked = Hdf5Handle("chunked", handle.data, path=datapath_chunked)
-    from tables_io.arrayUtils import getGroupInputDataLength, getInitializationForODict, sliceDict
+    from tables_io.arrayUtils import (  # pylint: disable=import-outside-toplevel
+        getInitializationForODict,
+        sliceDict,
+    )
 
     num_rows = len(handle.data["photometry"]["id"])
     check_num_rows = len(handle()["photometry"]["id"])
@@ -143,9 +157,10 @@ def test_hdf5_handle():
         for i in range(0, num_rows, chunk_size):
             start = i
             end = i + chunk_size
-            if end > num_rows:
-                end = num_rows
-            handle_chunked.set_data(sliceDict(handle.data["photometry"], slice(start, end)), partial=True)
+            end = min(end, num_rows)
+            handle_chunked.set_data(
+                sliceDict(handle.data["photometry"], slice(start, end)), partial=True
+            )
             handle_chunked.write_chunk(start, end)
     write_size = handle_chunked.size()
     assert len(handle_chunked.data) <= 1000
@@ -159,7 +174,9 @@ def test_hdf5_handle():
 
 
 def test_fits_handle():
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.fits")
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.fits"
+    )
     handle = do_data_handle(datapath, FitsHandle)
     fitsfile = handle.open()
     assert fitsfile
@@ -171,9 +188,21 @@ def test_fits_handle():
 def test_model_handle():
     DS = RailStage.data_store
     DS.clear()
-    model_path = os.path.join(RAILDIR, "rail", "examples_data", "estimation_data", "data", "CWW_HDFN_prior.pkl")
+    model_path = os.path.join(
+        RAILDIR,
+        "rail",
+        "examples_data",
+        "estimation_data",
+        "data",
+        "CWW_HDFN_prior.pkl",
+    )
     model_path_copy = os.path.join(
-        RAILDIR, "rail", "examples_data", "estimation_data", "data", "CWW_HDFN_prior_copy.pkl"
+        RAILDIR,
+        "rail",
+        "examples_data",
+        "estimation_data",
+        "data",
+        "CWW_HDFN_prior_copy.pkl",
     )
     mh = ModelHandle("model", path=model_path)
     mh2 = ModelHandle("model2", path=model_path)
@@ -195,8 +224,10 @@ def test_model_handle():
 def test_data_hdf5_iter():
     DS = RailStage.data_store
     DS.clear()
-    
-    datapath = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5")
+
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
+    )
 
     # data = DS.read_file('data', TableHandle, datapath)
     th = Hdf5Handle("data", path=datapath)
@@ -207,9 +238,12 @@ def test_data_hdf5_iter():
         assert xx[0] == i * 1000
         assert xx[1] - xx[0] <= 1000
 
-    data = DS.read_file("input", TableHandle, datapath)
+    _data = DS.read_file("input", TableHandle, datapath)
     cm = ColumnMapper.make_stage(
-        input=datapath, chunk_size=1000, hdf5_groupname="photometry", columns=dict(id="bob")
+        input=datapath,
+        chunk_size=1000,
+        hdf5_groupname="photometry",
+        columns=dict(id="bob"),
     )
     x = cm.input_iterator("input")
 
@@ -224,13 +258,19 @@ def test_data_store():
     DS = RailStage.data_store
     DS.clear()
     DS.__class__.allow_overwrite = False
-    
-    datapath_hdf5 = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5")
-    datapath_pq = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq")
+
+    datapath_hdf5 = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
+    )
+    datapath_pq = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
     datapath_hdf5_copy = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816_copy.hdf5"
     )
-    datapath_pq_copy = os.path.join(RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816_copy.pq")
+    datapath_pq_copy = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816_copy.pq"
+    )
 
     DS.add_data("hdf5", None, Hdf5Handle, path=datapath_hdf5)
     DS.add_data("pq", None, PqHandle, path=datapath_pq)
@@ -246,18 +286,18 @@ def test_data_store():
     DS.write("pq_copy")
     DS.write("hdf5_copy")
 
-    with pytest.raises(KeyError) as errinfo:
+    with pytest.raises(KeyError) as _errinfo:
         DS.read("nope")
-    with pytest.raises(KeyError) as errinfo:
+    with pytest.raises(KeyError) as _errinfo:
         DS.open("nope")
-    with pytest.raises(KeyError) as errinfo:
+    with pytest.raises(KeyError) as _errinfo:
         DS.write("nope")
 
-    with pytest.raises(TypeError) as errinfo:
+    with pytest.raises(TypeError) as _errinfo:
         DS["nope"] = None
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         DS["pq"] = DS["pq"]
-    with pytest.raises(ValueError) as errinfo:
+    with pytest.raises(ValueError) as _errinfo:
         DS.pq = DS["pq"]
 
     assert repr(DS)
@@ -273,7 +313,6 @@ def test_data_store():
 
     os.remove(datapath_hdf5_copy)
     os.remove(datapath_pq_copy)
-
 
 
 def test_common_params():
@@ -300,13 +339,21 @@ def test_set_data_nonexistent_file():
         col_map.set_data("model", None, path="./bad_directory/no_file.py")
         assert "Unable to find file" in err.context
 
+
 def test_set_data_real_file():
     """Create an instance of a child class of RailStage. Exercise the `set_data`
     method and pass in a path to model. The output of set_data should be `None`.
     """
     DS = RailStage.data_store
     DS.clear()
-    model_path = os.path.join(RAILDIR, "rail", "examples_data", "estimation_data", "data", "CWW_HDFN_prior.pkl")
+    model_path = os.path.join(
+        RAILDIR,
+        "rail",
+        "examples_data",
+        "estimation_data",
+        "data",
+        "CWW_HDFN_prior.pkl",
+    )
     DS.add_data("model", None, ModelHandle, path=model_path)
 
     col_map = ColumnMapper.make_stage(name="col_map", columns={})

@@ -2,6 +2,7 @@ import numpy as np
 
 from .base import MetricEvaluator
 
+
 class PointStatsEz(MetricEvaluator):
     """Copied from PZDC1paper repo. Adapted to remove the cut based on
     magnitude."""
@@ -26,7 +27,7 @@ class PointStatsEz(MetricEvaluator):
         super().__init__(None)
         self.pzs = pzvec
         self.szs = szvec
-        ez = (pzvec - szvec) / (1. + szvec)
+        ez = (pzvec - szvec) / (1.0 + szvec)
         self.ez = ez
 
     def evaluate(self):
@@ -45,7 +46,7 @@ class PointSigmaIQR(PointStatsEz):
         -------
         ``sigma_IQR`` float. Width of ez distribution for full sample
         """
-        x75, x25 = np.percentile(self.ez, [75., 25.])
+        x75, x25 = np.percentile(self.ez, [75.0, 25.0])
         iqr = x75 - x25
         sigma_iqr = iqr / 1.349
         return sigma_iqr
@@ -56,6 +57,7 @@ class PointBias(PointStatsEz):
 
     In keeping with the Science Book, this is just the median of the ez values
     """
+
     def evaluate(self):
         """
         Returns

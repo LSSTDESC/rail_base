@@ -64,6 +64,7 @@ disable = [
     "abstract-method",
     "invalid-name",
     "too-many-statements",
+    "too-many-arguments",
     "missing-module-docstring",
     "missing-class-docstring",
     "missing-function-docstring",
