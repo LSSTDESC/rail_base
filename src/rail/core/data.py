@@ -350,7 +350,7 @@ def default_model_read(modelfile):
 
 def default_model_write(model, path):
     """Write the model, this default implementation uses pickle"""
-    with open(path, "wb", encoding="utf-8") as fout:
+    with open(path, "wb") as fout:
         pickle.dump(obj=model, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
 
 
