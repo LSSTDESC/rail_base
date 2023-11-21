@@ -367,8 +367,7 @@ class ModelDict(dict):
 
     def open(self, path, mode, **kwargs):
         """Open the file and return the file handle"""
-        encoding = kwargs.pop('encoding', "utf-8")
-        return open(path, mode, encoding=encoding, **kwargs)
+        return open(path, mode, **kwargs)  # pylint: disable=unspecified-encoding
 
     def read(
         self, path, force=False, reader=None, **kwargs
