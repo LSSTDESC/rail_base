@@ -2,6 +2,7 @@ import numpy as np
 
 from .base import MetricEvaluator
 
+
 class PointStatsEz(MetricEvaluator):
     """Copied from PZDC1paper repo. Adapted to remove the cut based on
     magnitude."""
@@ -22,7 +23,7 @@ class PointStatsEz(MetricEvaluator):
         super().__init__(None)
         self.pzs = pzvec
         self.szs = szvec
-        ez = (pzvec - szvec) / (1. + szvec)
+        ez = (pzvec - szvec) / (1.0 + szvec)
         self.ez = ez
 
     def evaluate(self):
@@ -42,7 +43,7 @@ class PointSigmaIQR(PointStatsEz):
         sigma_IQR float: width of ez distribution for full sample
         sigma_IQR_magcut float: width of ez distribution for magcut sample
         """
-        x75, x25 = np.percentile(self.ez, [75., 25.])
+        x75, x25 = np.percentile(self.ez, [75.0, 25.0])
         iqr = x75 - x25
         sigma_iqr = iqr / 1.349
         return sigma_iqr
@@ -53,6 +54,7 @@ class PointBias(PointStatsEz):
 
     In keeping with the Science Book, this is just the median of the ez values
     """
+
     def evaluate(self):
         """
         Returns:
@@ -77,7 +79,7 @@ class PointOutlierRate(PointStatsEz):
         sig_iqr = PointSigmaIQR(self.pzs, self.szs).evaluate()
         threesig = 3.0 * sig_iqr
         cutcriterion = np.maximum(0.06, threesig)
-        mask = (np.fabs(self.ez) > cutcriterion)
+        mask = np.fabs(self.ez) > cutcriterion
         outlier = np.sum(mask)
         frac = float(outlier) / float(num)
         return frac

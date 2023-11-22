@@ -18,16 +18,19 @@ def one_algo(key, summarizer_class, summary_kwargs):
     test_data = DS.read_file("test_data", QPHandle, testdata)
     summarizer = summarizer_class.make_stage(name=key, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data)
-    os.remove(summarizer.get_output(summarizer.get_aliased_tag("output"), final_name=True))
-    os.remove(summarizer.get_output(summarizer.get_aliased_tag("single_NZ"), final_name=True))
+    os.remove(
+        summarizer.get_output(summarizer.get_aliased_tag("output"), final_name=True)
+    )
+    os.remove(
+        summarizer.get_output(summarizer.get_aliased_tag("single_NZ"), final_name=True)
+    )
     return summary_ens
 
 
 def test_naive_stack():
-    """Basic end to end test for the Naive stack informer to estimator stages
-    """
+    """Basic end to end test for the Naive stack informer to estimator stages"""
     naive_stack_informer_stage = naive_stack.NaiveStackInformer.make_stage()
-    naive_stack_informer_stage.inform('')
+    naive_stack_informer_stage.inform("")
 
     summary_config_dict = {}
     summarizer_class = naive_stack.NaiveStackSummarizer
@@ -39,7 +42,7 @@ def test_point_estimate_hist():
     stages
     """
     point_est_informer_stage = point_est_hist.PointEstHistInformer.make_stage()
-    point_est_informer_stage.inform('')
+    point_est_informer_stage.inform("")
 
     summary_config_dict = {}
     summarizer_class = point_est_hist.PointEstHistSummarizer
@@ -47,10 +50,9 @@ def test_point_estimate_hist():
 
 
 def test_var_inference_stack():
-    """Basic end to end test for the var inference informer to estimator stages
-    """
+    """Basic end to end test for the var inference informer to estimator stages"""
     var_inf_informer_stage = var_inf.VarInfStackInformer.make_stage()
-    var_inf_informer_stage.inform('')
+    var_inf_informer_stage.inform("")
 
     summary_config_dict = {}
     summarizer_class = var_inf.VarInfStackSummarizer

@@ -1,10 +1,11 @@
 """
 Abstract base classes defining Summarizers of the redshift distribution of an ensemble of galaxies
 """
+import numpy as np
+
 from rail.core.data import QPHandle, TableHandle, ModelHandle
 from rail.core.stage import RailStage
 
-from rail.estimation.informer import PzInformer
 # for backwards compatibility
 
 
@@ -18,11 +19,11 @@ class CatSummarizer(RailStage):
     provide as "output" a QPEnsemble, with per-ensemble n(z).
     """
 
-    name = 'CatSummarizer'
+    name = "CatSummarizer"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=10000)
-    inputs = [('input', TableHandle)]
-    outputs = [('output', QPHandle)]
+    inputs = [("input", TableHandle)]
+    outputs = [("output", QPHandle)]
 
     def __init__(self, args, comm=None):
         """Initialize Summarizer"""
@@ -53,10 +54,10 @@ class CatSummarizer(RailStage):
         output: `qp.Ensemble`
             Ensemble with n(z), and any ancilary data
         """
-        self.set_data('input', input_data)
+        self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
 
 
 class PZSummarizer(RailStage):
@@ -66,12 +67,11 @@ class PZSummarizer(RailStage):
     provide as "output" a QPEnsemble, with per-ensemble n(z).
     """
 
-    name = 'PZtoNZSummarizer'
+    name = "PZtoNZSummarizer"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=10000)
-    inputs = [('model', ModelHandle),
-              ('input', QPHandle)]
-    outputs = [('output', QPHandle)]
+    inputs = [("model", ModelHandle), ("input", QPHandle)]
+    outputs = [("output", QPHandle)]
 
     def __init__(self, args, comm=None):
         """Initialize Estimator that can sample galaxy data."""
@@ -102,43 +102,47 @@ class PZSummarizer(RailStage):
         output: `qp.Ensemble`
             Ensemble with n(z), and any ancilary data
         """
-        self.set_data('input', input_data)
+        self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
-
+        return self.get_handle("output")
 
     def _broadcast_bootstrap_matrix(self):
-        import numpy as np
         rng = np.random.default_rng(seed=self.config.seed)
         # Only one of the nodes needs to produce the bootstrap indices
         ngal = self._input_length
         if self.rank == 0:
-            bootstrap_matrix = rng.integers(low=0, high=ngal, size=(ngal,self.config.nsamples))
+            bootstrap_matrix = rng.integers(
+                low=0, high=ngal, size=(ngal, self.config.nsamples)
+            )
         else:  # pragma: no cover
             bootstrap_matrix = None
         if self.comm is not None:  # pragma: no cover
             self.comm.Barrier()
-            bootstrap_matrix = self.comm.bcast(bootstrap_matrix, root = 0)
+            bootstrap_matrix = self.comm.bcast(bootstrap_matrix, root=0)
         return bootstrap_matrix
 
-    def _join_histograms(self, bvals, yvals):#pragma: no cover
+    def _join_histograms(self, bvals, yvals):  # pragma: no cover
         bvals_r = self.comm.reduce(bvals)
         yvals_r = self.comm.reduce(yvals)
-        return(bvals_r, yvals_r)
+        return (bvals_r, yvals_r)
+
 
 class SZPZSummarizer(RailStage):
     """The base class for classes that use two sets of data: a photometry sample with
     spec-z values, and a photometry sample with unknown redshifts, e.g. minisom_som and
     outputs a QP Ensemble with bootstrap realization of the N(z) distribution
     """
-    name = 'SZPZtoNZSummarizer'
+
+    name = "SZPZtoNZSummarizer"
     config_options = RailStage.config_options.copy()
     config_options.update(chunk_size=10000)
-    inputs = [('input', TableHandle),
-              ('spec_input', TableHandle),
-              ('model', ModelHandle)]
-    outputs = [('output', QPHandle)]
+    inputs = [
+        ("input", TableHandle),
+        ("spec_input", TableHandle),
+        ("model", ModelHandle),
+    ]
+    outputs = [("output", QPHandle)]
 
     def __init__(self, args, comm=None):
         """Initialize Estimator that can sample galaxy data."""
@@ -164,18 +168,18 @@ class SZPZSummarizer(RailStage):
         self.model : `object`
             The object encapsulating the trained model.
         """
-        model = kwargs.get('model', None)
-        if model is None or model == 'None':  # pragma: no cover
+        model = kwargs.get("model", None)
+        if model is None or model == "None":  # pragma: no cover
             self.model = None
             return self.model
         if isinstance(model, str):
-            self.model = self.set_data('model', data=None, path=model)
-            self.config['model'] = model
+            self.model = self.set_data("model", data=None, path=model)
+            self.config["model"] = model
             return self.model
         if isinstance(model, ModelHandle):
             if model.has_path:
-                self.config['model'] = model.path
-        self.model = self.set_data('model', model)
+                self.config["model"] = model.path
+        self.model = self.set_data("model", model)
         return self.model
 
     def summarize(self, input_data, spec_data):
@@ -203,8 +207,8 @@ class SZPZSummarizer(RailStage):
         output: `qp.Ensemble`
             Ensemble with n(z), and any ancilary data
         """
-        self.set_data('input', input_data)
-        self.set_data('spec_input', spec_data)
+        self.set_data("input", input_data)
+        self.set_data("spec_input", spec_data)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")

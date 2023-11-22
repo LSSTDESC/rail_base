@@ -7,6 +7,7 @@ and returns a pandas DataFrame, and wraps the run method.
 from rail.core.stage import RailStage
 from rail.core.data import PqHandle
 
+
 class Degrader(RailStage):
     """Base class Degraders, which apply various degradations to synthetic 
     photometric data.
@@ -16,11 +17,11 @@ class Degrader(RailStage):
     files.
     """
 
-    name = 'Degrader'
+    name = "Degrader"
     config_options = RailStage.config_options.copy()
     config_options.update(seed=12345)
-    inputs = [('input', PqHandle)]
-    outputs = [('output', PqHandle)]
+    inputs = [("input", PqHandle)]
+    outputs = [("output", PqHandle)]
 
     def __init__(self, args, comm=None):
         """Initialize Degrader that can degrade photometric data"""
@@ -57,7 +58,7 @@ class Degrader(RailStage):
         """
         if seed is not None:
             self.config.seed = seed
-        self.set_data('input', sample)
+        self.set_data("input", sample)
         self.run()
         self.finalize()
-        return self.get_handle('output')
+        return self.get_handle("output")
