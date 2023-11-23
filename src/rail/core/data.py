@@ -167,10 +167,11 @@ class DataHandle:
 
     def iterator(self, **kwargs):
         """Iterator over the data"""
-        # if self.data is not None:
-        #    for i in range(1):
-        #        yield i, -1, self.data
-        return self._iterator(self.path, **kwargs)
+        if self.data is not None and self.partial is False:
+            for i in range(1):
+                return [(i, -1, self.data)]
+        else:
+            return self._iterator(self.path, **kwargs)
 
     def set_data(self, data, partial=False):
         """Set the data for a chunk, and set the partial flag to true"""
@@ -189,6 +190,15 @@ class DataHandle:
 
     def _size(self, path, **kwargs):
         raise NotImplementedError("DataHandle._size")  # pragma: no cover
+
+    def data_size(self):
+        """Return the size of the in memorry data"""
+        if not self.data:
+            return 0
+        return self._data_size(self.data)
+
+    def _data_size(self, data):
+        raise NotImplementedError("DataHandle._data_size")  # pragma: no cover
 
     @classmethod
     def _iterator(cls, path, **kwargs):
@@ -261,6 +271,12 @@ class TableHandle(DataHandle):
     def _size(self, path, **kwargs):
         return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
 
+    def _data_size(self, data):
+        max_l = 0
+        for _k, v in data.items():
+            max_l = max(max_l, len(v))
+        return max_l
+
     @classmethod
     def _iterator(cls, path, **kwargs):
         """Iterate over the data"""
@@ -286,6 +302,8 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
         keywords = {}
         for key, array in data.items():
             shape = list(array.shape)
+            if not shape:
+                continue
             shape[0] = data_length
             keywords[key] = (shape, array.dtype)
         return keywords
@@ -363,6 +381,9 @@ class QPHandle(DataHandle):
             return self.data.npdf
         return tables_io.io.getInputDataLengthHdf5(path, groupname="data")
 
+    def _data_size(self, data):
+        return self.data.npdf
+
     @classmethod
     def _iterator(cls, path, **kwargs):
         """Iterate over the data"""
@@ -376,12 +397,29 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
     suffix = 'hdf5'
 
     class PdfOrValue(enum.Enum):
-
         unknown = -1
-        distritubion = 0
+        distribution = 0
         point_estimate = 1
         both = 2
 
+        def has_dist(self):
+            return self.value in [0, 2]
+
+        def has_point(self):
+            return self.value in [1, 2]
+
+
+    def is_qp(self):
+        """ Check if the associated data or file is a QP ensemble"""
+        if self.path in [None, 'None', 'none']:
+            return isinstance(self.data, qp.Ensemble)
+        return qp.is_qp_file(self.path)
+
+    def check_pdf_or_point(self):
+        """Check the associated file to see if it is a QP pdf, point estimate or both"""
+        if self.is_qp():
+            return self.PdfOrValue.distribution
+        return self.PdfOrValue.point_estimate
 
     @classmethod
     def _open(cls, path, **kwargs):
@@ -398,42 +436,51 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
     def _read(cls, path, **kwargs):
         """Read and return the data from the associated file """
         if qp.is_qp_file(path):
-            return QPHandle._read(path)
-        return Hdf5Handle._read(path)
+            return qp.read(path, **kwargs)
+        return tables_io.read(path, **kwargs)
 
     @classmethod
     def _write(cls, data, path, **kwargs):
         """Write the data to the associatied file """
         if isinstance(data, qp.Ensemble):
-            return QPHandle._write(data, path, **kwargs)
-        return Hdf5Handle._write(data, path, **kwargs)
+            return data.write_to(path)
+        return tables_io.write(data, path, **kwargs)
 
     @classmethod
     def _initialize_write(cls, data, path, data_length, **kwargs):
         if isinstance(data, qp.Ensemble):
-            return QPHandle._initialize_write(data, path, data_length, **kwargs)
+            comm = kwargs.get("communicator", None)
+            return data.initializeHdf5Write(path, data_length, comm)
         return Hdf5Handle._initialize_write(data, path, data_length, **kwargs)
 
     @classmethod
     def _write_chunk(cls, data, fileObj, groups, start, end, **kwargs):
         if isinstance(data, qp.Ensemble):
-            return QPHandle._write_chunk(data, fileObj, groups, start, end, **kwargs)
-        return Hdf5Handle._write_chunk(data, fileObj, groups, start, end, **kwargs)
+            return data.writeHdf5Chunk(fileObj, start, end)
+        return tables_io.io.writeDictToHdf5ChunkSingle(fileObj, data, start, end, **kwargs)
 
     @classmethod
     def _finalize_write(cls, data, fileObj, **kwargs):
         if isinstance(data, qp.Ensemble):
-            return QPHandle._finalize_write(data, fileObj, **kwargs)
-        return Hdf5Handle._finalize_write(data, fileObj, **kwargs)
+            return data.finalizeHdf5Write(fileObj)
+        return tables_io.io.finalizeHdf5Write(fileObj, **kwargs)
 
     @classmethod
     def _validate_data(cls, data):
         pass
 
     def _size(self, path, **kwargs):
-        if qp.is_qp_file(path):
+        if self.is_qp():
             return QPHandle._size(self, path, **kwargs)
         return Hdf5Handle._size(self, path, **kwargs)
+
+    def _data_size(self, data):
+        if self.is_qp():
+            return self.data.npdf
+        max_l = 0
+        for _k, v in data.items():
+            max_l = max(max_l, len(v))
+        return max_l
 
     @classmethod
     def _iterator(cls, path, **kwargs):
