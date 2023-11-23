@@ -368,13 +368,13 @@ class RailStage(PipelineStage):
         # in a single chunk.
         else:  # pragma: no cover
             if self.config.hdf5_groupname:
-                test_data = self.get_data("input")[self.config.hdf5_groupname]
+                test_data = self.get_data(tag)[self.config.hdf5_groupname]
             else:
-                test_data = self.get_data("input")
-            max_l = 0
-            for _k, v in test_data.items():
-                max_l = max(max_l, len(v))
-            self._input_length = max_l
+                test_data = self.get_data(tag)
+            #max_l = 0
+            #for _k, v in test_data.items():
+            #    max_l = max(max_l, len(v))
+            self._input_length = self.get_handle(tag).data_size()
             s = 0
             iterator = [[s, self._input_length, test_data]]
             return iterator
