@@ -14,6 +14,7 @@ from rail.core.data import (
     ModelHandle,
     PqHandle,
     QPHandle,
+    QPOrTableHandle,
     TableHandle,
 )
 from rail.core.stage import RailStage
@@ -128,6 +129,30 @@ def test_qp_handle():
 
     with pytest.raises(TypeError) as _errInfo:
         _bad_dh = QPHandle(tag="bad_tag", data="this is not an Ensemble")
+
+
+def test_qp_or_table_handle_qp():
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5"
+    )
+    handle = do_data_handle(datapath, QPOrTableHandle)
+    qpfile = handle.open()
+    assert qpfile
+    assert handle.fileObj is not None
+    handle.close()
+    assert handle.fileObj is None
+
+
+def test_qp_or_table_handle_table():
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
+    )
+    handle = do_data_handle(datapath, QPOrTableHandle)
+    tablefile = handle.open()
+    assert tablefile
+    assert handle.fileObj is not None
+    handle.close()
+    assert handle.fileObj is None
 
 
 def test_hdf5_handle():
