@@ -15,8 +15,8 @@ class SpecSelection(Degrader):
     Parameters
     ----------
     N_tot : int
-        The total number of down-sampled, spec-selected galaxies. If N_tot is 
-        greater than the number of spec-sepected galaxies, then it will be 
+        The total number of down-sampled, spec-selected galaxies. If N_tot is
+        greater than the number of spec-sepected galaxies, then it will be
         ignored.
     nondetect_val : float
         The value to be removed for non detects
@@ -25,12 +25,12 @@ class SpecSelection(Degrader):
     success_rate_dir : string
         The path to the success rate files
     percentile_cut: int, default=100
-        If using color-based redshift cut, percentile in redshifts above which 
+        If using color-based redshift cut, percentile in redshifts above which
         redshifts will be cut from the sample. Default is 100 (no cut).
     colnames: dict
-        A dictionary that includes necessary columns (magnitudes, colors and 
-        redshift) for selection. For magnitudes, the keys are ugrizy; for 
-        colors, the keys are, for example, gr standing for g-r; for redshift, 
+        A dictionary that includes necessary columns (magnitudes, colors and
+        redshift) for selection. For magnitudes, the keys are ugrizy; for
+        colors, the keys are, for example, gr standing for g-r; for redshift,
         the key is 'redshift'.
     random_seed : int
         Random seed for reproducibility
@@ -89,7 +89,7 @@ class SpecSelection(Degrader):
             )
 
     def validate_colnames(self, data):
-        """Validate the column names of data table to make sure they have 
+        """Validate the column names of data table to make sure they have
         necessary information for each selection.
 
         Parameters
@@ -108,9 +108,9 @@ class SpecSelection(Degrader):
             )
 
     def selection(self, data):
-        """Selection functions. 
-        
-        This should be overwritten by the subclasses corresponding to different 
+        """Selection functions.
+
+        This should be overwritten by the subclasses corresponding to different
         spec selections.
         """
 
@@ -177,10 +177,10 @@ class SpecSelection_GAMA(SpecSelection):
     """The class of spectroscopic selections with GAMA.
 
     The GAMA survey covers an area of 286 deg^2, with ~238000 objects.
-    
+
     The necessary column is r band.
     """
-    
+
     name = "specselection_gama"
 
     def selection(self, data):
@@ -198,7 +198,7 @@ class SpecSelection_GAMA(SpecSelection):
 
 class SpecSelection_BOSS(SpecSelection):
     """The class of spectroscopic selections with BOSS.
-    
+
     BOSS selection function is based on
     http://www.sdss3.org/dr9/algorithms/boss_galaxy_ts.php
 
@@ -264,8 +264,8 @@ class SpecSelection_DEEP2(SpecSelection):
 
     DEEP2 has a sky coverage of 2.8 deg^2 with ~53000 spectra.
 
-    For DEEP2, one needs R band magnitude, B-R/R-I colors--which are not 
-    available for the time being, so we use LSST gri bands now. When the 
+    For DEEP2, one needs R band magnitude, B-R/R-I colors--which are not
+    available for the time being, so we use LSST gri bands now. When the
     conversion degrader is ready, this subclass will be updated accordingly.
     """
 
@@ -274,7 +274,7 @@ class SpecSelection_DEEP2(SpecSelection):
     def photometryCut(self, data):
         """Applies DEEP2 photometric cut based on Newman+13.
 
-        This modified selection gives the best match to the data n(z) with its 
+        This modified selection gives the best match to the data n(z) with its
         cut at z~0.75 and the B-R/R-I distribution (Newman+13, Fig. 12).
 
         Notes
@@ -363,7 +363,7 @@ class SpecSelection_VVDSf02(SpecSelection):
 
         Notes
         -----
-        The oversight of 1.0 magnitudes on the bright end misses 0.2% of 
+        The oversight of 1.0 magnitudes on the bright end misses 0.2% of
         galaxies.
         """
         mask = (data[self.config.colnames["i"]] > 17.5) & (
@@ -378,11 +378,11 @@ class SpecSelection_VVDSf02(SpecSelection):
         Notes
         -----
         We use a redshift-based and I-band based success rate independently here
-        since we do not know their correlation, which makes the success rate 
+        since we do not know their correlation, which makes the success rate
         worse than in reality.
 
         Spec-z success rate as function of i_AB read of Figure 16 in LeFevre+05
-        for the VVDS 2h field. Values are binned in steps of 0.5 mag with the 
+        for the VVDS 2h field. Values are binned in steps of 0.5 mag with the
         first starting at 17 and the last bin ending at 24.
         """
         success_I_bins = np.arange(17.0, 24.0 + 0.01, 0.5)
@@ -543,12 +543,12 @@ class SpecSelection_HSC(SpecSelection):
         self.mask &= mask
 
     def speczSuccess(self, data):
-        """HSC galaxies were binned in color magnitude space with i-band mag 
-        from -2 to 6 and g-z color from 13 to 26 (200 bins in each direction). 
-        The ratio of galaxies with spectroscopic redshifts (training galaxies) 
-        to galaxies with only photometry in HSC wide field (application 
+        """HSC galaxies were binned in color magnitude space with i-band mag
+        from -2 to 6 and g-z color from 13 to 26 (200 bins in each direction).
+        The ratio of galaxies with spectroscopic redshifts (training galaxies)
+        to galaxies with only photometry in HSC wide field (application
         galaxies) was computed for each pixel. We divide the data into the same
-        pixels and randomly select galaxies into the training sample based on 
+        pixels and randomly select galaxies into the training sample based on
         the HSC ratios.
         """
         success_rate_dir = self.config.success_rate_dir
