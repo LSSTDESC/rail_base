@@ -153,7 +153,7 @@ def get_data(verbose, **kwargs):  # pragma: no cover
             "remote_path": "https://portal.nersc.gov/cfs/lsst/PZ/test_dc2_training_9816_broadtypes.hdf5",
         },
         {
-            "local_path": "rail/examples_data/estimation_data/data/test_dc2_train_customtemp_broadttypes.hdf5",
+            "local_path": "rail/examples_data/estimation_data/data/test_dc2_train_customtemp_broadttypes.hdf5",  # pylint: disable=line-too-long
             "remote_path": "https://portal.nersc.gov/cfs/lsst/PZ/test_dc2_train_customtemp_broadttypes.hdf5",
         }
     ]
