@@ -1,74 +1,65 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics.concrete_metric_classes import DistToDistMetric
+from qp.metrics.base_metric_classes import PointToPointMetric
 
-from rail.core.data import Hdf5Handle, QPHandle
+from rail.core.data import Hdf5Handle, TableHandle
 from rail.core.stage import RailStage
 from rail.evaluation.evaluator import Evaluator
 
 # dynamically build a dictionary of all available metrics of the appropriate type
 METRIC_DICT = {}
-for subcls in DistToDistMetric.__subclasses__():
+for subcls in PointToPointMetric.__subclasses__():
     METRIC_DICT[subcls.metric_name] = subcls
 
-class ProbProbEvaluator(Evaluator):
-    """Evaluate the performance of a photo-z estimator against reference PDFs"""
+class PointToPointEvaluator(Evaluator):
+    """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
-    name = 'ProbProbEvaluator'
+    name = 'PointToPointEvaluator'
     config_options = RailStage.config_options.copy()
     config_options.update(
         metrics=Param(list, [], required=False,
             msg="The metrics you want to evaluate."),
         chunk_size=Param(int, 1000, required=False,
             msg="The default number of PDFs to evaluate per loop."),
-        limits=Param(tuple, (0.0, 3.0), required=False,
-            msg="The default end points for calculating metrics on a grid."),
-        dx=Param(float, 0.01, required=False,
-            msg="The default step size when calculating metrics on a grid."),
-        num_samples=Param(int, 100, required=False,
-            msg="The number of random samples to select for certain metrics."),
         _random_state=Param(float, default=None, required=False,
             msg="Random seed value to use for reproducible results."),
     )
-    inputs = [('input', QPHandle),
-              ('truth', QPHandle)]
+    inputs = [('input', TableHandle),
+              ('truth', TableHandle)]
     outputs = [('output', Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         Evaluator.__init__(self, args, comm=comm)
         self._output_handle = None
+        self._metric_dict = METRIC_DICT
 
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
-        estimate_iterator = self.input_iterator('input')
-
-        #! Correct the following line to be 'truth' !!!
-        # comparison_iterator = self.input_iterator('input')
-
-        #! Need to implement something to ensure that the iterators are aligned.
+        estimate_iterator = self.get_handle('input').iterator()
+        reference_iterator = self.get_handle('truth').iterator()
 
         first = True
-        for s, e, data in estimate_iterator:
+        for s, e, estimate_data, _, _, reference_data in zip(estimate_iterator, reference_iterator):
             print(f"Processing {self.rank} running evaluator on chunk {s} - {e}.")
-            self._process_chunk(s, e, data, first)
+            self._process_chunk(s, e, estimate_data, reference_data, first)
             first = False
 
         self._output_handle.finalize_write()
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
         for metric in self.config.metrics:
-            if metric not in METRIC_DICT:
+            if metric not in self._metric_dict:
                 #! Make the following a logged error instead of bailing out of the stage.
                 # raise ValueError(
                 # f"Unsupported metric requested: '{metric}'.
-                # Available metrics are: {METRIC_DICT.keys()}")
+                # Available metrics are: {self._metric_dict.keys()}")
                 continue
 
-            this_metric = METRIC_DICT[metric](**self.config.to_dict())
-            out_table[metric] = this_metric.evaluate(data, data)
+            this_metric = self._metric_dict[metric](**self.config.to_dict())
+            out_table[metric] = this_metric.evaluate(estimate_data, reference_data)
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
