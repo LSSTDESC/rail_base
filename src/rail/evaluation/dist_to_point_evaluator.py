@@ -32,6 +32,8 @@ class DistToPointEvaluator(Evaluator):
             msg="The x-value grid at which to evaluate the pdf values."),
         _random_state=Param(float, default=None, required=False,
             msg="Random seed value to use for reproducible results."),
+        hdf5_groupname=Param(str, "photometry", required=False,
+            msg="HDF5 Groupname for truth table."),
     )
     inputs = [('input', QPHandle),
               ('truth', TableHandle)]
@@ -45,8 +47,8 @@ class DistToPointEvaluator(Evaluator):
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
-        estimate_iterator = self.get_handle('input').iterator()
-        reference_iterator = self.get_handle('truth').iterator()
+        estimate_iterator = self.input_iterator('input')
+        reference_iterator = self.input_iterator('truth')
 
         first = True
         for s, e, estimate_data, _, _, reference_data in zip(estimate_iterator, reference_iterator):
