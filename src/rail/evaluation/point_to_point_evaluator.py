@@ -37,13 +37,16 @@ class PointToPointEvaluator(Evaluator):
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
-        estimate_iterator = self.get_handle('input').iterator()
-        reference_iterator = self.get_handle('truth').iterator()
+        estimate_iterator = self.input_iterator('input')
+        reference_iterator = self.input_iterator('truth')
 
         first = True
-        for s, e, estimate_data, _, _, reference_data in zip(estimate_iterator, reference_iterator):
-            print(f"Processing {self.rank} running evaluator on chunk {s} - {e}.")
-            self._process_chunk(s, e, estimate_data, reference_data, first)
+        for estimate_data_chunk, reference_data_chunk in zip(estimate_iterator, reference_iterator):
+            chunk_start, chunk_end, estimate_data = estimate_data_chunk
+            _, _, reference_data = reference_data_chunk
+
+            print(f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}.")
+            self._process_chunk(chunk_start, chunk_end, estimate_data, reference_data, first)
             first = False
 
         self._output_handle.finalize_write()

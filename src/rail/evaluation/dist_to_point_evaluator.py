@@ -1,7 +1,7 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics.base_metric_classes import DistToPointMetric
+from qp.metrics.concrete_metric_classes import DistToPointMetric
 
 from rail.core.data import Hdf5Handle, QPHandle, TableHandle
 from rail.core.stage import RailStage
@@ -34,6 +34,8 @@ class DistToPointEvaluator(Evaluator):
             msg="Random seed value to use for reproducible results."),
         hdf5_groupname=Param(str, "photometry", required=False,
             msg="HDF5 Groupname for truth table."),
+        reference_dictionary_key=Param(str, "redshift", required=False,
+            msg="The key in the `truth` dictionary where the redshift data is stored."),
     )
     inputs = [('input', QPHandle),
               ('truth', TableHandle)]
@@ -51,9 +53,12 @@ class DistToPointEvaluator(Evaluator):
         reference_iterator = self.input_iterator('truth')
 
         first = True
-        for s, e, estimate_data, _, _, reference_data in zip(estimate_iterator, reference_iterator):
-            print(f"Processing {self.rank} running evaluator on chunk {s} - {e}.")
-            self._process_chunk(s, e, estimate_data, reference_data, first)
+        for estimate_data_chunk, reference_data_chunk in zip(estimate_iterator, reference_iterator):
+            chunk_start, chunk_end, estimate_data = estimate_data_chunk
+            _, _, reference_data = reference_data_chunk
+
+            print(f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}.")
+            self._process_chunk(chunk_start, chunk_end, estimate_data, reference_data, first)
             first = False
 
         self._output_handle.finalize_write()
@@ -69,7 +74,7 @@ class DistToPointEvaluator(Evaluator):
                 continue
 
             this_metric = self._metric_dict[metric](**self.config.to_dict())
-            out_table[metric] = this_metric.evaluate(estimate_data, reference_data)
+            out_table[metric] = this_metric.evaluate(estimate_data, reference_data[self.config.reference_dictionary_key])
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
