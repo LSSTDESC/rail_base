@@ -220,7 +220,7 @@ class TableHandle(DataHandle):
 
     @classmethod
     def _size(cls, path, **kwargs):
-        return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
+        return tables_io.io.getInputDataLength(path, **kwargs)
 
     @classmethod
     def _iterator(cls, path, **kwargs):
@@ -265,6 +265,9 @@ class PqHandle(TableHandle):
     """DataHandle for a parquet table"""
     suffix = 'pq'
 
+    @classmethod
+    def _size(cls, path, **kwargs):
+        return tables_io.io.getInputDataLengthPq(path, **kwargs)
 
 class QPHandle(DataHandle):
     """DataHandle for qp ensembles
@@ -310,7 +313,7 @@ class QPHandle(DataHandle):
         if not isinstance(data, qp.Ensemble):
             raise TypeError(f"Expected `data` to be a `qp.Ensemble`, but {type(data)} was provided. Perhaps you meant to use `TableHandle`?")
 
-    # @classmethod
+    @classmethod
     def _size(cls, path, **kwargs):
         if path == 'None':
             return cls.data.npdf
