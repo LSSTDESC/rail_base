@@ -3,6 +3,7 @@
 import os
 import tables_io
 import pickle
+import json
 import qp
 
 
@@ -331,6 +332,31 @@ def default_model_write(model, path):
     """Write the model, this default implementation uses pickle"""
     with open(path, 'wb') as fout:
         pickle.dump(obj=model, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
+
+
+class JsonHandle(DataHandle):
+    """Generic handle for reading in a whole file in json format as a dictionary.
+    """
+
+    suffix = 'json'
+
+    @classmethod
+    def _open(cls, path, **kwargs):
+        """Open and return the contents of the json file."""
+        return cls.read(path, **kwargs)
+
+    @classmethod
+    def _read(cls, path, **kwargs):
+        """Read the contents of the json file into a python dictionary"""
+        with open(path, "r") as infile:
+            data = json.loads(infile)
+        return data
+
+    @classmethod
+    def _write(cls, data, path, **kwargs):
+        """Write out the provided data dictionary as json."""
+        with open(path, "w") as outfile:
+            json.dumps(data, outfile)
 
 
 class ModelDict(dict):
