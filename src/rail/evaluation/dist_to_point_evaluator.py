@@ -49,7 +49,7 @@ class DistToPointEvaluator(Evaluator):
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
-        estimate_iterator = self.input_iterator('input')
+        estimate_iterator = self.input_iterator('input', groupname=None)
         reference_iterator = self.input_iterator('truth')
 
         first = True
@@ -74,7 +74,9 @@ class DistToPointEvaluator(Evaluator):
                 continue
 
             this_metric = self._metric_dict[metric](**self.config.to_dict())
-            out_table[metric] = this_metric.evaluate(estimate_data, reference_data[self.config.reference_dictionary_key])
+            out_table[metric] = this_metric.evaluate(
+                estimate_data, reference_data[self.config.reference_dictionary_key]
+            )
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
