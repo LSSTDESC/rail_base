@@ -339,12 +339,12 @@ class RailStage(PipelineStage):
         handle = self.get_handle(tag, allow_missing=True)
 
         try:
-            self.config.hdf5_groupname
+            groupname = kwargs.get('groupname', self.config.hdf5_groupname)
         except Exception:
-            self.config.hdf5_groupname = None
+            groupname = None
 
         if handle.path and handle.path != "None":   # pylint: disable=no-else-return
-            self._input_length = handle.size(groupname=self.config.hdf5_groupname)
+            self._input_length = handle.size(groupname=groupname)
             total_chunks_needed = ceil(self._input_length / self.config.chunk_size)
             # If the number of process is larger than we need, we wemove some of them
             if total_chunks_needed < self.size:  # pragma: no cover
@@ -355,7 +355,7 @@ class RailStage(PipelineStage):
                 else:
                     quit()
             kwcopy = dict(
-                groupname=self.config.hdf5_groupname,
+                groupname=groupname,
                 chunk_size=self.config.chunk_size,
                 rank=self.rank,
                 parallel_size=self.size,
