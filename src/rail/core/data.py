@@ -7,7 +7,7 @@ import tables_io
 import qp
 
 
-class DataHandle:
+class DataHandle:  # pylint: disable=too-many-instance-attributes
     """Class to act as a handle for a bit of data.  Associating it with a file and
     providing tools to read & write it to that file
 
@@ -160,15 +160,8 @@ class DataHandle:
     def iterator(self, **kwargs):
         """Iterator over the data"""
         if self.data is not None and self.partial is False:
-            groupname = kwargs.get('groupname', None)            
-            nrows = self.size(groupname=groupname)
-            for start, end in tables_io.ioUtils.data_ranges_by_rank(nrows, kwargs.get('chunk_size', 100000), 1, 0):
-                if groupname: 
-                    yield start, end, tables_io.arrayUtils.sliceDict(self.data[groupname], slice(start,end))
-                else:
-                    yield start, end, self.data[start:end]
-        else:
-            return self._iterator(self.path, **kwargs)
+            return self._in_memory_iterator(**kwargs)
+        return self._iterator(self.path, **kwargs)
 
     def set_data(self, data, partial=False):
         """Set the data for a chunk, and set the partial flag to true"""
@@ -196,6 +189,9 @@ class DataHandle:
 
     def _data_size(self, data, **kwargs):
         raise NotImplementedError("DataHandle._data_size")  # pragma: no cover
+
+    def _in_memory_iterator(self, **kwargs):
+        raise NotImplementedError("DataHandle._in_memory_iterator")  # pragma: no cover
 
     @classmethod
     def _iterator(cls, path, **kwargs):
@@ -244,6 +240,17 @@ class TableHandle(DataHandle):
 
     suffix = None
 
+    def set_data(self, data, partial=False):
+        """Set the data for a chunk, and set the partial flag to true"""
+        self._validate_data(data)
+        self.data = data
+        self.partial = partial
+
+    @classmethod
+    def _validate_data(cls, data):  # pylint: disable=unused-argument
+        """Make sure that the right type of data is being passed in"""
+        return
+
     @classmethod
     def _open(cls, path, **kwargs):
         """Open and return the associated file
@@ -265,6 +272,10 @@ class TableHandle(DataHandle):
         """Write the data to the associatied file"""
         return tables_io.write(data, path, **kwargs)
 
+    def size(self, **kwargs):
+        """Return the size of the data associated to this handle"""
+        return self._size(self.path, **kwargs)
+
     def _size(self, path, **kwargs):
         return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
 
@@ -276,6 +287,24 @@ class TableHandle(DataHandle):
         for _k, v in data.items():
             max_l = max(max_l, len(v))
         return max_l
+
+    def _in_memory_iterator(self, **kwargs):
+        nrows = self.data_size(**kwargs)
+        groupname = kwargs.get('groupname', None)
+        if isinstance(self.data, dict) and groupname:
+            try:
+                table = self.data[groupname]
+            except KeyError:
+                table = self.data
+        else:
+            table = self.data
+        for start, end in tables_io.ioUtils.data_ranges_by_rank(
+                nrows, kwargs.get('chunk_size', 100000), 1, 0
+            ):
+            if isinstance(self.data, dict):
+                yield start, end, tables_io.arrayUtils.sliceDict(table, slice(start,end))
+            else:
+                yield start, end, table[start:end]
 
     @classmethod
     def _iterator(cls, path, **kwargs):
@@ -384,6 +413,13 @@ class QPHandle(DataHandle):
     def _data_size(self, data, **kwargs):
         return self.data.npdf
 
+    def _in_memory_iterator(self, **kwargs):
+        nrows = self.data.npdf
+        for start, end in tables_io.ioUtils.data_ranges_by_rank(
+                nrows, kwargs.get('chunk_size', 100000), 1, 0
+            ):
+            yield start, end, self.data[start:end]
+
     @classmethod
     def _iterator(cls, path, **kwargs):
         """Iterate over the data"""
@@ -481,6 +517,11 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
         for _k, v in data.items():
             max_l = max(max_l, len(v))
         return max_l
+
+    def _in_memory_iterator(self, **kwargs):
+        if self.is_qp():
+            return QPHandle._in_memory_iterator(**kwargs)
+        return Hdf5Handle._in_memory_iterator(**kwargs)
 
     @classmethod
     def _iterator(cls, path, **kwargs):
