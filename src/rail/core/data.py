@@ -95,11 +95,7 @@ class DataHandle:
         raise NotImplementedError("DataHandle._read")  # pragma: no cover
 
     def write(self, **kwargs):
-<<<<<<< HEAD
-        """Write the data to the associated file """
-=======
         """Write the data to the associatied file"""
->>>>>>> abe61bc (Lots of delinting with pylint)
         if self.path is None:
             raise ValueError(
                 "TableHandle.write() called but path has not been specified"
@@ -132,11 +128,7 @@ class DataHandle:
         raise NotImplementedError("DataHandle._initialize_write")  # pragma: no cover
 
     def write_chunk(self, start, end, **kwargs):
-<<<<<<< HEAD
-        """Write the data to the associated file """
-=======
         """Write the data to the associatied file"""
->>>>>>> abe61bc (Lots of delinting with pylint)
         if self.data is None:
             raise ValueError(
                 f"TableHandle.write_chunk() called for path {self.path} with no data"
@@ -168,8 +160,13 @@ class DataHandle:
     def iterator(self, **kwargs):
         """Iterator over the data"""
         if self.data is not None and self.partial is False:
-            for i in range(1):
-                return [(i, -1, self.data)]
+            groupname = kwargs.get('groupname', None)            
+            nrows = self.size(groupname=groupname)
+            for start, end in tables_io.ioUtils.data_ranges_by_rank(nrows, kwargs.get('chunk_size', 100000), 1, 0):
+                if groupname: 
+                    yield start, end, tables_io.arrayUtils.sliceDict(self.data[groupname], slice(start,end))
+                else:
+                    yield start, end, self.data[start:end]
         else:
             return self._iterator(self.path, **kwargs)
 
@@ -191,13 +188,13 @@ class DataHandle:
     def _size(self, path, **kwargs):
         raise NotImplementedError("DataHandle._size")  # pragma: no cover
 
-    def data_size(self):
+    def data_size(self, **kwargs):
         """Return the size of the in memorry data"""
         if not self.data:
             return 0
-        return self._data_size(self.data)
+        return self._data_size(self.data, **kwargs)
 
-    def _data_size(self, data):
+    def _data_size(self, data, **kwargs):
         raise NotImplementedError("DataHandle._data_size")  # pragma: no cover
 
     @classmethod
@@ -271,7 +268,10 @@ class TableHandle(DataHandle):
     def _size(self, path, **kwargs):
         return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
 
-    def _data_size(self, data):
+    def _data_size(self, data, **kwargs):
+        group_name = kwargs.get('groupname', None)
+        if group_name:
+            data = data[group_name]
         max_l = 0
         for _k, v in data.items():
             max_l = max(max_l, len(v))
@@ -381,7 +381,7 @@ class QPHandle(DataHandle):
             return self.data.npdf
         return tables_io.io.getInputDataLengthHdf5(path, groupname="data")
 
-    def _data_size(self, data):
+    def _data_size(self, data, **kwargs):
         return self.data.npdf
 
     @classmethod
@@ -474,7 +474,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
             return QPHandle._size(self, path, **kwargs)
         return Hdf5Handle._size(self, path, **kwargs)
 
-    def _data_size(self, data):
+    def _data_size(self, data, **kwargs):
         if self.is_qp():
             return self.data.npdf
         max_l = 0
