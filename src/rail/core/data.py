@@ -282,7 +282,10 @@ class TableHandle(DataHandle):
     def _data_size(self, data, **kwargs):
         group_name = kwargs.get('groupname', None)
         if group_name:
-            data = data[group_name]
+            try:
+                data = data[group_name]
+            except KeyError:
+                pass
         max_l = 0
         for _k, v in data.items():
             max_l = max(max_l, len(v))
