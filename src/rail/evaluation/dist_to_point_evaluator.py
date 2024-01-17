@@ -1,6 +1,7 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
+from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.concrete_metric_classes import DistToPointMetric
 
 from rail.core.data import Hdf5Handle, QPHandle, TableHandle
@@ -63,9 +64,11 @@ class DistToPointEvaluator(Evaluator):
 
         self._output_handle.finalize_write()
 
+    #pylint: disable=too-many-arguments
     def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
         for metric in self.config.metrics:
+
             if metric not in self._metric_dict:
                 #! Make the following a logged error instead of bailing out of the stage.
                 # raise ValueError(
@@ -74,8 +77,18 @@ class DistToPointEvaluator(Evaluator):
                 continue
 
             this_metric = self._metric_dict[metric](**self.config.to_dict())
+
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                print(f"We can't calculate a value for {this_metric.metric_name} right now.")
+                continue
+
+            if this_metric.metric_output_type == MetricOutputType.single_distribution:
+                print(f"We can't calculate a value for {this_metric.metric_name} right now.")
+                continue
+
             out_table[metric] = this_metric.evaluate(
-                estimate_data, reference_data[self.config.reference_dictionary_key]
+                estimate_data,
+                reference_data[self.config.reference_dictionary_key]
             )
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
