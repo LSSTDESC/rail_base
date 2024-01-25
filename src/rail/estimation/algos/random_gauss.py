@@ -14,38 +14,41 @@ from rail.core.data import TableHandle
 
 
 class RandomGaussInformer(CatInformer):
-    """Placeholder Informer
-    """
+    """Placeholder Informer"""
 
-    name = 'RandomGaussInformer'
+    name = "RandomGaussInformer"
     config_options = CatInformer.config_options.copy()
 
     def __init__(self, args, comm=None):
         CatInformer.__init__(self, args, comm=comm)
 
     def run(self):
-        self.add_data('model', np.array([None]))
+        self.add_data("model", np.array([None]))
 
 
 class RandomGaussEstimator(CatEstimator):
-    """Random CatEstimator
-    """
+    """Random CatEstimator"""
 
-    name = 'RandomGaussEstimator'
-    inputs = [('input', TableHandle)]
+    name = "RandomGaussEstimator"
+    inputs = [("input", TableHandle)]
     config_options = CatEstimator.config_options.copy()
-    config_options.update(rand_width=Param(float, 0.025, "ad hock width of PDF"),
-                          rand_zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-                          rand_zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
-                          nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
-                          seed=Param(int, 87, msg="random seed"),
-                          column_name=Param(str, "mag_i_lsst",
-                                            msg="name of a column that has the "\
-                                                "correct number of galaxies to find length of"))
+    config_options.update(
+        rand_width=Param(float, 0.025, "ad hock width of PDF"),
+        rand_zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
+        rand_zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
+        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        seed=Param(int, 87, msg="random seed"),
+        column_name=Param(
+            str,
+            "mag_i_lsst",
+            msg="name of a column that has the "
+            "correct number of galaxies to find length of",
+        ),
+    )
 
     def __init__(self, args, comm=None):
-        """ Constructor:
-        Do CatEstimator specific initialization """
+        """Constructor:
+        Do CatEstimator specific initialization"""
         CatEstimator.__init__(self, args, comm=comm)
         self.zgrid = None
 
@@ -56,10 +59,17 @@ class RandomGaussEstimator(CatEstimator):
         rng = np.random.default_rng(seed=self.config.seed + start)
         zmode = np.round(rng.uniform(0.0, self.config.rand_zmax, numzs), 3)
         widths = self.config.rand_width * (1.0 + zmode)
-        self.zgrid = np.linspace(self.config.rand_zmin, self.config.rand_zmax, self.config.nzbins)
+        self.zgrid = np.linspace(
+            self.config.rand_zmin, self.config.rand_zmax, self.config.nzbins
+        )
         for i in range(numzs):
             pdf.append(norm.pdf(self.zgrid, zmode[i], widths[i]))
-        qp_d = qp.Ensemble(qp.stats.norm, data=dict(loc=np.expand_dims(zmode, -1),  # pylint: disable=no-member
-                                                    scale=np.expand_dims(widths, -1)))
+        qp_d = qp.Ensemble(
+            qp.stats.norm,  # pylint: disable=no-member
+            data=dict(
+                loc=np.expand_dims(zmode, -1),  # pylint: disable=no-member
+                scale=np.expand_dims(widths, -1),
+            ),
+        )
         qp_d.set_ancil(dict(zmode=zmode))
         self._do_chunk_output(qp_d, start, end, first)

@@ -1,8 +1,8 @@
 import numpy as np
 from numpy.typing import NDArray
 
-class PointEstimationMixin():
 
+class PointEstimationMixin:
     def calculate_point_estimates(self, qp_dist, grid=None):
         """This function drives the calculation of point estimates for qp.Ensembles.
         It is defined here, and called from the `_process_chunk` method in the
@@ -36,20 +36,20 @@ class PointEstimationMixin():
 
         ancil_dict = dict()
         calculated_point_estimates = []
-        if 'calculated_point_estimates' in self.config:
-            calculated_point_estimates = self.config['calculated_point_estimates']
+        if "calculated_point_estimates" in self.config:
+            calculated_point_estimates = self.config["calculated_point_estimates"]
 
-        if 'mode' in calculated_point_estimates:
+        if "mode" in calculated_point_estimates:
             mode_value = self._calculate_mode_point_estimate(qp_dist, grid)
-            ancil_dict.update(mode = mode_value)
+            ancil_dict.update(mode=mode_value)
 
-        if 'mean' in calculated_point_estimates:
+        if "mean" in calculated_point_estimates:
             mean_value = self._calculate_mean_point_estimate(qp_dist)
-            ancil_dict.update(mean = mean_value)
+            ancil_dict.update(mean=mean_value)
 
-        if 'median' in calculated_point_estimates:
+        if "median" in calculated_point_estimates:
             median_value = self._calculate_median_point_estimate(qp_dist)
-            ancil_dict.update(median = median_value)
+            ancil_dict.update(median=median_value)
 
         if calculated_point_estimates:
             if qp_dist.ancil is None:
@@ -85,10 +85,12 @@ class PointEstimationMixin():
             we'll raise a KeyError.
         """
         if grid is None:
-            for key in ['zmin', 'zmax', 'nzbins']:
+            for key in ["zmin", "zmax", "nzbins"]:
                 if key not in self.config:
-                    raise KeyError(f"Expected `{key}` to be defined in stage " \
-                                   "configuration dictionary in order to caluclate mode.")
+                    raise KeyError(
+                        f"Expected `{key}` to be defined in stage "
+                        "configuration dictionary in order to caluclate mode."
+                    )
 
             grid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
 

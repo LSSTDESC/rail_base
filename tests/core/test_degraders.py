@@ -1,5 +1,4 @@
 import os
-from typing import Type
 
 import numpy as np
 import pandas as pd
@@ -8,11 +7,11 @@ import pytest
 from rail.core.data import DATA_STORE, TableHandle
 from rail.core.util_stages import ColumnMapper
 from rail.creation.degradation.quantityCut import QuantityCut
-from rail.creation.degradation.spectroscopic_selections import *
+from rail.creation.degradation.spectroscopic_selections import *  # pylint: disable=wildcard-import,unused-wildcard-import
 
 
-@pytest.fixture
-def data():
+@pytest.fixture(name='data')
+def data_fixture():
     """Some dummy data to use below."""
 
     DS = DATA_STORE()
@@ -30,8 +29,8 @@ def data():
     return DS.add_data("data", df, TableHandle, path="dummy.pd")
 
 
-@pytest.fixture
-def data_forspec():
+@pytest.fixture(name='data_forspec')
+def data_forspec_fixture():
     """Some dummy data to use below."""
 
     DS = DATA_STORE()
@@ -84,10 +83,10 @@ def test_QuantityCut_returns_correct_shape(data):
 
 def test_SpecSelection(data):
     bands = ["u", "g", "r", "i", "z", "y"]
-    band_dict = {band: f"mag_{band}_lsst" for band in bands}
+    _band_dict = {band: f"mag_{band}_lsst" for band in bands}
     rename_dict = {f"{band}_err": f"mag_err_{band}_lsst" for band in bands}
     rename_dict.update({f"{band}": f"mag_{band}_lsst" for band in bands})
-    standard_colnames = [f"mag_{band}_lsst" for band in "ugrizy"]
+    _standard_colnames = [f"mag_{band}_lsst" for band in "ugrizy"]
 
     col_remapper_test = ColumnMapper.make_stage(
         name="col_remapper_test", hdf5_groupname="", columns=rename_dict
@@ -96,51 +95,73 @@ def test_SpecSelection(data):
 
     degrader_GAMA = SpecSelection_GAMA.make_stage()
     degrader_GAMA(data)
-    degrader_GAMA.__repr__()
+    repr(degrader_GAMA)
 
-    os.remove(degrader_GAMA.get_output(degrader_GAMA.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_GAMA.get_output(
+            degrader_GAMA.get_aliased_tag("output"), final_name=True
+        )
+    )
 
     degrader_BOSS = SpecSelection_BOSS.make_stage()
     degrader_BOSS(data)
-    degrader_BOSS.__repr__()
+    repr(degrader_BOSS)
 
-    os.remove(degrader_BOSS.get_output(degrader_BOSS.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_BOSS.get_output(
+            degrader_BOSS.get_aliased_tag("output"), final_name=True
+        )
+    )
 
     degrader_DEEP2 = SpecSelection_DEEP2.make_stage()
     degrader_DEEP2(data)
-    degrader_DEEP2.__repr__()
+    repr(degrader_DEEP2)
 
-    os.remove(degrader_DEEP2.get_output(degrader_DEEP2.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_DEEP2.get_output(
+            degrader_DEEP2.get_aliased_tag("output"), final_name=True
+        )
+    )
 
     degrader_VVDSf02 = SpecSelection_VVDSf02.make_stage()
     degrader_VVDSf02(data)
-    degrader_VVDSf02.__repr__()
+    repr(degrader_VVDSf02)
 
-    degrader_zCOSMOS = SpecSelection_zCOSMOS.make_stage(colnames={"i": "mag_i_lsst", "redshift": "redshift"})
+    degrader_zCOSMOS = SpecSelection_zCOSMOS.make_stage(
+        colnames={"i": "mag_i_lsst", "redshift": "redshift"}
+    )
     degrader_zCOSMOS(data)
-    degrader_zCOSMOS.__repr__()
+    repr(degrader_zCOSMOS)
 
-    os.remove(degrader_zCOSMOS.get_output(degrader_zCOSMOS.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_zCOSMOS.get_output(
+            degrader_zCOSMOS.get_aliased_tag("output"), final_name=True
+        )
+    )
 
     degrader_HSC = SpecSelection_HSC.make_stage()
     degrader_HSC(data)
-    degrader_HSC.__repr__()
+    repr(degrader_HSC)
 
-    os.remove(degrader_HSC.get_output(degrader_HSC.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_HSC.get_output(degrader_HSC.get_aliased_tag("output"), final_name=True)
+    )
 
     degrader_HSC = SpecSelection_HSC.make_stage(percentile_cut=70)
     degrader_HSC(data)
-    degrader_HSC.__repr__()
+    repr(degrader_HSC)
 
-    os.remove(degrader_HSC.get_output(degrader_HSC.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_HSC.get_output(degrader_HSC.get_aliased_tag("output"), final_name=True)
+    )
 
 
 def test_SpecSelection_low_N_tot(data_forspec):
     bands = ["u", "g", "r", "i", "z", "y"]
-    band_dict = {band: f"mag_{band}_lsst" for band in bands}
+    _band_dict = {band: f"mag_{band}_lsst" for band in bands}
     rename_dict = {f"{band}_err": f"mag_err_{band}_lsst" for band in bands}
     rename_dict.update({f"{band}": f"mag_{band}_lsst" for band in bands})
-    standard_colnames = [f"mag_{band}_lsst" for band in "ugrizy"]
+    _standard_colnames = [f"mag_{band}_lsst" for band in "ugrizy"]
 
     col_remapper_test = ColumnMapper.make_stage(
         name="col_remapper_test", hdf5_groupname="", columns=rename_dict
@@ -150,7 +171,11 @@ def test_SpecSelection_low_N_tot(data_forspec):
     degrader_zCOSMOS = SpecSelection_zCOSMOS.make_stage(N_tot=1)
     degrader_zCOSMOS(data_forspec)
 
-    os.remove(degrader_zCOSMOS.get_output(degrader_zCOSMOS.get_aliased_tag("output"), final_name=True))
+    os.remove(
+        degrader_zCOSMOS.get_output(
+            degrader_zCOSMOS.get_aliased_tag("output"), final_name=True
+        )
+    )
 
 
 @pytest.mark.parametrize("N_tot, errortype", [(-1, ValueError)])
@@ -168,10 +193,10 @@ def test_SpecSelection_bad_colname(data, errortype):
         degrader_GAMA(data)
 
 
-@pytest.mark.parametrize("success_rate_dir, errortype", [("/this/path/should/not/exist", ValueError)])
+@pytest.mark.parametrize(
+    "success_rate_dir, errortype", [("/this/path/should/not/exist", ValueError)]
+)
 def test_SpecSelection_bad_path(success_rate_dir, errortype):
     """Test bad parameters that should raise TypeError"""
     with pytest.raises(errortype):
         SpecSelection.make_stage(success_rate_dir=success_rate_dir)
-
-
