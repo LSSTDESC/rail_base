@@ -24,6 +24,9 @@ class DataHandle:
     """
     suffix = ''
 
+    # This is to keep track of all the sub-types
+    data_handle_type_dict = {}
+
     def __init__(self, tag, data=None, path=None, creator=None):
         """Constructor """
         self.tag = tag
@@ -36,6 +39,21 @@ class DataHandle:
         self.groups = None
         self.partial = False
         self.length = None
+        
+    def __init_subclass__(cls, **kwargs):
+        """Register the subclass with the dict"""
+        cls.data_handle_type_dict[cls.__name__] = cls
+
+    @classmethod
+    def get_sub_class(cls, class_name):
+        """Get a particular subclass by name"""
+        return cls.data_handle_type_dict[class_name]
+
+    @classmethod
+    def print_sub_classes(cls):
+        """Print the list of all the subclasses"""
+        for key, val in cls.data_handle_type_dict.items():
+            print(f"{key}: {val}")    
 
     def open(self, **kwargs):
         """Open and return the associated file
