@@ -249,7 +249,7 @@ class BaseEvaluator(Evaluator):
         raise NotImplementedError('BaseEvaluator._process_chunk()')
 
 
-    def _output_table_chunk_data(self, out_table, first):        
+    def _output_table_chunk_data(self, start, end, out_table, first):        
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
         if first:
