@@ -6,74 +6,32 @@ from qp.metrics import point_estimate_metric_classes
 
 from rail.core.data import Hdf5Handle, TableHandle, QPHandle
 from rail.core.stage import RailStage
-from rail.evaluation.evaluator import Evaluator
-
-# dynamically build a dictionary of all available metrics of the appropriate type
-METRIC_DICT = {}
-
-def all_subclasses(cls):
-    return set(cls.__subclasses__()).union(
-        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
-for subcls in all_subclasses(PointToPointMetric):
-    METRIC_DICT[subcls.metric_name] = subcls
+from rail.evaluation.evaluator import BaseEvaluator
 
 
-class PointToPointEvaluator(Evaluator):
+class PointToPointEvaluator(BaseEvaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = 'PointToPointEvaluator'
-    config_options = RailStage.config_options.copy()
+    config_options = BaseEvaluator.config_options.copy()
     config_options.update(
-        metrics=Param(list, [], required=False,
-            msg="The metrics you want to evaluate."),
-        chunk_size=Param(int, 10000, required=False,
-            msg="The default number of PDFs to evaluate per loop."),
-        _random_state=Param(float, default=None, required=False,
-            msg="Random seed value to use for reproducible results."),
         reference_dictionary_key=Param(str, "redshift", required=False,
             msg="The key in the `truth` dictionary where the redshift data is stored."),
         point_estimate_key=Param(str, "redshift", required=False,
-            msg="The key in the `truth` dictionary where the redshift data is stored."),            
-            
+            msg="The key in the `truth` dictionary where the redshift data is stored."),                        
     )
     inputs = [('input', QPHandle),
               ('truth', TableHandle)]
 
-    def __init__(self, args, comm=None):
-        Evaluator.__init__(self, args, comm=comm)
-        self._output_handle = None
-        self._summary_handle = None
-        self._metric_dict = METRIC_DICT
-        self._cached_data = {}
-        self._cached_metrics = {}
+    metric_base_class = PointToPointMetric
 
-    def run(self):
-        print(f"Requested metrics: {self.config.metrics}")
+    def _process_chunk(self, data_tuple, first):
 
-        estimate_iterator = self.input_iterator('input')
-        reference_iterator = self.input_iterator('truth')
-
-        first = True
-        for estimate_data_chunk, reference_data_chunk in zip(estimate_iterator, reference_iterator):
-            chunk_start, chunk_end, estimate_data = estimate_data_chunk
-            _, _, reference_data = reference_data_chunk
-
-            print(f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}.")
-            self._process_chunk(chunk_start, chunk_end, estimate_data, reference_data, first)
-            first = False
-
-        self._output_handle.finalize_write()
-        summary_data = {}
-
-        for metric, cached_metric in self._cached_metrics.items():
-            if self.comm:
-                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
-            summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+        start = data_tuple[0]
+        end = data_tuple[1]
+        estimate_data = data_tuple[2]
+        reference_data = data_tuple[3]
         
-        self._summary_handle = self.add_handle('summary', data=summary_data)
-
-        
-    def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
         for metric in self.config.metrics:
 
@@ -111,10 +69,6 @@ class PointToPointEvaluator(Evaluator):
                     np.squeeze(estimate_data.ancil[self.config.point_estimate_key]),
                     reference_data[self.config.reference_dictionary_key]
                 )
-        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
-        if first:
-            self._output_handle = self.add_handle('output', data=out_table_to_write)
-            self._output_handle.initialize_write(self._input_length, communicator=self.comm)
-        self._output_handle.set_data(out_table_to_write, partial=True)
-        self._output_handle.write_chunk(start, end)
+        self._output_table_chunk_data(start, end, out_table, first)
+

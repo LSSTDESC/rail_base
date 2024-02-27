@@ -224,7 +224,7 @@ class SingleEvaluator(RailStage):
 
         itrs = [ self.input_iterator(tag) for tag in handle_list ]
 
-        for it in zip(*itrs):
+        for it in izip(*itrs):
             data = []
             first = True
             for (s, e, d) in it:
@@ -259,3 +259,6 @@ class SingleEvaluator(RailStage):
     def _finalize_run(self):
         self._output_array_handle.finalize_write()
         self._output_cache_handle.finalize_write()
+
+
+    def _do_chunk_
