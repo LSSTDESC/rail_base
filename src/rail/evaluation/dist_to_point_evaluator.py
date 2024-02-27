@@ -10,8 +10,13 @@ from rail.evaluation.evaluator import Evaluator
 
 # dynamically build a dictionary of all available metrics of the appropriate type
 METRIC_DICT = {}
-for subcls in DistToPointMetric.__subclasses__():
+
+def all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+for subcls in all_subclasses(DistToPointMetric):
     METRIC_DICT[subcls.metric_name] = subcls
+
 
 class DistToPointEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
@@ -40,13 +45,16 @@ class DistToPointEvaluator(Evaluator):
     )
     inputs = [('input', QPHandle),
               ('truth', TableHandle)]
-    outputs = [('output', Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         Evaluator.__init__(self, args, comm=comm)
         self._output_handle = None
+        self._summary_handle = None
+        self._cached_data = {}
+        self._cached_metrics = {}
         self._metric_dict = METRIC_DICT
 
+        
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
@@ -64,6 +72,15 @@ class DistToPointEvaluator(Evaluator):
 
         self._output_handle.finalize_write()
 
+        summary_data = {}
+        for metric, cached_metric in self._cached_metrics.items():
+            if self.comm:
+                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+            summary_data[metric] = cached_metric.finalize(self._cached_data[metric])
+        
+        self._summary_handle = self.add_handle('summary', data=summary_data)
+        
+
     #pylint: disable=too-many-arguments
     def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
@@ -79,18 +96,24 @@ class DistToPointEvaluator(Evaluator):
             this_metric = self._metric_dict[metric](**self.config.to_dict())
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
-                print(f"We can't calculate a value for {this_metric.metric_name} right now.")
+                if not hasattr(this_metric, 'accumulate'):
+                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                    continue
+                self._cached_metrics[metric] = this_metric
+                self._cached_data[metric] = this_metric.accumulate(
+                    estimate_data,
+                    reference_data[self.config.reference_dictionary_key]
+                )
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
                 continue
-
-            if this_metric.metric_output_type == MetricOutputType.single_distribution:
-                print(f"We can't calculate a value for {this_metric.metric_name} right now.")
-                continue
-
-            out_table[metric] = this_metric.evaluate(
-                estimate_data,
-                reference_data[self.config.reference_dictionary_key]
-            )
-
+            else:
+                self._cached_metrics[metric] = this_metric
+                out_table[metric] = this_metric.evaluate(
+                    estimate_data,
+                    reference_data[self.config.reference_dictionary_key]
+                )
+                
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
         if first:

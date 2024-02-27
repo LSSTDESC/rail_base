@@ -1,16 +1,22 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics.base_metric_classes import PointToPointMetric
+from qp.metrics.base_metric_classes import MetricOutputType, PointToPointMetric
+from qp.metrics import point_estimate_metric_classes
 
-from rail.core.data import Hdf5Handle, TableHandle
+from rail.core.data import Hdf5Handle, TableHandle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.evaluator import Evaluator
 
 # dynamically build a dictionary of all available metrics of the appropriate type
 METRIC_DICT = {}
-for subcls in PointToPointMetric.__subclasses__():
+
+def all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+for subcls in all_subclasses(PointToPointMetric):
     METRIC_DICT[subcls.metric_name] = subcls
+
 
 class PointToPointEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
@@ -20,19 +26,26 @@ class PointToPointEvaluator(Evaluator):
     config_options.update(
         metrics=Param(list, [], required=False,
             msg="The metrics you want to evaluate."),
-        chunk_size=Param(int, 1000, required=False,
+        chunk_size=Param(int, 10000, required=False,
             msg="The default number of PDFs to evaluate per loop."),
         _random_state=Param(float, default=None, required=False,
             msg="Random seed value to use for reproducible results."),
+        reference_dictionary_key=Param(str, "redshift", required=False,
+            msg="The key in the `truth` dictionary where the redshift data is stored."),
+        point_estimate_key=Param(str, "redshift", required=False,
+            msg="The key in the `truth` dictionary where the redshift data is stored."),            
+            
     )
-    inputs = [('input', TableHandle),
+    inputs = [('input', QPHandle),
               ('truth', TableHandle)]
-    outputs = [('output', Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         Evaluator.__init__(self, args, comm=comm)
         self._output_handle = None
+        self._summary_handle = None
         self._metric_dict = METRIC_DICT
+        self._cached_data = {}
+        self._cached_metrics = {}
 
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
@@ -50,20 +63,54 @@ class PointToPointEvaluator(Evaluator):
             first = False
 
         self._output_handle.finalize_write()
+        summary_data = {}
 
+        for metric, cached_metric in self._cached_metrics.items():
+            if self.comm:
+                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+            summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+        
+        self._summary_handle = self.add_handle('summary', data=summary_data)
+
+        
     def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
         for metric in self.config.metrics:
+
             if metric not in self._metric_dict:
                 #! Make the following a logged error instead of bailing out of the stage.
                 # raise ValueError(
-                # f"Unsupported metric requested: '{metric}'.
-                # Available metrics are: {self._metric_dict.keys()}")
+                print(f"Unsupported metric requested: '{metric}'.  Available metrics are: {self._metric_dict.keys()}")
                 continue
 
-            this_metric = self._metric_dict[metric](**self.config.to_dict())
-            out_table[metric] = this_metric.evaluate(estimate_data, reference_data)
+            this_metric = self._metric_dict[metric](**self.config.get(metric, {}))
+            
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                if not hasattr(this_metric, 'accumulate'):
+                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                    continue
+                
+                self._cached_metrics[metric] = this_metric
+                centroids = this_metric.accumulate(
+                    np.squeeze(estimate_data.ancil[self.config.point_estimate_key]),
+                    reference_data[self.config.reference_dictionary_key]
+                )
+                if self.comm:
+                    self._cached_data[metric] = centroids
+                else:
+                    if metric in self._cached_data:
+                        self._cached_data[metric].append(centroids)
+                    else:
+                        self._cached_data[metric] = [centroids]
 
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
+                continue
+            else:
+                out_table[metric] = this_metric.evaluate(
+                    np.squeeze(estimate_data.ancil[self.config.point_estimate_key]),
+                    reference_data[self.config.reference_dictionary_key]
+                )
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
 
         if first:

@@ -1,6 +1,7 @@
 import numpy as np
 
 from ceci.config import StageParameter as Param
+from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.concrete_metric_classes import DistToDistMetric
 
 from rail.core.data import Hdf5Handle, QPHandle
@@ -9,8 +10,13 @@ from rail.evaluation.evaluator import Evaluator
 
 # dynamically build a dictionary of all available metrics of the appropriate type
 METRIC_DICT = {}
-for subcls in DistToDistMetric.__subclasses__():
+
+def all_subclasses(cls):
+    return set(cls.__subclasses__()).union(
+        [s for c in cls.__subclasses__() for s in all_subclasses(c)])
+for subcls in all_subclasses(DistToDistMetric):
     METRIC_DICT[subcls.metric_name] = subcls
+
 
 class DistToDistEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference PDFs"""
@@ -33,12 +39,14 @@ class DistToDistEvaluator(Evaluator):
     )
     inputs = [('input', QPHandle),
               ('truth', QPHandle)]
-    outputs = [('output', Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         Evaluator.__init__(self, args, comm=comm)
         self._output_handle = None
+        self._summary_handle = None        
         self._metric_dict = METRIC_DICT
+        self._cached_data = {}
+        self._cached_metrics = {}
 
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
@@ -56,7 +64,14 @@ class DistToDistEvaluator(Evaluator):
             first = False
 
         self._output_handle.finalize_write()
-
+        summary_data = {}
+        for metric, cached_metric in self._cached_metrics.items():
+            if self.comm:
+                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+            summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+        
+        self._summary_handle = self.add_handle('summary', data=summary_data)
+        
     def _process_chunk(self, start, end, estimate_data, reference_data, first):
         out_table = {}
         for metric in self.config.metrics:
@@ -68,6 +83,28 @@ class DistToDistEvaluator(Evaluator):
                 continue
 
             this_metric = self._metric_dict[metric](**self.config.to_dict())
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                if not hasattr(this_metric, 'accumulate'):
+                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                    continue
+                
+                self._cached_metrics[metric] = this_metric
+                centroids = this_metric.accumulate(
+                    estimate_data,
+                    reference_data,
+                )
+                if self.comm:
+                    self._cached_data[metric] = centroids
+                else:
+                    if metric in self._cached_data:
+                        self._cached_data[metric].append(centroids)
+                    else:
+                        self._cached_data[metric] = [centroids]
+
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
+                continue
+
             out_table[metric] = this_metric.evaluate(estimate_data, reference_data)
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
