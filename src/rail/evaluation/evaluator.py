@@ -7,6 +7,7 @@ The key feature is that the evaluate method.
 import numpy as np
 
 from ceci.config import StageParameter as Param
+from ceci.stage import PipelineStage
 from qp.metrics.pit import PIT
 from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
@@ -159,3 +160,102 @@ class Evaluator(RailStage):
             key: np.array(val).astype(float) for key, val in out_table.items()
         }
         self.add_data("output", out_table_to_write)
+
+
+def _all_subclasses(a_class):
+    return set(a_class.__subclasses__()).union(
+        [s for c in a_class.__subclasses__() for s in _all_subclasses(c)]
+    )
+
+def _build_metric_dict(a_class):
+    the_dict = {}
+    for subcls in _all_subclasses(a_class):
+        the_dict[subcls.metric_name] = subcls
+    return the_dict
+        
+
+class BaseEvaluator(Evaluator):
+    """Evaluate the performance of a photo-z estimator against reference point estimate"""
+
+    name = 'BaseEvaluator'
+    config_options = RailStage.config_options.copy()
+    config_options.update(
+        metrics=Param(list, [], required=False,
+            msg="The metrics you want to evaluate."),
+        chunk_size=Param(int, 10000, required=False,
+            msg="The default number of PDFs to evaluate per loop."),
+        _random_state=Param(float, default=None, required=False,
+            msg="Random seed value to use for reproducible results."),
+    )
+
+    outputs = [("output", Hdf5Handle),
+               ('summary', Hdf5Handle)]
+
+    metric_base_class = None
+        
+    def __init__(self, args, comm=None):
+        RailStage.__init__(self, args, comm=comm)
+        self._output_handle = None
+        self._summary_handle = None
+        self._metric_dict = _build_metric_dict(self.metric_base_class)
+        self._cached_data = {}
+        self._cached_metrics = {}
+
+    def run(self):
+        print(f"Requested metrics: {self.config.metrics}")
+
+        itr = self._setup_iterator()
+
+        first = True
+        for data_tuple in itr:
+            chunk_start, chunk_end = data_tuple[0], data_tuple[1]
+
+            print(f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}.")
+            self._process_chunk(data_tuple, first)
+            first = False
+
+    def finalize(self):
+        self._output_handle.finalize_write()
+        summary_data = {}
+
+        for metric, cached_metric in self._cached_metrics.items():
+            if self.comm:
+                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+            summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+        
+        self._summary_handle = self.add_handle('summary', data=summary_data)
+        PipelineStage.finalize(self)
+
+    def _setup_iterator(self):
+        """Setup the iterator that runs in parallel over the handles"""
+
+        handle_list = [ input_[0] for input_ in self.inputs ]
+        itrs = [ self.input_iterator(tag) for tag in handle_list ]
+
+        for it in zip(*itrs):
+            data = []
+            first = True
+            for (s, e, d) in it:
+                if first:
+                    data.append(s)
+                    data.append(e)
+                    data.append(d)
+                    first = False
+                else:
+                    data.append(d)
+            yield data
+
+    def _process_chunk(self, data_tuple, first):
+        raise NotImplementedError('BaseEvaluator._process_chunk()')
+
+
+    def _output_table_chunk_data(self, out_table, first):        
+        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
+
+        if first:
+            self._output_handle = self.add_handle('output', data=out_table_to_write)
+            self._output_handle.initialize_write(self._input_length, communicator=self.comm)
+        self._output_handle.set_data(out_table_to_write, partial=True)
+        self._output_handle.write_chunk(start, end)
+
+    
