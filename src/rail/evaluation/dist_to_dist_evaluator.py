@@ -35,21 +35,14 @@ class DistToDistEvaluator(BaseEvaluator):
         reference_data = data_tuple[3]
 
         out_table = {}
-        for metric in self.config.metrics:
-            if metric not in self._metric_dict:
-                #! Make the following a logged error instead of bailing out of the stage.
-                # raise ValueError(
-                # f"Unsupported metric requested: '{metric}'.
-                # Available metrics are: {self._metric_dict.keys()}")
-                continue
 
-            this_metric = self._metric_dict[metric](**self.config.to_dict())
+        for metric, this_metric in self._cached_metrics.items():
+
             if this_metric.metric_output_type == MetricOutputType.single_value:
                 if not hasattr(this_metric, 'accumulate'):
                     print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
                     continue
                 
-                self._cached_metrics[metric] = this_metric
                 centroids = this_metric.accumulate(
                     estimate_data,
                     reference_data,
