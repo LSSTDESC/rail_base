@@ -186,6 +186,8 @@ class BaseEvaluator(Evaluator):
             msg="The default number of PDFs to evaluate per loop."),
         _random_state=Param(float, default=None, required=False,
             msg="Random seed value to use for reproducible results."),
+        force_exact=Param(bool, default=False, required=False,
+            msg="Force the exact calculation.  This will not allow parallelization"),            
     )
 
     outputs = [("output", Hdf5Handle),
@@ -204,6 +206,9 @@ class BaseEvaluator(Evaluator):
     def run(self):
         print(f"Requested metrics: {self.config.metrics}")
 
+        if self.config.force_exact:
+            return self.run_single_node()        
+        
         itr = self._setup_iterator()
 
         first = True
@@ -214,16 +219,21 @@ class BaseEvaluator(Evaluator):
             self._process_chunk(data_tuple, first)
             first = False
 
-    def finalize(self):
-        self._output_handle.finalize_write()
-        summary_data = {}
-
-        for metric, cached_metric in self._cached_metrics.items():
-            if self.comm:
-                self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
-            summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+    def run_single_node(self):
+        data_tuple = self._get_all_data()
+        self._process_all(data_tuple)
         
-        self._summary_handle = self.add_handle('summary', data=summary_data)
+            
+    def finalize(self):
+        if not self.config.force_exact:
+            summary_data = {}
+
+            for metric, cached_metric in self._cached_metrics.items():
+                if self.comm:
+                    self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+                summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+        
+            self._summary_handle = self.add_handle('summary', data=summary_data)
         PipelineStage.finalize(self)
 
     def _setup_iterator(self):
@@ -245,9 +255,18 @@ class BaseEvaluator(Evaluator):
                     data.append(d)
             yield data
 
+    
+    def _get_all_data(self):
+        """Stuff the data from all the handles into a tuple"""
+        handles = [ input_[0] for input_ in self.inputs ]
+        all_data = [ self.get_data(handle_) for handle_ in handles ]
+        return all_data
+            
     def _process_chunk(self, data_tuple, first):
         raise NotImplementedError('BaseEvaluator._process_chunk()')
 
+    def _process_all(self, data_tuple):
+        raise NotImplementedError('BaseEvaluator._process_all()')
 
     def _output_table_chunk_data(self, start, end, out_table, first):        
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
