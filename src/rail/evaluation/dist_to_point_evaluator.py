@@ -81,28 +81,25 @@ class DistToPointEvaluator(BaseEvaluator):
 
         out_table = {}
         summary_table = {}
-        for metric in self.config.metrics:
 
-            if metric not in self._metric_dict:
-                #! Make the following a logged error instead of bailing out of the stage.
-                print(f"Unsupported metric requested: '{metric}'.  Available metrics are: {self._metric_dict.keys()}")
-                continue
-
-            this_metric = self._metric_dict[metric](**self.config.to_dict())
+        for metric, this_metric in self._cached_metrics.items():
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
-                summary_table[metric] = this_metric.evaluate(
-                    estimate_data,
-                    reference_data[self.config.reference_dictionary_key]
+                summary_table[metric] = np.array(
+                    [
+                        this_metric.evaluate(
+                            estimate_data,
+                            reference_data[self.config.hdf5_groupname][self.config.reference_dictionary_key]
+                        )
+                    ]
                 )
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
                 print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
                 continue
             else:
-                self._cached_metrics[metric] = this_metric
                 out_table[metric] = this_metric.evaluate(
                     estimate_data,
-                    reference_data[self.config.reference_dictionary_key]
+                    reference_data[self.config.hdf5_groupname][self.config.reference_dictionary_key]
                 )
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}

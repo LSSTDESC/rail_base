@@ -9,6 +9,7 @@ import numpy as np
 from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
 from qp.metrics.pit import PIT
+from qp.metrics.base_metric_classes import MetricOutputType, MetricOutputType
 from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
 from rail.core.common_params import SHARED_PARAMS
@@ -182,6 +183,8 @@ class BaseEvaluator(Evaluator):
     config_options.update(
         metrics=Param(list, [], required=False,
             msg="The metrics you want to evaluate."),
+        exclude_metrics=Param(list, [], msg="List of metrics to exclude", required=False),
+        metric_config=Param(dict, msg="configuration of individual_metrics", default={}),        
         chunk_size=Param(int, 10000, required=False,
             msg="The default number of PDFs to evaluate per loop."),
         _random_state=Param(float, default=None, required=False,
@@ -202,9 +205,13 @@ class BaseEvaluator(Evaluator):
         self._metric_dict = _build_metric_dict(self.metric_base_class)
         self._cached_data = {}
         self._cached_metrics = {}
+        self._metric_config_dict = {}
 
     def run(self):
-        print(f"Requested metrics: {self.config.metrics}")
+
+        self._build_config_dict()
+        
+        print(f"Requested metrics: {list(self._metric_config_dict.keys())}")
 
         if self.config.force_exact:
             return self.run_single_node()        
@@ -229,6 +236,11 @@ class BaseEvaluator(Evaluator):
             summary_data = {}
 
             for metric, cached_metric in self._cached_metrics.items():
+                if cached_metric.metric_output_type != MetricOutputType.single_value:
+                    continue
+                if metric not in self._cached_data:
+                    print(f"Skipping {metric} which did not cache data")
+                    continue
                 if self.comm:
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
                 summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
@@ -276,5 +288,26 @@ class BaseEvaluator(Evaluator):
             self._output_handle.initialize_write(self._input_length, communicator=self.comm)
         self._output_handle.set_data(out_table_to_write, partial=True)
         self._output_handle.write_chunk(start, end)
-
     
+    def _build_config_dict(self):
+        """Build the configuration dict for each of the metrics"""
+        self._metric_config_dict = {}
+
+        if 'all' in self.config.metrics:
+            metric_list = list(self._metric_dict.keys())
+        else:
+            metric_list = self.config.metrics
+
+        for metric_name_ in metric_list:
+            if metric_name_ in self.config.exclude_metrics:
+                continue
+            if metric_name_ not in self._metric_dict:
+                print(f"Unsupported metric requested: '{metric_name_}'.  Available metrics are: {self._metric_dict.keys()}")
+                continue
+            
+            sub_dict = self.config.metric_config.get('general', {}).copy()
+            sub_dict.update(self.config.metric_config.get(metric_name_, {}))
+            self._metric_config_dict[metric_name_] = sub_dict
+            this_metric_class = self._metric_dict[metric_name_]
+            this_metric = this_metric_class(**sub_dict)
+            self._cached_metrics[metric_name_] = this_metric
