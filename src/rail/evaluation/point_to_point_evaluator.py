@@ -101,4 +101,3 @@ class PointToPointEvaluator(BaseEvaluator):
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
         self._output_handle = self.add_handle('output', data=out_table_to_write)
         self._summary_handle = self.add_handle('summary', data=summary_table)
-
