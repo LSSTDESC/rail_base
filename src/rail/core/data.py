@@ -516,15 +516,12 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
     def _data_size(self, data, **kwargs):
         if self.is_qp():
             return self.data.npdf
-        max_l = 0
-        for _k, v in data.items():
-            max_l = max(max_l, len(v))
-        return max_l
+        return TableHandle._data_size(self, data, **kwargs)
 
     def _in_memory_iterator(self, **kwargs):
         if self.is_qp():
-            return QPHandle._in_memory_iterator(**kwargs)
-        return Hdf5Handle._in_memory_iterator(**kwargs)
+            return QPHandle._in_memory_iterator(self, **kwargs)
+        return Hdf5Handle._in_memory_iterator(self, **kwargs)
 
     @classmethod
     def _iterator(cls, path, **kwargs):
@@ -676,6 +673,12 @@ class DataStore(dict):
     def add_data(self, key, data, handle_class, path=None, creator="DataStore"):
         """Create a handle for some data, and insert it into the DataStore"""
         handle = handle_class(key, path=path, data=data, creator=creator)
+        self[key] = handle
+        return handle
+    
+    def add_handle(self, key, handle_class, path, creator="DataStore"):
+        """Create a handle for some data, and insert it into the DataStore"""
+        handle = handle_class(key, path=path, data=None, creator=creator)
         self[key] = handle
         return handle
 
