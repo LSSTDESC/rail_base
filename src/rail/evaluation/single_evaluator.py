@@ -7,12 +7,10 @@ The key feature is that the evaluate method.
 import numpy as np
 
 from ceci.config import StageParameter as Param
-from qp.metrics import create_metric, list_metrics, MetricInputType, MetricOutputType
+from qp.metrics import MetricInputType, MetricOutputType
 from qp.metrics.base_metric_classes import BaseMetric
 
-from rail.core.data import Hdf5Handle, QPOrTableHandle
-from rail.core.stage import RailStage
-from rail.core.common_params import SHARED_PARAMS
+from rail.core.data import QPOrTableHandle
 from rail.evaluation.evaluator import BaseEvaluator
 
 
@@ -21,25 +19,23 @@ class SingleEvaluator(BaseEvaluator):
 
     name = 'SingleEvaluator'
     config_options = BaseEvaluator.config_options.copy()
-    config_options.update(exclude_metrics=Param(list, msg="List of metrics to exclude"),
-                          point_estimates=Param(list, msg="List of point estimates to use", default=[]),
-                          metric_config=Param(dict, msg="configuration of individual_metrics", default={}),
+    config_options.update(point_estimates=Param(list, msg="List of point estimates to use", default=[]),
                           truth_point_estimates=Param(
                               list, msg="List of true point values to use", default=[])
                           )
     inputs = [('input', QPOrTableHandle),
               ('truth', QPOrTableHandle)]
-    outputs = [('output', Hdf5Handle),
-               ('cache', Hdf5Handle)]
 
     metric_base_class = BaseMetric
 
     def __init__(self, args, comm=None):
         """Initialize Evaluator"""
-        RailStage.__init__(self, args, comm=comm)
+        BaseEvaluator.__init__(self, args, comm=comm)
         self._input_data_type = QPOrTableHandle.PdfOrValue.unknown
         self._truth_data_type = QPOrTableHandle.PdfOrValue.unknown
-
+        self._out_table = {}
+        self._summary_table = {}
+        
     def evaluate(self, data, truth):
         """Evaluate the performance of an estimator
 
@@ -90,96 +86,272 @@ class SingleEvaluator(BaseEvaluator):
         BaseEvaluator.run(self)
         
 
-    def _process_chunk(self, data_tuple, first)
+    def _process_chunk(self, data_tuple, first):
         
-        out_data = {}
-
         start = data_tuple[0]
         end = data_tuple[1]
         input_data = data_tuple[2]
         truth_data = data_tuple[3]
 
-        print(start, end)
-
+        import pdb
+        pdb.set_trace()
+        
         for metric, this_metric in self._cached_metrics.items():
+
             if this_metric.metric_input_type == MetricInputType.single_ensemble:
                 if not self._input_data_type.has_dist():
                     continue
                 key_val = f"{metric}"
-                try:
-                    metric_chunk_data[key_val] = this_metric.evaluate(input_data)
-                except Exception:
-                    print(f"Failed to evaluate {key_val} for chunk {start}:{end}")
+                self._process_chunk_single_ensemble(this_metric, key_val, input_data)            
             elif this_metric.metric_input_type == MetricInputType.dist_to_dist:
                 if not self._input_data_type.has_dist() or not self._truth_data_type.has_dist():
                     continue
                 key_val = f"{metric}"
-                try:
-                    metric_chunk_data[key_val] = this_metric.evaluate(input_data, truth_data)
-                except Exception:
-                    print(f"Failed to evaluate {key_val} for chunk {start}:{end}")
+                self._process_chunk_dist_to_dist(this_metric, key_val, input_data, truth_data)
             elif this_metric.metric_input_type == MetricInputType.dist_to_point:
                 if not self._input_data_type.has_dist() or not self._truth_data_type.has_point():
                     continue
                 for truth_point_estimate_ in self.config.truth_point_estimates:
                     key_val = f"{metric}_{truth_point_estimate_}"
-                    print(key_val)
-                    try:
-                        ret_data = this_metric.evaluate(
-                            input_data,
-                            truth_data[truth_point_estimate_],
-                        )
-                        metric_chunk_data[key_val] = ret_data
-                    except Exception:
-                        print(f"Failed to evaluate {key_val} for chunk {start}:{end}")
+                    self._process_chunk_dist_to_point(this_metric, key_val, input_data, truth_data[truth_point_estimate_])    
             elif this_metric.metric_input_type == MetricInputType.point_to_point:
                 if not self._input_data_type.has_point() or not self._truth_data_type.has_point():
                     continue
                 for point_estimate_ in self.config.point_estimates:
                     key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
-                    print(key_val)
                     point_data = input_data.ancil[point_estimate_]
                     for truth_point_estimate_ in self.config.truth_point_estimates:
-                        try:
-                            ret_data = this_metric.evaluate(
-                                point_data,
-                                truth_data[truth_point_estimate_],
-                            )
-                            metric_chunk_data[key_val] = ret_data
-                        except Exception:
-                            print(f"Failed to evaluate {key_val} for chunk {start}:{end}")
+                        self._process_chunk_point_to_point(this_metric, key_val, point_data, truth_data[truth_point_estimate_])    
             elif this_metric.metric_input_type == MetricInputType.point_to_dist:
                 if not self._input_data_type.has_point() or not self._truth_data_type.has_dist():
                     continue
                 for point_estimate_ in self.config.point_estimates:
-                    key_val = f"{metric_name}_{point_estimate_}"
-                    print(key_val)
-                    try:
-                        metric_chunk_data[key_val] = metric_evaluator_.evaluate(
-                            input_data,
-                            truth_data,
-                        )
-                    except Exception:
-                        print(f"Failed to evaluate {key_val} for chunk {start}:{end}")
+                    key_val = f"{metric}_{point_estimate_}"
+                    self._process_chunk_point_to_dist(this_metric, key_val, point_data, truth_data[truth_point_estimate_])    
 
-            if this_metric.metric_output_type == MetricOutputType.single_value:
-                for key, val in metric_chunk_data.items():
-                    metric_chunk_data[key] = np.array([val])
-                print(f"caching {metric_name}")
-                cached_data.update(metric_chunk_data)
-            elif metric_evaluator_.metric_output_type == MetricOutputType.one_value_per_distribution:
-                print(f"saving {metric_name}")
-                out_data.update(metric_chunk_data)
-            elif metric_evaluator_.metric_output_type == MetricOutputType.single_distribution:
-                print(f"dropping {metric_name}")
+        self._output_table_chunk_data(start, end, self._out_table, first)
 
-            self._do_chunk_output(cached_data, out_data, start, end, first)
+        
+    def _process_all(self, data_tuple):
 
-        print('finalize')
+        input_data = data_tuple[0]
+        truth_data = data_tuple[1]
 
-        for metric_evaluator_ in metric_evaluators:
-            metric_evaluator_.finalize()
-        self._finalize_run()
-        print('done')
+        for metric, this_metric in self._cached_metrics.items():
 
-  
+            if this_metric.metric_input_type == MetricInputType.single_ensemble:
+                if not self._input_data_type.has_dist():
+                    continue
+                key_val = f"{metric}"
+                self._process_all_single_ensemble(this_metric, key_val, input_data)            
+            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:
+                if not self._input_data_type.has_dist() or not self._truth_data_type.has_dist():
+                    continue
+                key_val = f"{metric}"
+                self._process_all_dist_to_dist(this_metric, key_val, input_data, truth_data)
+            elif this_metric.metric_input_type == MetricInputType.dist_to_point:
+                if not self._input_data_type.has_dist() or not self._truth_data_type.has_point():
+                    continue
+                for truth_point_estimate_ in self.config.truth_point_estimates:
+                    key_val = f"{metric}_{truth_point_estimate_}"
+                    self._process_all_dist_to_point(this_metric, key_val, input_data, truth_data[truth_point_estimate_])    
+            elif this_metric.metric_input_type == MetricInputType.point_to_point:
+                if not self._input_data_type.has_point() or not self._truth_data_type.has_point():
+                    continue
+                for point_estimate_ in self.config.point_estimates:
+                    key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
+                    point_data = input_data.ancil[point_estimate_]
+                    for truth_point_estimate_ in self.config.truth_point_estimates:
+                        self._process_all_point_to_point(this_metric, key_val, point_data, truth_data[truth_point_estimate_])    
+            elif this_metric.metric_input_type == MetricInputType.point_to_dist:
+                if not self._input_data_type.has_point() or not self._truth_data_type.has_dist():
+                    continue
+                for point_estimate_ in self.config.point_estimates:
+                    key_val = f"{metric}_{point_estimate_}"
+                    self._process_all_point_to_dist(this_metric, key_val, point_data, truth_data[truth_point_estimate_])    
+
+        out_table_to_write = {key: np.array(val).astype(float) for key, val in self._out_table.items()}
+        self._output_handle = self.add_handle('output', data=out_table_to_write)
+        self._summary_handle = self.add_handle('summary', data=self._summary_table)
+
+
+                    
+    def _process_chunk_single_ensemble(self, this_metric, key, input_data):
+
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            if not hasattr(this_metric, 'accumulate'):
+                print(f"{this_metric.metric_name} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+            
+            centroids = this_metric.accumulate(input_data)
+                
+            if self.comm:
+                self._cached_data[key] = centroids
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(centroids)
+                else:
+                    self._cached_data[key] = [centroids]
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data)
+
+    def _process_chunk_dist_to_dist(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            if not hasattr(this_metric, 'accumulate'):
+                print(f"{this_metric.metric_name} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+               
+            centroids = this_metric.accumulate(input_data, truth_data)
+            if self.comm:
+                self._cached_data[key] = centroids
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(centroids)
+                else:
+                    self._cached_data[key] = [centroids]
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+            
+    def _process_chunk_dist_to_point(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            if not hasattr(this_metric, 'accumulate'):
+                print(f"{this_metric.metric_name} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+              
+            centroids = this_metric.accumulate(input_data, truth_data)
+            if self.comm:
+                self._cached_data[key] = centroids
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(centroids)
+                else:
+                    self._cached_data[key] = [centroids]
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+    def _process_chunk_point_to_dist(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            if not hasattr(this_metric, 'accumulate'):
+                print(f"{this_metric.metric_name} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+               
+            centroids = this_metric.accumulate(input_data, truth_data)
+            if self.comm:
+                self._cached_data[key] = centroids
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(centroids)
+                else:
+                    self._cached_data[key] = [centroids]
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+    def _process_chunk_point_to_point(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            if not hasattr(this_metric, 'accumulate'):
+                print(f"{this_metric.metric_name} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+                
+            centroids = this_metric.accumulate(input_data, truth_data)
+            if self.comm:
+                self._cached_data[key] = centroids
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(centroids)
+                else:
+                    self._cached_data[key] = [centroids]
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+
+    def _process_all_single_ensemble(self, this_metric, key, input_data):
+
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            self._summary_table[key] = np.array([this_metric.evaluate(input_data)])
+            
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data)
+
+    def _process_all_dist_to_dist(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            self._summary_table[key] = np.array([this_metric.evaluate(input_data, truth_data)])
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+            
+    def _process_all_dist_to_point(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            self._summary_table[key] = np.array([this_metric.evaluate(input_data, truth_data)])
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+    def _process_all_point_to_dist(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            self._summary_table[key] = np.array([this_metric.evaluate(input_data, truth_data)])
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+
+    def _process_all_point_to_point(self, this_metric, key, input_data, truth_data):
+        
+        if this_metric.metric_output_type == MetricOutputType.single_value:
+            self._summary_table[key] = np.array([this_metric.evaluate(input_data, truth_data)])
+
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+            print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
+
+        else:
+            self._out_table[key] = this_metric.evaluate(input_data, truth_data)
+
+        
+    def _setup_iterator(self, itrs=None):
+        import pdb
+        pdb.set_trace()
+        if itrs is None:
+            tags = ['input', 'truth']
+            itrs = [self.input_iterator(tag, groupname=self.config.hdf5_groupname) for tag in tags]
+        return BaseEvaluator._setup_iterator(self, itrs)
+

@@ -171,6 +171,8 @@ def _all_subclasses(a_class):
 def _build_metric_dict(a_class):
     the_dict = {}
     for subcls in _all_subclasses(a_class):
+        if subcls.metric_name is None:
+            continue
         the_dict[subcls.metric_name] = subcls
     return the_dict
         
@@ -248,11 +250,12 @@ class BaseEvaluator(Evaluator):
             self._summary_handle = self.add_handle('summary', data=summary_data)
         PipelineStage.finalize(self)
 
-    def _setup_iterator(self):
+    def _setup_iterator(self, itrs=None):
         """Setup the iterator that runs in parallel over the handles"""
 
-        handle_list = [ input_[0] for input_ in self.inputs ]
-        itrs = [ self.input_iterator(tag) for tag in handle_list ]
+        if itrs is None:
+            handle_list = [ input_[0] for input_ in self.inputs ]
+            itrs = [ self.input_iterator(tag) for tag in handle_list ]
 
         for it in zip(*itrs):
             data = []
