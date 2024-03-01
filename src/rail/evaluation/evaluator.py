@@ -9,7 +9,7 @@ import qp
 from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
 from qp.metrics.pit import PIT
-from qp.metrics.base_metric_classes import MetricOutputType, MetricOutputType
+from qp.metrics.base_metric_classes import MetricOutputType
 from rail.core.data import Hdf5Handle, QPHandle
 from rail.core.stage import RailStage
 from rail.core.common_params import SHARED_PARAMS
@@ -167,6 +167,7 @@ def _all_subclasses(a_class):
         [s for c in a_class.__subclasses__() for s in _all_subclasses(c)]
     )
 
+
 def _build_metric_dict(a_class):
     the_dict = {}
     for subcls in _all_subclasses(a_class):
@@ -174,24 +175,41 @@ def _build_metric_dict(a_class):
             continue
         the_dict[subcls.metric_name] = subcls
     return the_dict
-        
+
 
 class BaseEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
-    name = 'BaseEvaluator'
+    name = "BaseEvaluator"
     config_options = RailStage.config_options.copy()
     config_options.update(
-        metrics=Param(list, [], required=False,
-            msg="The metrics you want to evaluate."),
-        exclude_metrics=Param(list, [], msg="List of metrics to exclude", required=False),
-        metric_config=Param(dict, msg="configuration of individual_metrics", default={}),        
-        chunk_size=Param(int, 10000, required=False,
-            msg="The default number of PDFs to evaluate per loop."),
-        _random_state=Param(float, default=None, required=False,
-            msg="Random seed value to use for reproducible results."),
-        force_exact=Param(bool, default=False, required=False,
-            msg="Force the exact calculation.  This will not allow parallelization"),            
+        metrics=Param(
+            list, [], required=False, msg="The metrics you want to evaluate."
+        ),
+        exclude_metrics=Param(
+            list, [], msg="List of metrics to exclude", required=False
+        ),
+        metric_config=Param(
+            dict, msg="configuration of individual_metrics", default={}
+        ),
+        chunk_size=Param(
+            int,
+            10000,
+            required=False,
+            msg="The default number of PDFs to evaluate per loop.",
+        ),
+        _random_state=Param(
+            float,
+            default=None,
+            required=False,
+            msg="Random seed value to use for reproducible results.",
+        ),
+        force_exact=Param(
+            bool,
+            default=False,
+            required=False,
+            msg="Force the exact calculation.  This will not allow parallelization",
+        ),
     )
 
     outputs = [("output", Hdf5Handle),
@@ -199,7 +217,7 @@ class BaseEvaluator(Evaluator):
                ('single_distribution_summary', QPHandle)]
 
     metric_base_class = None
-        
+
     def __init__(self, args, comm=None):
         RailStage.__init__(self, args, comm=comm)
         self._output_handle = None
@@ -211,29 +229,30 @@ class BaseEvaluator(Evaluator):
         self._metric_config_dict = {}
 
     def run(self):
-
         self._build_config_dict()
-        
+
         print(f"Requested metrics: {list(self._metric_config_dict.keys())}")
 
         if self.config.force_exact:
-            return self.run_single_node()        
-        
+            self.run_single_node()
+            return
+
         itr = self._setup_iterator()
 
         first = True
         for data_tuple in itr:
             chunk_start, chunk_end = data_tuple[0], data_tuple[1]
 
-            print(f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}.")
+            print(
+                f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}."
+            )
             self._process_chunk(data_tuple, first)
             first = False
 
     def run_single_node(self):
         data_tuple = self._get_all_data()
         self._process_all(data_tuple)
-        
-            
+
     def finalize(self):
         if not self.config.force_exact:
 
@@ -280,13 +299,13 @@ class BaseEvaluator(Evaluator):
         """Setup the iterator that runs in parallel over the handles"""
 
         if itrs is None:
-            handle_list = [ input_[0] for input_ in self.inputs ]
-            itrs = [ self.input_iterator(tag) for tag in handle_list ]
+            handle_list = [input_[0] for input_ in self.inputs]
+            itrs = [self.input_iterator(tag) for tag in handle_list]
 
         for it in zip(*itrs):
             data = []
             first = True
-            for (s, e, d) in it:
+            for s, e, d in it:
                 if first:
                     data.append(s)
                     data.append(e)
@@ -296,33 +315,36 @@ class BaseEvaluator(Evaluator):
                     data.append(d)
             yield data
 
-    
     def _get_all_data(self):
         """Stuff the data from all the handles into a tuple"""
-        handles = [ input_[0] for input_ in self.inputs ]
-        all_data = [ self.get_data(handle_) for handle_ in handles ]
+        handles = [input_[0] for input_ in self.inputs]
+        all_data = [self.get_data(handle_) for handle_ in handles]
         return all_data
-            
+
     def _process_chunk(self, data_tuple, first):
-        raise NotImplementedError('BaseEvaluator._process_chunk()')
+        raise NotImplementedError("BaseEvaluator._process_chunk()")
 
     def _process_all(self, data_tuple):
-        raise NotImplementedError('BaseEvaluator._process_all()')
+        raise NotImplementedError("BaseEvaluator._process_all()")
 
-    def _output_table_chunk_data(self, start, end, out_table, first):        
-        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
+    def _output_table_chunk_data(self, start, end, out_table, first):
+        out_table_to_write = {
+            key: np.array(val).astype(float) for key, val in out_table.items()
+        }
 
         if first:
-            self._output_handle = self.add_handle('output', data=out_table_to_write)
-            self._output_handle.initialize_write(self._input_length, communicator=self.comm)
+            self._output_handle = self.add_handle("output", data=out_table_to_write)
+            self._output_handle.initialize_write(
+                self._input_length, communicator=self.comm
+            )
         self._output_handle.set_data(out_table_to_write, partial=True)
         self._output_handle.write_chunk(start, end)
-    
+
     def _build_config_dict(self):
         """Build the configuration dict for each of the metrics"""
         self._metric_config_dict = {}
 
-        if 'all' in self.config.metrics:
+        if "all" in self.config.metrics:
             metric_list = list(self._metric_dict.keys())
         else:
             metric_list = self.config.metrics
@@ -331,10 +353,13 @@ class BaseEvaluator(Evaluator):
             if metric_name_ in self.config.exclude_metrics:
                 continue
             if metric_name_ not in self._metric_dict:
-                print(f"Unsupported metric requested: '{metric_name_}'.  Available metrics are: {self._metric_dict.keys()}")
+                print(
+                    f"Unsupported metric requested: '{metric_name_}'.  "
+                    "Available metrics are: {self._metric_dict.keys()}"
+                )
                 continue
-            
-            sub_dict = self.config.metric_config.get('general', {}).copy()
+
+            sub_dict = self.config.metric_config.get("general", {}).copy()
             sub_dict.update(self.config.metric_config.get(metric_name_, {}))
             self._metric_config_dict[metric_name_] = sub_dict
             this_metric_class = self._metric_dict[metric_name_]
