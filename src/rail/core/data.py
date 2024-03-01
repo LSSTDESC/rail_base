@@ -457,7 +457,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
     def check_pdf_or_point(self):
         """Check the associated file to see if it is a QP pdf, point estimate or both"""
         if self.is_qp():
-            return self.PdfOrValue.distribution
+            return self.PdfOrValue.both
         return self.PdfOrValue.point_estimate
 
     @classmethod
