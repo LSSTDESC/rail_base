@@ -21,7 +21,9 @@ class SingleEvaluator(BaseEvaluator):
     config_options = BaseEvaluator.config_options.copy()
     config_options.update(point_estimates=Param(list, msg="List of point estimates to use", default=[]),
                           truth_point_estimates=Param(
-                              list, msg="List of true point values to use", default=[])
+                              list, msg="List of true point values to use", default=[]),
+                          hdf5_groupname=Param(str, "photometry", required=False,
+                              msg="HDF5 Groupname for truth table."),
                           )
     inputs = [('input', QPOrTableHandle),
               ('truth', QPOrTableHandle)]
@@ -36,36 +38,7 @@ class SingleEvaluator(BaseEvaluator):
         self._out_table = {}
         self._summary_table = {}
         
-    def evaluate(self, data, truth):
-        """Evaluate the performance of an estimator
-
-        This will attach the input data and truth to this `Evaluator`
-        (for introspection and provenance tracking).
-
-        Then it will call the run() and finalize() methods, which need to
-        be implemented by the sub-classes.
-
-        The run() method will need to register the data that it creates to this Estimator
-        by using `self.add_data('output', output_data)`.
-
-        Parameters
-        ----------
-        data : qp.Ensemble
-            The sample to evaluate
-        truth : Table-like
-            Table with the truth information
-
-        Returns
-        -------
-        output : Table-like
-            The evaluation metrics
-        """
-        self.set_data('input', data)
-        self.set_data('truth', truth)
-        self.run()
-        self.finalize()
-        return self.get_handle('output')
-
+ 
     def run(self):  # pylint: disable=too-many-branches
         """ Run method
 
@@ -93,37 +66,39 @@ class SingleEvaluator(BaseEvaluator):
         input_data = data_tuple[2]
         truth_data = data_tuple[3]
 
-        import pdb
-        pdb.set_trace()
-        
         for metric, this_metric in self._cached_metrics.items():
 
             if this_metric.metric_input_type == MetricInputType.single_ensemble:
                 if not self._input_data_type.has_dist():
+                    print(f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}")
                     continue
                 key_val = f"{metric}"
-                self._process_chunk_single_ensemble(this_metric, key_val, input_data)            
+                self._process_chunk_single_ensemble(this_metric, key_val, input_data)
             elif this_metric.metric_input_type == MetricInputType.dist_to_dist:
                 if not self._input_data_type.has_dist() or not self._truth_data_type.has_dist():
+                    print(f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}")
                     continue
                 key_val = f"{metric}"
                 self._process_chunk_dist_to_dist(this_metric, key_val, input_data, truth_data)
             elif this_metric.metric_input_type == MetricInputType.dist_to_point:
                 if not self._input_data_type.has_dist() or not self._truth_data_type.has_point():
+                    print(f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}")
                     continue
                 for truth_point_estimate_ in self.config.truth_point_estimates:
                     key_val = f"{metric}_{truth_point_estimate_}"
-                    self._process_chunk_dist_to_point(this_metric, key_val, input_data, truth_data[truth_point_estimate_])    
+                    self._process_chunk_dist_to_point(this_metric, key_val, input_data, np.squeeze(truth_data[truth_point_estimate_]))    
             elif this_metric.metric_input_type == MetricInputType.point_to_point:
                 if not self._input_data_type.has_point() or not self._truth_data_type.has_point():
+                    print(f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}")
                     continue
                 for point_estimate_ in self.config.point_estimates:
                     key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
-                    point_data = input_data.ancil[point_estimate_]
+                    point_data = np.squeeze(input_data.ancil[point_estimate_])
                     for truth_point_estimate_ in self.config.truth_point_estimates:
-                        self._process_chunk_point_to_point(this_metric, key_val, point_data, truth_data[truth_point_estimate_])    
+                        self._process_chunk_point_to_point(this_metric, key_val, point_data, np.squeeze(truth_data[truth_point_estimate_]))    
             elif this_metric.metric_input_type == MetricInputType.point_to_dist:
                 if not self._input_data_type.has_point() or not self._truth_data_type.has_dist():
+                    print(f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}")
                     continue
                 for point_estimate_ in self.config.point_estimates:
                     key_val = f"{metric}_{point_estimate_}"
@@ -136,6 +111,9 @@ class SingleEvaluator(BaseEvaluator):
 
         input_data = data_tuple[0]
         truth_data = data_tuple[1]
+
+        if self.config.hdf5_groupname:
+            truth_data = truth_data[self.config.hdf5_groupname]
 
         for metric, this_metric in self._cached_metrics.items():
 
@@ -188,6 +166,7 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
+                print('acc single', key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -197,6 +176,7 @@ class SingleEvaluator(BaseEvaluator):
             print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
 
         else:
+            print(key)
             self._out_table[key] = this_metric.evaluate(input_data)
 
     def _process_chunk_dist_to_dist(self, this_metric, key, input_data, truth_data):
@@ -210,6 +190,7 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
+                print('acc d2d', key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -219,6 +200,7 @@ class SingleEvaluator(BaseEvaluator):
             print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
 
         else:
+            print(key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
             
@@ -233,6 +215,7 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
+                print('acc d2p', key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -242,6 +225,7 @@ class SingleEvaluator(BaseEvaluator):
             print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
 
         else:
+            print(key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_point_to_dist(self, this_metric, key, input_data, truth_data):
@@ -255,6 +239,7 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
+                print('acc p2d', key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -264,6 +249,7 @@ class SingleEvaluator(BaseEvaluator):
             print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
 
         else:
+            print(key)            
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_point_to_point(self, this_metric, key, input_data, truth_data):
@@ -277,6 +263,7 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
+                print('acc p2p', key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -286,6 +273,7 @@ class SingleEvaluator(BaseEvaluator):
             print(f"{this_metric.metric_name} with output type MetricOutputType.single_distribution not supported yet")
 
         else:
+            print('eval p2p', key)            
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
 
@@ -348,8 +336,6 @@ class SingleEvaluator(BaseEvaluator):
 
         
     def _setup_iterator(self, itrs=None):
-        import pdb
-        pdb.set_trace()
         if itrs is None:
             tags = ['input', 'truth']
             itrs = [self.input_iterator(tag, groupname=self.config.hdf5_groupname) for tag in tags]
