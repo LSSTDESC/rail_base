@@ -39,8 +39,7 @@ class Evaluator(RailStage):
     )
     inputs = [('input', QPHandle),
               ('truth', Hdf5Handle)]
-    outputs = [("output", Hdf5Handle),
-               ('summary', Hdf5Handle)]
+    outputs = [("output", Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         """Initialize Evaluator"""
@@ -75,7 +74,7 @@ class Evaluator(RailStage):
         self.set_data("truth", truth)
         self.run()
         self.finalize()
-        return dict(output=self.get_handle("output"), summary=self.get_handle("summary"))
+        return self.get_handle("output")
 
     def run(self):
         """Run method
