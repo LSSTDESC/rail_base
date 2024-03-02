@@ -5,7 +5,7 @@ The key feature is that the evaluate method.
 """
 
 import numpy as np
-
+import qp
 from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
 from qp.metrics.pit import PIT
@@ -195,7 +195,8 @@ class BaseEvaluator(Evaluator):
     )
 
     outputs = [("output", Hdf5Handle),
-               ('summary', Hdf5Handle)]
+               ('summary', Hdf5Handle),
+               ('single_distribution_summary', QPHandle)]
 
     metric_base_class = None
         
@@ -203,6 +204,7 @@ class BaseEvaluator(Evaluator):
         RailStage.__init__(self, args, comm=comm)
         self._output_handle = None
         self._summary_handle = None
+        self._single_distribution_summary_handle = None
         self._metric_dict = _build_metric_dict(self.metric_base_class)
         self._cached_data = {}
         self._cached_metrics = {}
@@ -234,8 +236,9 @@ class BaseEvaluator(Evaluator):
             
     def finalize(self):
         if not self.config.force_exact:
-            summary_data = {}
 
+            # Finalize all the metrics that produce a single value summary
+            summary_data = {}
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type != MetricOutputType.single_value:
                     continue
@@ -245,8 +248,32 @@ class BaseEvaluator(Evaluator):
                 if self.comm:
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
                 summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
-        
+
             self._summary_handle = self.add_handle('summary', data=summary_data)
+
+            # Finalize all the metrics that produce a single distribution summaries
+            single_distribution_summary = qp.Ensemble(qp.stats.norm, data=dict(loc=[], scale=[]))
+            for metric, cached_metric in self._cached_metrics.items():
+                if cached_metric.metric_output_type != MetricOutputType.single_distribution:
+                    continue
+                if metric not in self._cached_data:
+                    print(f"Skipping {metric} which did not cache data")
+                    continue
+                if self.comm:
+                    self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+
+                # we expected `cached_metric.finalize` to return a qp.Ensemble
+                single_distribution_ensemble = cached_metric.finalize(self._cached_data[metric])
+                single_distribution_ensemble.set_ancil({'metric': [metric.name]})
+
+                # append the ensembles into a single output ensemble
+                if single_distribution_summary is None:
+                    single_distribution_summary = single_distribution_ensemble
+                else:
+                    single_distribution_summary.append(single_distribution_ensemble)
+
+            self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
+
         PipelineStage.finalize(self)
 
     def _setup_iterator(self, itrs=None):

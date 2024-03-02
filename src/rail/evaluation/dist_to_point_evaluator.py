@@ -1,5 +1,5 @@
 import numpy as np
-
+import qp
 from ceci.config import StageParameter as Param
 from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.concrete_metric_classes import DistToPointMetric
@@ -62,8 +62,14 @@ class DistToPointEvaluator(BaseEvaluator):
                     reference_data[self.config.reference_dictionary_key]
                 )
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
-                continue
+                if not hasattr(this_metric, 'accumulate'):
+                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                    continue
+                self._cached_metrics[metric] = this_metric
+                self._cached_data[metric] = this_metric.accumulate(
+                    estimate_data,
+                    reference_data[self.config.reference_dictionary_key]
+                )
             else:
                 self._cached_metrics[metric] = this_metric
                 out_table[metric] = this_metric.evaluate(
@@ -81,6 +87,7 @@ class DistToPointEvaluator(BaseEvaluator):
 
         out_table = {}
         summary_table = {}
+        single_distribution_summary = qp.Ensemble(qp.stats.norm, data=dict(loc=[], scale=[]))
 
         for metric, this_metric in self._cached_metrics.items():
 
@@ -94,8 +101,14 @@ class DistToPointEvaluator(BaseEvaluator):
                     ]
                 )
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                print(f"{metric} with output type MetricOutputType.single_distribution not supported yet")
-                continue
+                single_distribution_ensemble = this_metric.finalize(self._cached_data[metric])
+                single_distribution_ensemble.set_ancil({'metric': [metric.name]})
+
+                # append the ensembles into a single output ensemble
+                if single_distribution_summary is None:
+                    single_distribution_summary = single_distribution_ensemble
+                else:
+                    single_distribution_summary.append(single_distribution_ensemble)
             else:
                 out_table[metric] = this_metric.evaluate(
                     estimate_data,
@@ -105,3 +118,4 @@ class DistToPointEvaluator(BaseEvaluator):
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
         self._output_handle = self.add_handle('output', data=out_table_to_write)
         self._summary_handle = self.add_handle('summary', data=summary_table)
+        self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
