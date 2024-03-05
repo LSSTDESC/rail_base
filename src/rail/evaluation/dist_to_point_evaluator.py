@@ -102,7 +102,7 @@ class DistToPointEvaluator(BaseEvaluator):
 
         out_table = {}
         summary_table = {}
-        single_distribution_summary = qp.Ensemble(qp.stats.norm, data=dict(loc=[], scale=[]))
+        single_distribution_summary = {}
 
         for metric, this_metric in self._cached_metrics.items():
             if this_metric.metric_output_type == MetricOutputType.single_value:
@@ -117,14 +117,11 @@ class DistToPointEvaluator(BaseEvaluator):
                     ]
                 )
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                single_distribution_ensemble = this_metric.finalize(self._cached_data[metric])
-                single_distribution_ensemble.set_ancil({'metric': [metric.name]})
+                single_distribution_summary[this_metric.metric_name] = this_metric.evaluate(
+                    estimate_data,
+                    reference_data[self.config.hdf5_groupname][self.config.reference_dictionary_key],
+                    )
 
-                # append the ensembles into a single output ensemble
-                if single_distribution_summary is None:
-                    single_distribution_summary = single_distribution_ensemble
-                else:
-                    single_distribution_summary.append(single_distribution_ensemble)
             else:
                 out_table[metric] = this_metric.evaluate(
                     estimate_data,
