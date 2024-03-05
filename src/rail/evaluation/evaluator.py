@@ -177,7 +177,7 @@ def _build_metric_dict(a_class):
     return the_dict
 
 
-class BaseEvaluator(Evaluator):
+class BaseEvaluator(RailStage):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "BaseEvaluator"
@@ -227,6 +227,41 @@ class BaseEvaluator(Evaluator):
         self._cached_data = {}
         self._cached_metrics = {}
         self._metric_config_dict = {}
+
+    def evaluate(self, data, truth):
+        """Evaluate the performance of an estimator
+
+        This will attach the input data and truth to this `Evaluator`
+        (for introspection and provenance tracking).
+
+        Then it will call the run() and finalize() methods, which need to
+        be implemented by the sub-classes.
+
+        The run() method will need to register the data that it creates to this Estimator
+        by using `self.add_data('output', output_data)`.
+
+        Parameters
+        ----------
+        data : qp.Ensemble
+            The sample to evaluate
+        truth : Table-like
+            Table with the truth information
+
+        Returns
+        -------
+        output : Table-like
+            The evaluation metrics
+        """
+
+        self.set_data("input", data)
+        self.set_data("truth", truth)
+        self.run()
+        self.finalize()
+        return {
+            'output':self.get_handle("output"),
+            'summary':self.get_handle("summary"),
+            'single_distribution_summary':self.get_handle("single_distribution_summary"),
+        }
 
     def run(self):
         self._build_config_dict()
