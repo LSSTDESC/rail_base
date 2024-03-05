@@ -59,15 +59,15 @@ class DistToPointEvaluator(BaseEvaluator):
         reference_data = data_tuple[3]
 
         out_table = {}
-        for metric in self.config.metrics:
+
+        for metric, this_metric in self._cached_metrics.items():
+
             if metric not in self._metric_dict:
                 #! Make the following a logged error instead of bailing out of the stage.
                 # raise ValueError(
                 # f"Unsupported metric requested: '{metric}'.
                 # Available metrics are: {self._metric_dict.keys()}")
                 continue
-
-            this_metric = self._metric_dict[metric](**self.config.to_dict())
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
                 if not hasattr(this_metric, "accumulate"):

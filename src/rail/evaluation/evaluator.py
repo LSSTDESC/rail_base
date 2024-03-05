@@ -207,7 +207,8 @@ class BaseEvaluator(Evaluator):
 
     outputs = [("output", Hdf5Handle),
                ('summary', Hdf5Handle),
-               ('single_distribution_summary', QPHandle)]
+            #    ('single_distribution_summary', Hdf5Handle),
+            ]
 
     metric_base_class = None
 
@@ -264,7 +265,7 @@ class BaseEvaluator(Evaluator):
             self._summary_handle = self.add_handle('summary', data=summary_data)
 
             # Finalize all the metrics that produce a single distribution summaries
-            single_distribution_summary = qp.Ensemble(qp.stats.norm, data=dict(loc=[], scale=[]))
+            single_distribution_summary = {}
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type != MetricOutputType.single_distribution:
                     continue
@@ -275,16 +276,9 @@ class BaseEvaluator(Evaluator):
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
 
                 # we expected `cached_metric.finalize` to return a qp.Ensemble
-                single_distribution_ensemble = cached_metric.finalize(self._cached_data[metric])
-                single_distribution_ensemble.set_ancil({'metric': [metric.name]})
+                single_distribution_summary[cached_metric.metric_name] = cached_metric.finalize([self._cached_data[metric]])
 
-                # append the ensembles into a single output ensemble
-                if single_distribution_summary is None:
-                    single_distribution_summary = single_distribution_ensemble
-                else:
-                    single_distribution_summary.append(single_distribution_ensemble)
-
-            self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
+            qp.write_dict('./aaa_temp.hdf5', single_distribution_summary)
 
         PipelineStage.finalize(self)
 
