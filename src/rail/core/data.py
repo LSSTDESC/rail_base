@@ -430,6 +430,33 @@ class QPHandle(DataHandle):
         return qp.iterator(path, **kwargs)
 
 
+class QPDictHandle(DataHandle):
+    """DataHandle for dictionaries of qp ensembles"""
+
+    suffix = "hdf5"
+
+    @classmethod
+    def _open(cls, path, **kwargs):
+        """Open and return the associated file
+
+        Notes
+        -----
+        This will simply open the file and return a file-like object to the caller.
+        It will not read or cache the data
+        """
+        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
+
+    @classmethod
+    def _read(cls, path, **kwargs):
+        """Read and return the dictionary of qp.Ensembles from the associated file"""
+        return qp.read_dict(path)
+
+    @classmethod
+    def _write(cls, data, path, **kwargs):
+        """Write the data (a dictionary of qp.Ensembles) to the associated file"""
+        return qp.write_dict(path, data)
+
+
 class QPOrTableHandle(QPHandle, Hdf5Handle):
     """DataHandle that should work with either qp.ensembles or tables
     """

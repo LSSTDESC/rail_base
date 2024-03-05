@@ -10,7 +10,7 @@ from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
 from qp.metrics.pit import PIT
 from qp.metrics.base_metric_classes import MetricOutputType
-from rail.core.data import Hdf5Handle, QPHandle
+from rail.core.data import Hdf5Handle, QPHandle, QPDictHandle
 from rail.core.stage import RailStage
 from rail.core.common_params import SHARED_PARAMS
 from rail.evaluation.metrics.cdeloss import CDELoss
@@ -214,7 +214,7 @@ class BaseEvaluator(RailStage):
 
     outputs = [("output", Hdf5Handle),
                ('summary', Hdf5Handle),
-            #    ('single_distribution_summary', Hdf5Handle),
+               ('single_distribution_summary', QPDictHandle),
             ]
 
     metric_base_class = None
@@ -320,7 +320,7 @@ class BaseEvaluator(RailStage):
                 # we expected `cached_metric.finalize` to return a qp.Ensemble
                 single_distribution_summary[cached_metric.metric_name] = cached_metric.finalize([self._cached_data[metric]])
 
-            qp.write_dict('./aaa_temp.hdf5', single_distribution_summary)
+            self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
 
         PipelineStage.finalize(self)
 
