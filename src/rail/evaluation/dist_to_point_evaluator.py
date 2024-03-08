@@ -1,5 +1,4 @@
 import numpy as np
-import qp
 from ceci.config import StageParameter as Param
 from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.concrete_metric_classes import DistToPointMetric
@@ -98,37 +97,28 @@ class DistToPointEvaluator(BaseEvaluator):
 
     def _process_all(self, data_tuple):
         estimate_data = data_tuple[0]
-        reference_data = data_tuple[1]
+        reference_data = data_tuple[1][self.config.hdf5_groupname][self.config.reference_dictionary_key]
 
         out_table = {}
         summary_table = {}
         single_distribution_summary = {}
 
         for metric, this_metric in self._cached_metrics.items():
-            if this_metric.metric_output_type == MetricOutputType.single_value:
-                summary_table[metric] = np.array(
-                    [
-                        this_metric.evaluate(
-                            estimate_data,
-                            reference_data[self.config.hdf5_groupname][
-                                self.config.reference_dictionary_key
-                            ],
-                        )
-                    ]
+            if metric not in self._metric_dict:
+                print(
+                    f"Unsupported metric requested: '{metric}'.  "
+                    "Available metrics are: {self._metric_dict.keys()}"
                 )
-            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                single_distribution_summary[this_metric.metric_name] = this_metric.evaluate(
-                    estimate_data,
-                    reference_data[self.config.hdf5_groupname][self.config.reference_dictionary_key],
-                    )
+                continue
 
+            metric_result = this_metric.evaluate(estimate_data, reference_data)
+
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                summary_table[metric] = np.array([metric_result])
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                single_distribution_summary[this_metric.metric_name] = metric_result
             else:
-                out_table[metric] = this_metric.evaluate(
-                    estimate_data,
-                    reference_data[self.config.hdf5_groupname][
-                        self.config.reference_dictionary_key
-                    ],
-                )
+                out_table[metric] = metric_result
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
         self._output_handle = self.add_handle('output', data=out_table_to_write)

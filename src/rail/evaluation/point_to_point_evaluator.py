@@ -1,10 +1,7 @@
 import numpy as np
-import qp
 from ceci.config import StageParameter as Param
-from qp.metrics.base_metric_classes import (
-    MetricOutputType,
-    PointToPointMetric,
-)
+from qp.metrics.base_metric_classes import MetricOutputType
+from qp.metrics.point_estimate_metric_classes import PointToPointMetric
 
 from rail.core.data import TableHandle, QPHandle
 from rail.evaluation.evaluator import BaseEvaluator
@@ -79,50 +76,29 @@ class PointToPointEvaluator(BaseEvaluator):
         self._output_table_chunk_data(start, end, out_table, first)
 
     def _process_all(self, data_tuple):
-        estimate_data = data_tuple[0]
-        reference_data = data_tuple[1][self.config.hdf5_groupname]
+        estimate_data = np.squeeze(data_tuple[0].ancil[self.config.point_estimate_key])
+        reference_data = data_tuple[1][self.config.hdf5_groupname][self.config.reference_dictionary_key]
 
         out_table = {}
         summary_table = {}
-        single_distribution_summary = qp.Ensemble(qp.stats.norm, data=dict(loc=[], scale=[]))
+        single_distribution_summary = {}
 
-        for metric in self.config.metrics:
+        for metric, this_metric in self._cached_metrics.items():
             if metric not in self._metric_dict:
-                #! Make the following a logged error instead of bailing out of the stage.
                 print(
                     f"Unsupported metric requested: '{metric}'.  "
                     "Available metrics are: {self._metric_dict.keys()}"
                 )
                 continue
 
-            this_metric = self._metric_dict[metric](**self.config.get(metric, {}))
+            metric_result = this_metric.evaluate(estimate_data, reference_data)
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
-                summary_table[metric] = np.array(
-                    [
-                        this_metric.evaluate(
-                            np.squeeze(
-                                estimate_data.ancil[self.config.point_estimate_key]
-                            ),
-                            reference_data[self.config.reference_dictionary_key],
-                        )
-                    ]
-                )
-
+                summary_table[metric] = np.array([metric_result])
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                single_distribution_ensemble = this_metric.finalize(self._cached_data[metric])
-                single_distribution_ensemble.set_ancil({'metric': [metric.name]})
-
-                # append the ensembles into a single output ensemble
-                if single_distribution_summary is None:
-                    single_distribution_summary = single_distribution_ensemble
-                else:
-                    single_distribution_summary.append(single_distribution_ensemble)
+                single_distribution_summary[this_metric.metric_name] = metric_result
             else:
-                out_table[metric] = this_metric.evaluate(
-                    np.squeeze(estimate_data.ancil[self.config.point_estimate_key]),
-                    reference_data[self.config.reference_dictionary_key],
-                )
+                out_table[metric] = metric_result
 
         out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
         self._output_handle = self.add_handle('output', data=out_table_to_write)
