@@ -396,8 +396,7 @@ class RailStage(PipelineStage):
         """
         handle = self.get_handle(tag, allow_missing=True)
         if self.config.output_mode == 'default':
-            if not os.path.exists(handle.path):
-                handle.write()
+            handle.write()
         final_name = PipelineStage._finalize_tag(self, tag)
         handle.path = final_name
         return final_name
