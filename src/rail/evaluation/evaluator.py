@@ -79,7 +79,10 @@ class Evaluator(RailStage):
         """
 
         pz_data = self.get_data('input')
-        z_true = self.get_data('truth')[self.config.redshift_col]
+        if self.config.hdf5_groupname:
+                z_true = self.get_data('truth')[self.config.hdf5_groupname][self.config.redshift_col]
+        else:
+                z_true = self.get_data('truth')[self.config.redshift_col]
         zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins+1)
 
         # Create an instance of the PIT class
