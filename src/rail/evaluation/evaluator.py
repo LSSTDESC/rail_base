@@ -353,8 +353,66 @@ class BaseEvaluator(RailStage):
     def _process_chunk(self, data_tuple, first):
         raise NotImplementedError("BaseEvaluator._process_chunk()")
 
-    def _process_all(self, data_tuple):
-        raise NotImplementedError("BaseEvaluator._process_all()")
+    def _process_all_chunk_metrics(self, estimate_data, reference_data, start, end, first):
+        """This function takes the properly formatted data and loops over all the
+        requested metrics. The metric outputs are either cached for later finalization
+        or written to output files.
+
+        Parameters
+        ----------
+        estimate_data : Ensemble or array
+            The estimated values (of the appropriate type, float or pdf) to be used
+            by the requested metrics.
+        reference_data : Ensemble or array
+            The reference or known values (of the appropriate type, float or pdf)
+            to be used by the requested metrics.
+        start : int
+            The start index of the data chunk, used to write metric results to
+            the correct location of the output file.
+        end : int
+            The end index of the data chunk, used to write metric results to the
+            correct location of the output file.
+        first : bool
+            Used internally to determine if the output file should be initialized.
+
+        Raises
+        ------
+        ValueError
+            Raises an error if an unknown metric is requested.
+        """
+        out_table = {}
+        for metric, this_metric in self._cached_metrics.items():
+            if metric not in self._metric_dict:
+                raise ValueError(
+                    f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
+                )
+
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                if not hasattr(this_metric, "accumulate"):
+                    print(
+                        f"{metric} with output type single_value does not support parallel processing yet"
+                    )
+                    continue
+
+                centroids = this_metric.accumulate(estimate_data, reference_data)
+                if self.comm:
+                    self._cached_data[metric] = centroids
+                else:
+                    if metric in self._cached_data:
+                        self._cached_data[metric].append(centroids)
+                    else:
+                        self._cached_data[metric] = [centroids]
+
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                if not hasattr(this_metric, 'accumulate'):
+                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                    continue
+                self._cached_data[metric] = this_metric.accumulate(estimate_data, reference_data)
+            else:
+                out_table[metric] = this_metric.evaluate(estimate_data, reference_data,)
+
+        self._output_table_chunk_data(start, end, out_table, first)
+
 
     def _output_table_chunk_data(self, start, end, out_table, first):
         out_table_to_write = {
@@ -368,6 +426,54 @@ class BaseEvaluator(RailStage):
             )
         self._output_handle.set_data(out_table_to_write, partial=True)
         self._output_handle.write_chunk(start, end)
+
+
+    def _process_all(self, data_tuple):
+        raise NotImplementedError("BaseEvaluator._process_all()")
+
+
+    def _process_all_metrics(self, estimate_data, reference_data):
+        """This function writes out metric values when operating in non-parallel mode.
+
+        Parameters
+        ----------
+        estimate_data : Ensemble or array
+            The estimated values (of the appropriate type, float or pdf) to be used
+            by the requested metrics.
+        reference_data : Ensemble or array
+            The reference or known values (of the appropriate type, float or pdf)
+            to be used by the requested metrics.
+
+        Raises
+        ------
+        ValueError
+            Raises an error if an unknown metric is requested.
+        """
+
+        out_table = {}
+        summary_table = {}
+        single_distribution_summary = {}
+
+        for metric, this_metric in self._cached_metrics.items():
+            if metric not in self._metric_dict:
+                raise ValueError(
+                    f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
+                )
+
+            metric_result = this_metric.evaluate(estimate_data, reference_data)
+
+            if this_metric.metric_output_type == MetricOutputType.single_value:
+                summary_table[metric] = np.array([metric_result])
+            elif this_metric.metric_output_type == MetricOutputType.single_distribution:
+                single_distribution_summary[this_metric.metric_name] = metric_result
+            else:
+                out_table[metric] = metric_result
+
+        out_table_to_write = {key: np.array(val).astype(float) for key, val in out_table.items()}
+        self._output_handle = self.add_handle('output', data=out_table_to_write)
+        self._summary_handle = self.add_handle('summary', data=summary_table)
+        self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
+
 
     def _build_config_dict(self):
         """Build the configuration dict for each of the metrics"""
