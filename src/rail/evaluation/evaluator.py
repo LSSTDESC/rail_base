@@ -377,7 +377,7 @@ class BaseEvaluator(RailStage):
         for metric, this_metric in self._cached_metrics.items():
             if metric not in self._metric_dict:  # pragma: no cover
                 raise ValueError(
-                    f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
+                    f"Unsupported metric requested: '{metric}'. Available metrics are: {sorted(self._metric_dict.keys())}"
                 )
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
@@ -450,7 +450,7 @@ class BaseEvaluator(RailStage):
         for metric, this_metric in self._cached_metrics.items():
             if metric not in self._metric_dict:  # pragma: no cover
                 raise ValueError(
-                    f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
+                    f"Unsupported metric requested: '{metric}'. Available metrics are: {sorted(self._metric_dict.keys())}"
                 )
 
             metric_result = this_metric.evaluate(estimate_data, reference_data)
@@ -483,7 +483,7 @@ class BaseEvaluator(RailStage):
             if metric_name_ not in self._metric_dict:
                 print(
                     f"Unsupported metric requested: '{metric_name_}'.  "
-                    "Available metrics are: {self._metric_dict.keys()}"
+                    f"Available metrics are: {sorted(self._metric_dict.keys())}"
                 )
                 continue
 
