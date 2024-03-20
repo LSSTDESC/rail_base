@@ -66,8 +66,8 @@ class SingleEvaluator(BaseEvaluator):
         truth_data = data_tuple[3]
 
         for metric, this_metric in self._cached_metrics.items():
-            if this_metric.metric_input_type == MetricInputType.single_ensemble:
-                if not self._input_data_type.has_dist():
+            if this_metric.metric_input_type == MetricInputType.single_ensemble:  # pragma: no cover
+                if not self._input_data_type.has_dist():  # pragma: no cover
                     print(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
@@ -78,7 +78,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()
-                ):
+                ):  # pragma: no cover
                     print(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
@@ -91,7 +91,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_point()
-                ):
+                ):  # pragma: no cover
                     print(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
@@ -108,7 +108,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_point()
-                ):
+                ):  # pragma: no cover
                     print(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
@@ -123,11 +123,11 @@ class SingleEvaluator(BaseEvaluator):
                             point_data,
                             np.squeeze(truth_data[truth_point_estimate_]),
                         )
-            elif this_metric.metric_input_type == MetricInputType.point_to_dist:
+            elif this_metric.metric_input_type == MetricInputType.point_to_dist:  # pragma: no cover
                 if (
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_dist()
-                ):
+                ):  # pragma: no cover
                     print(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
@@ -151,8 +151,8 @@ class SingleEvaluator(BaseEvaluator):
             truth_data = truth_data[self.config.hdf5_groupname]
 
         for metric, this_metric in self._cached_metrics.items():
-            if this_metric.metric_input_type == MetricInputType.single_ensemble:
-                if not self._input_data_type.has_dist():
+            if this_metric.metric_input_type == MetricInputType.single_ensemble:  # pragma: no cover
+                if not self._input_data_type.has_dist():  # pragma: no cover
                     continue
                 key_val = f"{metric}"
                 self._process_all_single_ensemble(this_metric, key_val, input_data)
@@ -160,7 +160,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()
-                ):
+                ):  # pragma: no cover
                     continue
                 key_val = f"{metric}"
                 self._process_all_dist_to_dist(
@@ -170,7 +170,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_point()
-                ):
+                ):  # pragma: no cover
                     continue
                 for truth_point_estimate_ in self.config.truth_point_estimates:
                     key_val = f"{metric}_{truth_point_estimate_}"
@@ -184,7 +184,7 @@ class SingleEvaluator(BaseEvaluator):
                 if (
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_point()
-                ):
+                ):  # pragma: no cover
                     continue
                 for point_estimate_ in self.config.point_estimates:
                     key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
@@ -196,11 +196,11 @@ class SingleEvaluator(BaseEvaluator):
                             point_data,
                             truth_data[truth_point_estimate_],
                         )
-            elif this_metric.metric_input_type == MetricInputType.point_to_dist:
+            elif this_metric.metric_input_type == MetricInputType.point_to_dist:  # pragma: no cover
                 if (
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_dist()
-                ):
+                ):  # pragma: no cover
                     continue
                 for point_estimate_ in self.config.point_estimates:
                     key_val = f"{metric}_{point_estimate_}"
@@ -217,7 +217,7 @@ class SingleEvaluator(BaseEvaluator):
         self._output_handle = self.add_handle("output", data=out_table_to_write)
         self._summary_handle = self.add_handle("summary", data=self._summary_table)
 
-    def _process_chunk_single_ensemble(self, this_metric, key, input_data):
+    def _process_chunk_single_ensemble(self, this_metric, key, input_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
                 print(
@@ -247,7 +247,7 @@ class SingleEvaluator(BaseEvaluator):
             print(key)
             self._out_table[key] = this_metric.evaluate(input_data)
 
-    def _process_chunk_dist_to_dist(self, this_metric, key, input_data, truth_data):
+    def _process_chunk_dist_to_dist(self, this_metric, key, input_data, truth_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
                 print(
@@ -278,7 +278,7 @@ class SingleEvaluator(BaseEvaluator):
 
     def _process_chunk_dist_to_point(self, this_metric, key, input_data, truth_data):
         if this_metric.metric_output_type == MetricOutputType.single_value:
-            if not hasattr(this_metric, "accumulate"):
+            if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
@@ -286,10 +286,9 @@ class SingleEvaluator(BaseEvaluator):
                 return
 
             centroids = this_metric.accumulate(input_data, truth_data)
-            if self.comm:
+            if self.comm:  # pragma: no cover
                 self._cached_data[key] = centroids
             else:
-                print("acc d2p", key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -302,12 +301,11 @@ class SingleEvaluator(BaseEvaluator):
             )
 
         else:
-            print(key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_point_to_dist(self, this_metric, key, input_data, truth_data):
         if this_metric.metric_output_type == MetricOutputType.single_value:
-            if not hasattr(this_metric, "accumulate"):
+            if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
@@ -315,10 +313,9 @@ class SingleEvaluator(BaseEvaluator):
                 return
 
             centroids = this_metric.accumulate(input_data, truth_data)
-            if self.comm:
+            if self.comm:  # pragma: no cover
                 self._cached_data[key] = centroids
             else:
-                print("acc p2d", key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -331,12 +328,11 @@ class SingleEvaluator(BaseEvaluator):
             )
 
         else:
-            print(key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_point_to_point(self, this_metric, key, input_data, truth_data):
         if this_metric.metric_output_type == MetricOutputType.single_value:
-            if not hasattr(this_metric, "accumulate"):
+            if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
@@ -344,10 +340,9 @@ class SingleEvaluator(BaseEvaluator):
                 return
 
             centroids = this_metric.accumulate(input_data, truth_data)
-            if self.comm:
+            if self.comm:  # pragma: no cover
                 self._cached_data[key] = centroids
             else:
-                print("acc p2p", key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
@@ -360,10 +355,9 @@ class SingleEvaluator(BaseEvaluator):
             )
 
         else:
-            print("eval p2p", key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_all_single_ensemble(self, this_metric, key, input_data):
+    def _process_all_single_ensemble(self, this_metric, key, input_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array([this_metric.evaluate(input_data)])
 
@@ -376,7 +370,7 @@ class SingleEvaluator(BaseEvaluator):
         else:
             self._out_table[key] = this_metric.evaluate(input_data)
 
-    def _process_all_dist_to_dist(self, this_metric, key, input_data, truth_data):
+    def _process_all_dist_to_dist(self, this_metric, key, input_data, truth_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]

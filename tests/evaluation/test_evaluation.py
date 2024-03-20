@@ -4,9 +4,14 @@ import numpy as np
 import qp
 
 import rail.evaluation.metrics.pointestimates as pe
-from rail.core.data import QPHandle, TableHandle
+from rail.core.data import QPHandle, TableHandle,  QPOrTableHandle
 from rail.core.stage import RailStage
+from rail.core.utils import find_rail_file
 from rail.evaluation.evaluator import Evaluator
+from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
+from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
+from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
+from rail.evaluation.single_evaluator import SingleEvaluator
 
 # values for metrics
 OUTRATE = 0.0
@@ -21,6 +26,22 @@ OUTRATE = 0.0
 SIGMAD = 0.0046489
 
 
+def _get_files():
+    possible_local_file = './examples_data/evaluation_data/data/output_fzboost.hdf5'
+    if os.path.exists(possible_local_file):
+        pdfs_file = os.path.abspath(possible_local_file)
+    else:
+        pdfs_file = 'examples_data/evaluation_data/data/output_fzboost.hdf5'
+        try:
+            os.makedirs(os.path.dirname(pdfs_file))
+        except FileExistsError:
+            pass
+        curl_com = f"curl -o {pdfs_file} https://portal.nersc.gov/cfs/lsst/PZ/output_fzboost.hdf5"
+        os.system(curl_com)
+    ztrue_file = find_rail_file('examples_data/testdata/test_dc2_validation_9816.hdf5')
+    return pdfs_file, ztrue_file
+
+    
 def construct_test_ensemble():
     np.random.seed(87)
     nmax = 2.5
@@ -68,3 +89,90 @@ def test_evaluation_stage():
     os.remove(
         evaluator.get_output(evaluator.get_aliased_tag("output"), final_name=True)
     )
+
+
+def test_dist_to_dist_evaluator():
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    pdfs_file, ztrue_file = _get_files()
+    stage_dict = dict(
+        #metrics=['cvm', 'ks', 'rmse', 'kld', 'ad'],
+        metrics=['ks'],
+        _random_state=None,
+    )
+
+    ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
+
+    dtd_stage = DistToDistEvaluator.make_stage(name='dist_to_dist', **stage_dict)
+    dtd_stage_single = DistToDistEvaluator.make_stage(name='dist_to_dist_single', force_exact=True, **stage_dict)
+
+    dtd_results = dtd_stage.evaluate(ensemble, ensemble)
+    dtd_results_single = dtd_stage_single.evaluate(ensemble, ensemble)
+
+    
+def test_dist_to_point_evaluator():
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    pdfs_file, ztrue_file = _get_files()
+    stage_dict = dict(
+        metrics=['cdeloss', 'pit', 'brier'],
+        _random_state=None,
+        metric_config={
+            'brier': {'limits':(0,3.1)},
+        }        
+    )
+
+    ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
+    ztrue_data = DS.read_file('ztrue_data', TableHandle, ztrue_file)
+
+    dtp_stage = DistToPointEvaluator.make_stage(name='dist_to_point', **stage_dict)
+    dtp_stage_single = DistToPointEvaluator.make_stage(name='dist_to_point_single', force_exact=True, **stage_dict)
+
+    dtp_results = dtp_stage.evaluate(ensemble, ztrue_data)
+    dtp_results_single = dtp_stage_single.evaluate(ensemble, ztrue_data)
+
+
+
+def test_point_to_point_evaluator():
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    pdfs_file, ztrue_file = _get_files()
+    stage_dict = dict(
+        metrics=['point_stats_ez', 'point_stats_iqr', 'point_bias', 'point_outlier_rate', 'point_stats_sigma_mad'],
+        _random_state=None,
+        hdf5_groupname='photometry',
+        point_estimate_key='zmode',
+        chunk_size=10000,
+    )
+
+    ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
+    ztrue_data = DS.read_file('ztrue_data', TableHandle, ztrue_file)
+
+    ptp_stage = PointToPointEvaluator.make_stage(name='point_to_point', **stage_dict)
+    ptp_stage_single = PointToPointEvaluator.make_stage(name='point_to_point_single', force_exact=True, **stage_dict)
+    
+    ptp_results = ptp_stage.evaluate(ensemble, ztrue_data)
+    ptp_results_single = ptp_stage_single.evaluate(ensemble, ztrue_data)
+
+
+
+def test_single_evaluator():
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    pdfs_file, ztrue_file = _get_files()
+    stage_dict = dict(
+        metrics=['cvm', 'ks', 'omega', 'kld', 'cdeloss', 'point_stats_ez', 'point_stats_iqr'],
+        _random_state=None,
+        hdf5_groupname='photometry',
+        point_estimates=['zmode'],
+        truth_point_estimates=['redshift'],
+        chunk_size=1000,
+    )
+    ensemble_d = DS.add_data('pdfs_data_2', None, QPOrTableHandle, path=pdfs_file)
+    ztrue_data_d = DS.add_data('ztrue_data_2', None, QPOrTableHandle, path=ztrue_file)
+
+    single_stage = SingleEvaluator.make_stage(name='single', **stage_dict)
+    single_stage_single = SingleEvaluator.make_stage(name='single_single', force_exact=True, **stage_dict)
+
+    single_results = single_stage.evaluate(ensemble_d, ztrue_data_d)
+    single_results_single = single_stage_single.evaluate(ensemble_d, ztrue_data_d)

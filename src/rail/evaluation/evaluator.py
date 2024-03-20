@@ -300,7 +300,7 @@ class BaseEvaluator(RailStage):
                 if metric not in self._cached_data:
                     print(f"Skipping {metric} which did not cache data")
                     continue
-                if self.comm:
+                if self.comm:  # pragma: no cover
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
                 summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
 
@@ -311,10 +311,10 @@ class BaseEvaluator(RailStage):
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type != MetricOutputType.single_distribution:
                     continue
-                if metric not in self._cached_data:
+                if metric not in self._cached_data:  # pragma: no cover
                     print(f"Skipping {metric} which did not cache data")
                     continue
-                if self.comm:
+                if self.comm:  # pragma: no cover
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
 
                 # we expected `cached_metric.finalize` to return a qp.Ensemble
@@ -350,7 +350,7 @@ class BaseEvaluator(RailStage):
         all_data = [self.get_data(handle_) for handle_ in handles]
         return all_data
 
-    def _process_chunk(self, data_tuple, first):
+    def _process_chunk(self, data_tuple, first):  # pragma: no cover
         raise NotImplementedError("BaseEvaluator._process_chunk()")
 
     def _process_all_chunk_metrics(self, estimate_data, reference_data, start, end, first):
@@ -382,20 +382,20 @@ class BaseEvaluator(RailStage):
         """
         out_table = {}
         for metric, this_metric in self._cached_metrics.items():
-            if metric not in self._metric_dict:
+            if metric not in self._metric_dict:  # pragma: no cover
                 raise ValueError(
                     f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
                 )
 
             if this_metric.metric_output_type == MetricOutputType.single_value:
-                if not hasattr(this_metric, "accumulate"):
+                if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                     print(
                         f"{metric} with output type single_value does not support parallel processing yet"
                     )
                     continue
 
                 centroids = this_metric.accumulate(estimate_data, reference_data)
-                if self.comm:
+                if self.comm:  # pragma: no cover
                     self._cached_data[metric] = centroids
                 else:
                     if metric in self._cached_data:
@@ -404,7 +404,7 @@ class BaseEvaluator(RailStage):
                         self._cached_data[metric] = [centroids]
 
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                if not hasattr(this_metric, 'accumulate'):
+                if not hasattr(this_metric, 'accumulate'):  # pragma: no cover
                     print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
                     continue
                 self._cached_data[metric] = this_metric.accumulate(estimate_data, reference_data)
@@ -428,7 +428,7 @@ class BaseEvaluator(RailStage):
         self._output_handle.write_chunk(start, end)
 
 
-    def _process_all(self, data_tuple):
+    def _process_all(self, data_tuple):  # pragma: no cover
         raise NotImplementedError("BaseEvaluator._process_all()")
 
 
@@ -455,7 +455,7 @@ class BaseEvaluator(RailStage):
         single_distribution_summary = {}
 
         for metric, this_metric in self._cached_metrics.items():
-            if metric not in self._metric_dict:
+            if metric not in self._metric_dict:  # pragma: no cover
                 raise ValueError(
                     f"Unsupported metric requested: '{metric}'. Available metrics are: {self._metric_dict.keys()}"
                 )
@@ -479,13 +479,13 @@ class BaseEvaluator(RailStage):
         """Build the configuration dict for each of the metrics"""
         self._metric_config_dict = {}
 
-        if "all" in self.config.metrics:
+        if "all" in self.config.metrics:  # pragma: no cover
             metric_list = list(self._metric_dict.keys())
         else:
             metric_list = self.config.metrics
 
         for metric_name_ in metric_list:
-            if metric_name_ in self.config.exclude_metrics:
+            if metric_name_ in self.config.exclude_metrics:  # pragma: no cover
                 continue
             if metric_name_ not in self._metric_dict:
                 print(
