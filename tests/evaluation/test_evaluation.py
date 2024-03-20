@@ -1,3 +1,5 @@
+from unittest.mock import Mock, patch
+
 import os
 
 import numpy as np
@@ -97,7 +99,7 @@ def test_dist_to_dist_evaluator():
     pdfs_file, ztrue_file = _get_files()
     stage_dict = dict(
         #metrics=['cvm', 'ks', 'rmse', 'kld', 'ad'],
-        metrics=['ks'],
+        metrics=['rmse'],
         _random_state=None,
     )
 
@@ -109,7 +111,7 @@ def test_dist_to_dist_evaluator():
     dtd_results = dtd_stage.evaluate(ensemble, ensemble)
     dtd_results_single = dtd_stage_single.evaluate(ensemble, ensemble)
 
-    
+
 def test_dist_to_point_evaluator():
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
