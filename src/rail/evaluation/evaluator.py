@@ -319,7 +319,7 @@ class BaseEvaluator(RailStage):
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
 
                 # we expected `cached_metric.finalize` to return a qp.Ensemble
-                single_distribution_summary_data[cached_metric.metric_name] = cached_metric.finalize([self._cached_data[metric]])
+                single_distribution_summary_data[metric] = cached_metric.finalize(self._cached_data[metric])
 
             self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary_data)
 
@@ -391,7 +391,7 @@ class BaseEvaluator(RailStage):
             if this_metric.metric_output_type == MetricOutputType.single_value:
                 if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                     print(
-                        f"{metric} with output type single_value does not support parallel processing yet"
+                        f"The metric `{metric}` does not support parallel processing yet"
                     )
                     continue
 
@@ -405,10 +405,18 @@ class BaseEvaluator(RailStage):
                         self._cached_data[metric] = [centroids]
 
             elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-                if not hasattr(this_metric, 'accumulate'):  # pragma: no cover
-                    print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                if not hasattr(this_metric, "accumulate"):  # pragma: no cover
+                    print(f"The metric `{metric}` does not support parallel processing yet")
                     continue
-                self._cached_data[metric] = this_metric.accumulate(estimate_data, reference_data)
+
+                centroids = this_metric.accumulate(estimate_data, reference_data)
+                if self.comm:  # pragma: no cover
+                    self._cached_data[metric] = centroids
+                else:
+                    if metric in self._cached_data:
+                        self._cached_data[metric].append(centroids)
+                    else:
+                        self._cached_data[metric] = [centroids]
             else:
                 out_table[metric] = this_metric.evaluate(estimate_data, reference_data,)
 
