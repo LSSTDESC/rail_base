@@ -227,6 +227,7 @@ class BaseEvaluator(RailStage):
         self._metric_dict = _build_metric_dict(self.metric_base_class)
         self._cached_data = {}
         self._cached_metrics = {}
+        self._single_distribution_summary_data = {}
         self._metric_config_dict = {}
 
     def evaluate(self, data, truth):
@@ -307,7 +308,7 @@ class BaseEvaluator(RailStage):
             self._summary_handle = self.add_handle('summary', data=summary_data)
 
             # Finalize all the metrics that produce a single distribution summaries
-            single_distribution_summary = {}
+            single_distribution_summary_data = {}
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type != MetricOutputType.single_distribution:
                     continue
@@ -318,9 +319,9 @@ class BaseEvaluator(RailStage):
                     self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
 
                 # we expected `cached_metric.finalize` to return a qp.Ensemble
-                single_distribution_summary[cached_metric.metric_name] = cached_metric.finalize([self._cached_data[metric]])
+                single_distribution_summary_data[cached_metric.metric_name] = cached_metric.finalize([self._cached_data[metric]])
 
-            self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary)
+            self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary_data)
 
         PipelineStage.finalize(self)
 
