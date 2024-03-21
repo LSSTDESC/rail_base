@@ -74,7 +74,7 @@ class SingleEvaluator(BaseEvaluator):
                     continue
                 key_val = f"{metric}"
                 self._process_chunk_single_ensemble(this_metric, key_val, input_data)
-            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:
+            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:  # pragma: no cover
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()
@@ -156,7 +156,7 @@ class SingleEvaluator(BaseEvaluator):
                     continue
                 key_val = f"{metric}"
                 self._process_all_single_ensemble(this_metric, key_val, input_data)
-            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:
+            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:  # pragma: no cover
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()
@@ -216,6 +216,7 @@ class SingleEvaluator(BaseEvaluator):
         }
         self._output_handle = self.add_handle("output", data=out_table_to_write)
         self._summary_handle = self.add_handle("summary", data=self._summary_table)
+        self._single_distribution_summary_handle = self.add_handle("single_distribution_summary", data=self._single_distribution_summary_data)
 
     def _process_chunk_single_ensemble(self, this_metric, key, input_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
@@ -231,20 +232,25 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
-                print("acc single", key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
                     self._cached_data[key] = [centroids]
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
+            if not hasattr(this_metric, 'accumulate'):  # pragma: no cover
+                print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
 
+            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            if self.comm:
+                self._cached_data[key] = accumulated_data
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(accumulated_data)
+                else:
+                    self._cached_data[key] = [accumulated_data]
         else:
-            print(key)
             self._out_table[key] = this_metric.evaluate(input_data)
 
     def _process_chunk_dist_to_dist(self, this_metric, key, input_data, truth_data):  # pragma: no cover
@@ -260,20 +266,26 @@ class SingleEvaluator(BaseEvaluator):
             if self.comm:
                 self._cached_data[key] = centroids
             else:
-                print("acc d2d", key)
                 if key in self._cached_data:
                     self._cached_data[key].append(centroids)
                 else:
                     self._cached_data[key] = [centroids]
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
+            if not hasattr(this_metric, 'accumulate'):  # pragma: no cover
+                print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
+                return
+
+            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            if self.comm:
+                self._cached_data[key] = accumulated_data
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(accumulated_data)
+                else:
+                    self._cached_data[key] = [accumulated_data]
 
         else:
-            print(key)
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_dist_to_point(self, this_metric, key, input_data, truth_data):
@@ -294,16 +306,26 @@ class SingleEvaluator(BaseEvaluator):
                 else:
                     self._cached_data[key] = [centroids]
 
-        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:  # pragma: no cover
+            if not hasattr(this_metric, "accumulate"):
+                print(
+                    f"{this_metric.metric_name} with output type "
+                    "single_value does not support parallel processing yet"
+                )
+                return
+            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            if self.comm:
+                self._cached_data[key] = accumulated_data
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(accumulated_data)
+                else:
+                    self._cached_data[key] = [accumulated_data]
 
-        else:
+        else:   # pragma: no cover
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_chunk_point_to_dist(self, this_metric, key, input_data, truth_data):
+    def _process_chunk_point_to_dist(self, this_metric, key, input_data, truth_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
@@ -322,11 +344,20 @@ class SingleEvaluator(BaseEvaluator):
                     self._cached_data[key] = [centroids]
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+            if not hasattr(this_metric, "accumulate"):  # pragma: no cover
+                print(
+                    f"{this_metric.metric_name} with output type "
+                    "single_value does not support parallel processing yet"
+                )
+                return
+            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            if self.comm:
+                self._cached_data[key] = accumulated_data
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(accumulated_data)
+                else:
+                    self._cached_data[key] = [accumulated_data]
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
@@ -348,12 +379,21 @@ class SingleEvaluator(BaseEvaluator):
                 else:
                     self._cached_data[key] = [centroids]
 
-        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:  # pragma: no cover
+            if not hasattr(this_metric, "accumulate"):
+                print(
+                    f"{this_metric.metric_name} with output type "
+                    "single_value does not support parallel processing yet"
+                )
+                return
+            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            if self.comm:
+                self._cached_data[key] = accumulated_data
+            else:
+                if key in self._cached_data:
+                    self._cached_data[key].append(accumulated_data)
+                else:
+                    self._cached_data[key] = [accumulated_data]
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
@@ -361,12 +401,8 @@ class SingleEvaluator(BaseEvaluator):
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array([this_metric.evaluate(input_data)])
 
-        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:            
+            self._single_distribution_summary_data[key] = this_metric.evaluate(input_data)
         else:
             self._out_table[key] = this_metric.evaluate(input_data)
 
@@ -377,11 +413,7 @@ class SingleEvaluator(BaseEvaluator):
             )
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+            self._single_distribution_summary_data[key] = this_metric.evaluate(input_data, truth_data)
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
@@ -391,27 +423,19 @@ class SingleEvaluator(BaseEvaluator):
                 [this_metric.evaluate(input_data, truth_data)]
             )
 
-        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
-        else:
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:  # pragma: no cover
+            self._single_distribution_summary_data[key] = this_metric.evaluate(input_data, truth_data)
+        else:  # pragma: no cover
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_all_point_to_dist(self, this_metric, key, input_data, truth_data):
+    def _process_all_point_to_dist(self, this_metric, key, input_data, truth_data):  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]
             )
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+            self._single_distribution_summary_data[key] = this_metric.evaluate(input_data, truth_data)
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
@@ -421,12 +445,8 @@ class SingleEvaluator(BaseEvaluator):
                 [this_metric.evaluate(input_data, truth_data)]
             )
 
-        elif this_metric.metric_output_type == MetricOutputType.single_distribution:
-            print(
-                f"{this_metric.metric_name} with output type "
-                "single_distribution not supported yet"
-            )
-
+        elif this_metric.metric_output_type == MetricOutputType.single_distribution:  # pragma: no cover
+            self._single_distribution_summary_data[key] = this_metric.evaluate(input_data, truth_data)
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
