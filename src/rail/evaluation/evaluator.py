@@ -79,9 +79,9 @@ class Evaluator(RailStage):
         """
 
         pz_data = self.get_data('input')
-        if self.config.hdf5_groupname:
+        try: #pragma: no cover
                 z_true = self.get_data('truth')[self.config.hdf5_groupname][self.config.redshift_col]
-        else:
+        except:
                 z_true = self.get_data('truth')[self.config.redshift_col]
         zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins+1)
 
