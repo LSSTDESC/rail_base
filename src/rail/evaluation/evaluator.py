@@ -25,6 +25,7 @@ class Evaluator(RailStage):
                           nzbins=Param(int, 301, msg="# of bins in zgrid"),
                           pit_metrics=Param(str, 'all', msg='PIT-based metrics to include'),
                           point_metrics=Param(str, 'all', msg='Point-estimate metrics to include'),
+                          hdf5_groupname=SHARED_PARAMS['hdf5_groupname'],
                           do_cde=Param(bool, True, msg='Evaluate CDE Metric'),
                           redshift_col=SHARED_PARAMS)
     inputs = [('input', QPHandle),
@@ -79,10 +80,12 @@ class Evaluator(RailStage):
         """
 
         pz_data = self.get_data('input')
-        try: #pragma: no cover
-                z_true = self.get_data('truth')[self.config.hdf5_groupname][self.config.redshift_col]
-        except:
-                z_true = self.get_data('truth')[self.config.redshift_col]
+        if self.config.hdf5_groupname:
+            specz_data = self.get_data('truth')[self.config.hdf5_groupname]
+        else: 
+            specz_data = self.get_data('truth')
+        z_true = specz_data[self.config['redshift_col']]
+
         zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins+1)
 
         # Create an instance of the PIT class
