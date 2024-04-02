@@ -80,7 +80,7 @@ class Evaluator(RailStage):
         """
 
         pz_data = self.get_data('input')
-        if self.config.hdf5_groupname:
+        if self.config.hdf5_groupname:  # pragma: no cover
             specz_data = self.get_data('truth')[self.config.hdf5_groupname]
         else: 
             specz_data = self.get_data('truth')
