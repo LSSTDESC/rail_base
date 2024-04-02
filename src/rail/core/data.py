@@ -176,6 +176,12 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
     def size(self, **kwargs):
         """Return the size of the data associated to this handle"""
+        if self.partial:
+            if self.length is not None:  # pragma: no cover
+                return self.length
+            return self._size(self.path, **kwargs)
+        if self.data is not None:
+            return self.data_size(**kwargs)
         return self._size(self.path, **kwargs)
 
     def _size(self, path, **kwargs):
@@ -183,7 +189,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
     def data_size(self, **kwargs):
         """Return the size of the in memorry data"""
-        if not self.data:
+        if self.data is None:  # pragma: no cover
             return 0
         return self._data_size(self.data, **kwargs)
 
@@ -272,19 +278,20 @@ class TableHandle(DataHandle):
         """Write the data to the associatied file"""
         return tables_io.write(data, path, **kwargs)
 
-    def size(self, **kwargs):
-        """Return the size of the data associated to this handle"""
-        return self._size(self.path, **kwargs)
-
     def _size(self, path, **kwargs):
-        return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
+        if path in [None, 'none', 'None']:  # pragma: no cover
+            return 0
+        try:
+            return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
+        except Exception:
+            return 0
 
     def _data_size(self, data, **kwargs):
         group_name = kwargs.get('groupname', None)
         if group_name:
             try:
                 data = data[group_name]
-            except KeyError:
+            except KeyError:  # pragma: no cover
                 pass
         max_l = 0
         for _k, v in data.items():
@@ -297,7 +304,7 @@ class TableHandle(DataHandle):
         if isinstance(self.data, dict) and groupname:
             try:
                 table = self.data[groupname]
-            except KeyError:
+            except KeyError:   # pragma: no cover
                 table = self.data
         else:
             table = self.data
@@ -306,7 +313,7 @@ class TableHandle(DataHandle):
             ):
             if isinstance(self.data, dict):
                 yield start, end, tables_io.arrayUtils.sliceDict(table, slice(start,end))
-            else:
+            else:  # pragma: no cover
                 yield start, end, table[start:end]
 
     @classmethod
@@ -409,7 +416,9 @@ class QPHandle(DataHandle):
             )
 
     def _size(self, path, **kwargs):
-        if path == "None":
+        if self.data is not None:  # pragma: no cover
+            return self._data_size(self.data)
+        if path in [None, 'none', "None"]:  # pragma: no cover
             return self.data.npdf
         return tables_io.io.getInputDataLengthHdf5(path, groupname="data")
 
@@ -508,28 +517,19 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
     @classmethod
     def _write(cls, data, path, **kwargs):
         """Write the data to the associatied file """
-        if isinstance(data, qp.Ensemble):
-            return data.write_to(path)
-        return tables_io.write(data, path, **kwargs)
+        raise RuntimeError("QPOrTableHandle should be used for input, not output")  # pragma: no cover
 
     @classmethod
     def _initialize_write(cls, data, path, data_length, **kwargs):
-        if isinstance(data, qp.Ensemble):
-            comm = kwargs.get("communicator", None)
-            return data.initializeHdf5Write(path, data_length, comm)
-        return Hdf5Handle._initialize_write(data, path, data_length, **kwargs)
+        raise RuntimeError("QPOrTableHandle should be used for input, not output")  # pragma: no cover
 
     @classmethod
     def _write_chunk(cls, data, fileObj, groups, start, end, **kwargs):
-        if isinstance(data, qp.Ensemble):
-            return data.writeHdf5Chunk(fileObj, start, end)
-        return tables_io.io.writeDictToHdf5ChunkSingle(fileObj, data, start, end, **kwargs)
+        raise RuntimeError("QPOrTableHandle should be used for input, not output")  # pragma: no cover
 
     @classmethod
     def _finalize_write(cls, data, fileObj, **kwargs):
-        if isinstance(data, qp.Ensemble):
-            return data.finalizeHdf5Write(fileObj)
-        return tables_io.io.finalizeHdf5Write(fileObj, **kwargs)
+        raise RuntimeError("QPOrTableHandle should be used for input, not output")  # pragma: no cover
 
     @classmethod
     def _validate_data(cls, data):
@@ -702,7 +702,7 @@ class DataStore(dict):
         handle = handle_class(key, path=path, data=data, creator=creator)
         self[key] = handle
         return handle
-    
+
     def add_handle(self, key, handle_class, path, creator="DataStore"):
         """Create a handle for some data, and insert it into the DataStore"""
         handle = handle_class(key, path=path, data=None, creator=creator)

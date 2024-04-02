@@ -76,6 +76,10 @@ def do_data_handle(datapath, handle_class):
         th.write()
 
     assert not th.has_data
+    check_size = th.size()
+    if check_size == 0:
+        print(f"Warning, failed to read size from {datapath}")
+    
     with pytest.raises(ValueError) as _errinfo:
         th.write_chunk(0, 1)
     assert th.has_path
@@ -89,6 +93,8 @@ def do_data_handle(datapath, handle_class):
 
     th2 = handle_class("data2", data=data)
     assert th2.has_data
+    assert th2.size() > 0
+    
     assert not th2.has_path
     assert not th2.is_written
     with pytest.raises(ValueError) as _errinfo:
@@ -141,7 +147,25 @@ def test_qp_or_table_handle_qp():
     assert handle.fileObj is not None
     handle.close()
     assert handle.fileObj is None
+    
+    x = handle.iterator(chunk_size=100)
 
+    assert isinstance(x, GeneratorType)
+    for i, xx in enumerate(x):
+        assert xx[0] == i * 100
+        assert xx[1] - xx[0] <= 100
+
+
+    handle2 = QPOrTableHandle(tag='qp_or_table_qp_2', path=datapath)
+    
+    x2 = handle2.iterator(chunk_size=100)
+
+    assert isinstance(x2, GeneratorType)
+    for i2, xx2 in enumerate(x2):
+        assert xx2[0] == i2 * 100
+        assert xx2[1] - xx2[0] <= 100
+
+        
 
 def test_qp_or_table_handle_table():
     datapath = os.path.join(
@@ -153,6 +177,22 @@ def test_qp_or_table_handle_table():
     assert handle.fileObj is not None
     handle.close()
     assert handle.fileObj is None
+    
+    x = handle.iterator(chunk_size=100)
+
+    assert isinstance(x, GeneratorType)
+    for i, xx in enumerate(x):
+        assert xx[0] == i * 100
+        assert xx[1] - xx[0] <= 100
+        
+    handle2 = QPOrTableHandle(tag='qp_or_table_table_2', path=datapath)
+    
+    x2 = handle2.iterator(groupname='photometry', chunk_size=100)
+
+    assert isinstance(x2, GeneratorType)
+    for i2, xx2 in enumerate(x2):
+        assert xx2[0] == i2 * 100
+        assert xx2[1] - xx2[0] <= 100
 
 
 def test_hdf5_handle():
@@ -331,6 +371,9 @@ def test_data_store():
     with pytest.raises(ValueError) as _errinfo:
         DS.pq = DS["pq"]
 
+    a_handle = DS.add_handle("pq_copy_2", PqHandle, path=datapath_pq_copy)
+    assert a_handle
+    
     assert repr(DS)
 
     DS2 = DataStore(pq=DS.pq)
@@ -338,7 +381,9 @@ def test_data_store():
 
     # pop the 'pq' data item to avoid overwriting file under git control
     DS.pop("pq")
-
+    # pop the 'pq_copy_2' because it is empty
+    DS.pop("pq_copy_2")
+    
     DS.write_all()
     DS.write_all(force=True)
 

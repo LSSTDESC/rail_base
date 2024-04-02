@@ -133,8 +133,20 @@ def test_dist_to_point_evaluator():
     dtp_results = dtp_stage.evaluate(ensemble, ztrue_data)
     dtp_results_single = dtp_stage_single.evaluate(ensemble, ztrue_data)
 
+    qp_dict = qp.read_dict(dtp_results_single['single_distribution_summary'].path)
+    assert qp_dict['pit'].npdf == 1
 
+    qp_dict_handle = dtp_results_single['single_distribution_summary']
+    qp_dict_handle.data = None
+    qp_dict_2 = qp_dict_handle.read()
+    assert qp_dict_2['pit'].npdf == 1
 
+    qp_dict_handle.data = None
+
+    with qp_dict_handle.open() as qp_dict_data:
+        assert qp_dict_data
+    
+    
 def test_point_to_point_evaluator():
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
