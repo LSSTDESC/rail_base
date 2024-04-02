@@ -14,7 +14,7 @@ RAIL is a flexible software library providing tools to produce at-scale
 photometric redshift data products, including uncertainties and summary
 statistics, and stress-test them under realistically complex systematics.
 A detailed description of RAIL's modular structure is available in the 
-[Overview](https://lsstdescrail.readthedocs.io/en/latest/source/overview.html) 
+[Overview](https://rail-hub.readthedocs.io/en/latest/source/overview.html) 
 on ReadTheDocs.
 
 RAIL serves as the infrastructure supporting many extragalactic applications 
