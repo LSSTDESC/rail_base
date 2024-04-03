@@ -416,10 +416,10 @@ class QPHandle(DataHandle):
             )
 
     def _size(self, path, **kwargs):
-        if self.data is not None:  # pragma: no cover
+        if self.data is not None and not self.partial:  # pragma: no cover
             return self._data_size(self.data)
         if path in [None, 'none', "None"]:  # pragma: no cover
-            return self.data.npdf
+            return 0
         return tables_io.io.getInputDataLengthHdf5(path, groupname="data")
 
     def _data_size(self, data, **kwargs):
