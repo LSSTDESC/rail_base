@@ -25,7 +25,7 @@ class Evaluator(RailStage):
                           nzbins=Param(int, 301, msg="# of bins in zgrid"),
                           pit_metrics=Param(str, 'all', msg='PIT-based metrics to include'),
                           point_metrics=Param(str, 'all', msg='Point-estimate metrics to include'),
-                          hdf5_groupname=SHARED_PARAMS['hdf5_groupname'],
+                          hdf5_groupname=Param(str, '', msg='Name of group in hdf5 where redshift data is located'),
                           do_cde=Param(bool, True, msg='Evaluate CDE Metric'),
                           redshift_col=SHARED_PARAMS)
     inputs = [('input', QPHandle),
