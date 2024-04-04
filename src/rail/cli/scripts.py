@@ -50,7 +50,7 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
 
 
 def clone_source(outdir, git_mode, dry_run, package_file):  # pragma: no cover
-    with open(package_file, encoding='utf-8') as pfile:
+    with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
     for key, _val in package_dict.items():
@@ -72,7 +72,7 @@ def clone_source(outdir, git_mode, dry_run, package_file):  # pragma: no cover
 
 
 def update_source(outdir, dry_run, package_file):
-    with open(package_file, encoding='utf-8') as pfile:
+    with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
     currentpath = os.path.abspath(".")
@@ -92,7 +92,7 @@ def update_source(outdir, dry_run, package_file):
 
 
 def install(outdir, from_source, dry_run, package_file):
-    with open(package_file, encoding='utf-8') as pfile:
+    with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
     for key, val in package_dict.items():

@@ -40,7 +40,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         self.groups = None
         self.partial = False
         self.length = None
-        
+
     def __init_subclass__(cls, **kwargs):
         """Register the subclass with the dict"""
         cls.data_handle_type_dict[cls.__name__] = cls
@@ -54,7 +54,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
     def print_sub_classes(cls):
         """Print the list of all the subclasses"""
         for key, val in cls.data_handle_type_dict.items():
-            print(f"{key}: {val}")    
+            print(f"{key}: {val}")
 
     def open(self, **kwargs):
         """Open and return the associated file
@@ -95,7 +95,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("DataHandle._read")  # pragma: no cover
 
     def write(self, **kwargs):
-        """Write the data to the associatied file"""
+        """Write the data to the associated file"""
         if self.path is None:
             raise ValueError(
                 "TableHandle.write() called but path has not been specified"
@@ -128,7 +128,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("DataHandle._initialize_write")  # pragma: no cover
 
     def write_chunk(self, start, end, **kwargs):
-        """Write the data to the associatied file"""
+        """Write the data to the associated file"""
         if self.data is None:
             raise ValueError(
                 f"TableHandle.write_chunk() called for path {self.path} with no data"
@@ -275,7 +275,7 @@ class TableHandle(DataHandle):
 
     @classmethod
     def _write(cls, data, path, **kwargs):
-        """Write the data to the associatied file"""
+        """Write the data to the associated file"""
         return tables_io.write(data, path, **kwargs)
 
     def _size(self, path, **kwargs):
@@ -312,7 +312,7 @@ class TableHandle(DataHandle):
                 nrows, kwargs.get('chunk_size', 100000), 1, 0
             ):
             if isinstance(self.data, dict):
-                yield start, end, tables_io.arrayUtils.sliceDict(table, slice(start,end))
+                yield start, end, tables_io.arrayUtils.sliceDict(table, slice(start, end))
             else:  # pragma: no cover
                 yield start, end, table[start:end]
 
@@ -391,7 +391,7 @@ class QPHandle(DataHandle):
 
     @classmethod
     def _write(cls, data, path, **kwargs):
-        """Write the data to the associatied file"""
+        """Write the data to the associated file"""
         return data.write_to(path)
 
     @classmethod
@@ -483,7 +483,6 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
         def has_point(self):
             return self.value in [1, 2]
 
-
     def is_qp(self):
         """ Check if the associated data or file is a QP ensemble"""
         if self.path in [None, 'None', 'none']:
@@ -505,7 +504,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
         This will simply open the file and return a file-like object to the caller.
         It will not read or cache the data
         """
-        return tables_io.io.io_open(path, **kwargs)  #pylint: disable=no-member
+        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
     def _read(cls, path, **kwargs):
@@ -516,7 +515,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 
     @classmethod
     def _write(cls, data, path, **kwargs):
-        """Write the data to the associatied file """
+        """Write the data to the associated file """
         raise RuntimeError("QPOrTableHandle should be used for input, not output")  # pragma: no cover
 
     @classmethod
@@ -629,7 +628,7 @@ class ModelHandle(DataHandle):
 
     @classmethod
     def _write(cls, data, path, **kwargs):
-        """Write the data to the associatied file"""
+        """Write the data to the associated file"""
         return cls.model_factory.write(data, path, **kwargs)
 
 
