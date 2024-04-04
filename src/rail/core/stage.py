@@ -369,9 +369,10 @@ class RailStage(PipelineStage):
         else:  # pragma: no cover
             if self.config.hdf5_groupname:
                 test_data = self.get_data(tag)[self.config.hdf5_groupname]
+                self._input_length = self.get_handle(tag).data_size(groupname=self.config.hdf5_groupname)
             else:
                 test_data = self.get_data(tag)
-            self._input_length = self.get_handle(tag).data_size()
+                self._input_length = self.get_handle(tag).data_size()
             s = 0
             iterator = [[s, self._input_length, test_data]]
             return iterator
