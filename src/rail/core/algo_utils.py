@@ -5,8 +5,6 @@ from rail.core.stage import RailStage
 from rail.core.utils import RAILDIR
 from rail.core.data import TableHandle
 
-sci_ver_str = scipy.__version__.split(".")
-
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
 validdata = os.path.join(RAILDIR, "rail/examples_data/testdata/validation_10gal.hdf5")
