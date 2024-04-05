@@ -3,14 +3,14 @@ from ceci.config import StageParameter as Param
 from qp.metrics.point_estimate_metric_classes import PointToPointMetric
 
 from rail.core.data import TableHandle, QPHandle
-from rail.evaluation.evaluator import BaseEvaluator
+from rail.evaluation.evaluator import Evaluator
 
 
-class PointToPointEvaluator(BaseEvaluator):
+class PointToPointEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "PointToPointEvaluator"
-    config_options = BaseEvaluator.config_options.copy()
+    config_options = Evaluator.config_options.copy()
     config_options.update(
         hdf5_groupname=Param(
             str, "photometry", required=False, msg="HDF5 Groupname for truth table."

@@ -3,14 +3,14 @@ from ceci.config import StageParameter as Param
 from qp.metrics.concrete_metric_classes import DistToPointMetric
 
 from rail.core.data import QPHandle, TableHandle
-from rail.evaluation.evaluator import BaseEvaluator
+from rail.evaluation.evaluator import Evaluator
 
 
-class DistToPointEvaluator(BaseEvaluator):
+class DistToPointEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "DistToPointEvaluator"
-    config_options = BaseEvaluator.config_options.copy()
+    config_options = Evaluator.config_options.copy()
     config_options.update(
         limits=Param(
             tuple,

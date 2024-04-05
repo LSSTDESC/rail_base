@@ -11,14 +11,14 @@ from qp.metrics import MetricInputType, MetricOutputType
 from qp.metrics.base_metric_classes import BaseMetric
 
 from rail.core.data import QPOrTableHandle
-from rail.evaluation.evaluator import BaseEvaluator
+from rail.evaluation.evaluator import Evaluator
 
 
-class SingleEvaluator(BaseEvaluator):
+class SingleEvaluator(Evaluator):
     """Evaluate the performance of a photo-Z estimator"""
 
     name = "SingleEvaluator"
-    config_options = BaseEvaluator.config_options.copy()
+    config_options = Evaluator.config_options.copy()
     config_options.update(
         point_estimates=Param(list, msg="List of point estimates to use", default=[]),
         truth_point_estimates=Param(
@@ -34,7 +34,7 @@ class SingleEvaluator(BaseEvaluator):
 
     def __init__(self, args, comm=None):
         """Initialize Evaluator"""
-        BaseEvaluator.__init__(self, args, comm=comm)
+        Evaluator.__init__(self, args, comm=comm)
         self._input_data_type = QPOrTableHandle.PdfOrValue.unknown
         self._truth_data_type = QPOrTableHandle.PdfOrValue.unknown
         self._out_table = {}
@@ -57,7 +57,7 @@ class SingleEvaluator(BaseEvaluator):
         self._input_data_type = input_data_handle.check_pdf_or_point()
         self._truth_data_type = truth_data_handle.check_pdf_or_point()
 
-        BaseEvaluator.run(self)
+        Evaluator.run(self)
 
     def _process_chunk(self, data_tuple, first):
         start = data_tuple[0]
@@ -457,4 +457,4 @@ class SingleEvaluator(BaseEvaluator):
                 self.input_iterator(tag, groupname=self.config.hdf5_groupname)
                 for tag in tags
             ]
-        return BaseEvaluator._setup_iterator(self, itrs)
+        return Evaluator._setup_iterator(self, itrs)

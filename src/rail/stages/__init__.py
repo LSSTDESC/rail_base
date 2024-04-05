@@ -25,7 +25,7 @@ from rail.creation.engine import *
 # from rail.creation.engines.dsps_photometry_creator import *
 # from rail.creation.engines.dsps_sed_modeler import *
 
-from rail.evaluation.evaluator import Evaluator
+# from rail.evaluation.evaluator import Evaluator
 
 
 def import_and_attach_all():
