@@ -9,7 +9,7 @@ import rail.evaluation.metrics.pointestimates as pe
 from rail.core.data import QPHandle, TableHandle,  QPOrTableHandle
 from rail.core.stage import RailStage
 from rail.core.utils import find_rail_file
-from rail.evaluation.evaluator import Evaluator
+from rail.evaluation.evaluator import OldEvaluator
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
@@ -85,7 +85,7 @@ def test_evaluation_stage():
     pdf = DS.add_data("pdf", pdf_ens, QPHandle)
     truth_table = dict(redshift=zspec)
     truth = DS.add_data("truth", truth_table, TableHandle)
-    evaluator = Evaluator.make_stage(name="Eval")
+    evaluator = OldEvaluator.make_stage(name="Eval")
     evaluator.evaluate(pdf, truth)
 
     os.remove(
