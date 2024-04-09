@@ -25,6 +25,13 @@ class Noisifier(RailStage):
     def __init__(self, args, comm=None):
         """Initialize Noisifier that can add noise to photometric data"""
         RailStage.__init__(self, args, comm=comm)
+        
+        
+    def initNoiseModel(self):  # pragma: no cover
+        raise NotImplementedError("Noisifier.initNoiseModel()")
+        
+    def addNoise(self, noiseModel):  # pragma: no cover
+        raise NotImplementedError("Noisifier.addNoise()")
 
     def __call__(self, sample, seed: int = None):
         """The main interface method for ``Noisifier``.
@@ -63,9 +70,14 @@ class Noisifier(RailStage):
             self.config.seed = seed
         self.set_data('input', sample)
         
-        self.initNoiseModel()
-        self.addNoise(self.noiseModel)
-        
-        self.finalize()
+        self.run()
         
         return self.get_handle('output')
+    
+    def run(self):
+        
+        self.initNoiseModel()
+        
+        self.addNoise(self.noiseModel)
+        
+        

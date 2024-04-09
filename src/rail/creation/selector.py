@@ -52,10 +52,15 @@ class Selector(RailStage):
         output_data : PqHandle
             A handle giving access to a table with selected sample
         """
+        
+        self.run()
+        
+        return self.get_handle('output')
+
+    def run(self):
+        
         self.set_data('input', sample)
         
         self.select()
         
         self.finalize(dropRows = self.args['dropRows'])
-        
-        return self.get_handle('output')
