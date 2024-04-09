@@ -27,10 +27,10 @@ class Noisifier(RailStage):
         RailStage.__init__(self, args, comm=comm)
         
         
-    def initNoiseModel(self):  # pragma: no cover
+    def _initNoiseModel(self):  # pragma: no cover
         raise NotImplementedError("Noisifier.initNoiseModel()")
         
-    def addNoise(self, noiseModel):  # pragma: no cover
+    def _addNoise(self):  # pragma: no cover
         raise NotImplementedError("Noisifier.addNoise()")
 
     def __call__(self, sample, seed: int = None):
@@ -40,13 +40,13 @@ class Noisifier(RailStage):
 
         This will attach the input to this `Noisifier` 
 
-        Then it will call the initNoiseModel() and addNoise(), which need to be
+        Then it will call the _initNoiseModel() and _addNoise(), which need to be
         implemented by the sub-classes.
 
-        The initNoiseModel() method will initialize the noise model of the sub-classes, and 
+        The _initNoiseModel() method will initialize the noise model of the sub-classes, and 
         store the noise model as self.noiseModel
         
-        The addNoise() method will add noise to the flux and magnitude of the column of the
+        The _addNoise() method will add noise to the flux and magnitude of the column of the
         catalog. 
         
         The finalize() method will check the end results (like preserving number of rows)
@@ -71,13 +71,13 @@ class Noisifier(RailStage):
         self.set_data('input', sample)
         
         self.run()
-        
+        self.finalize()
         return self.get_handle('output')
-    
+
+
     def run(self):
         
-        self.initNoiseModel()
-        
-        self.addNoise(self.noiseModel)
+        self._initNoiseModel()        
+        self._addNoise()
         
         

@@ -3,10 +3,10 @@
 from numbers import Number
 
 import numpy as np
-from rail.creation.degrader import Degrader
+from rail.creation.selector import Selector
 
 
-class QuantityCut(Degrader):
+class QuantityCut(Selector):
     """Degrader that applies a cut to the given columns.
 
     Note that if a galaxy fails any of the cuts on any one of its columns, that
@@ -14,7 +14,7 @@ class QuantityCut(Degrader):
     """
 
     name = "QuantityCut"
-    config_options = Degrader.config_options.copy()
+    config_options = Selector.config_options.copy()
     config_options.update(cuts=dict)
 
     def __init__(self, args, comm=None):
@@ -23,7 +23,7 @@ class QuantityCut(Degrader):
         Performs standard Degrader initialization as well as defining the cuts 
         to be applied.
         """
-        Degrader.__init__(self, args, comm=comm)
+        Selector.__init__(self, args, comm=comm)
         self.cuts = None
         self.set_cuts(self.config["cuts"])
 
@@ -82,7 +82,7 @@ class QuantityCut(Degrader):
             else:
                 raise TypeError(bad_cut_msg)
 
-    def run(self):
+    def _select(self):
         """Applies cuts.
 
         Notes
@@ -97,7 +97,7 @@ class QuantityCut(Degrader):
         columns = set(self.cuts.keys()).intersection(data.columns)
 
         if len(columns) == 0:  # pragma: no cover
-            self.add_data("output", data)
+            return np.ones(len(data), dtype=int)
         else:
             # generate a pandas query from the cuts
             query = [
@@ -105,9 +105,10 @@ class QuantityCut(Degrader):
                 for col in columns
             ]
             query = " & ".join(query)
-
-            out_data = data.query(query)
-            self.add_data("output", out_data)
+            out_indices = data.query(query).index.values
+            out_mask = np.zeros(len(data), dtype=int)
+            out_mask[out_indices] = 1
+            return out_mask
 
     def __repr__(self):  # pragma: no cover
         """Pretty print this object."""

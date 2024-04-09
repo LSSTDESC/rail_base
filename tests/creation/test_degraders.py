@@ -8,7 +8,7 @@ import pytest
 from rail.core.data import DATA_STORE, TableHandle
 from rail.core.util_stages import ColumnMapper
 from rail.creation.degradation.quantityCut import QuantityCut
-# from rail.creation.degradation.spectroscopic_selections import *
+from rail.creation.degradation.addRandom import AddColumnOfRandom
 
 
 @pytest.fixture
@@ -71,14 +71,33 @@ def test_QuantityCut_returns_correct_shape(data):
     """Make sure QuantityCut is returning the correct shape"""
 
     cuts = {
-        "u": 0,
-        "y": (1, 2),
+        "u": 30,
+        "redshift": (1, 2),
     }
     degrader = QuantityCut.make_stage(cuts=cuts)
 
     degraded_data = degrader(data).data
 
-    assert degraded_data.shape == data.data.query("u < 0 & y > 1 & y < 2").shape
+    assert degraded_data.shape == data.data.query("u < 30 & redshift > 1 & redshift < 2").shape
     os.remove(degrader.get_output(degrader.get_aliased_tag("output"), final_name=True))
 
+    
+    degrader_w_flag = QuantityCut.make_stage(name="degrader_w_flag", cuts=cuts, drop_rows=False)
 
+    degraded_data_w_flag = degrader_w_flag(data).data
+
+    test_mask = np.zeros(len(data.data), dtype=int)
+    out_indices = data.data.query("u < 30 & redshift > 1 & redshift < 2").index.values
+    test_mask[out_indices] = 1
+    
+    assert (degraded_data_w_flag['flag'] == test_mask).all()
+    os.remove(degrader_w_flag.get_output(degrader_w_flag.get_aliased_tag("output"), final_name=True))
+
+
+
+def test_add_random(data):
+
+    add_random = AddColumnOfRandom.make_stage()
+
+    test_data = add_random(data, seed=1234).data
+    assert len(test_data[add_random.config.col_name]) == len(data.data)

@@ -5,6 +5,7 @@ Intended subclasses spectroscopic selection, probability selection on a grid for
 or pure photometric selection. 
 """
 
+from ceci.config import StageParameter as Param
 from rail.core.stage import RailStage
 from rail.core.data import PqHandle
 
@@ -19,6 +20,9 @@ class Selector(RailStage):
 
     name = 'Selector'
     config_options = RailStage.config_options.copy()
+    config_options.update(
+        drop_rows=Param(bool, True, msg="Drop selected rows from output table"),
+    )
     inputs = [('input', PqHandle)]
     outputs = [('output', PqHandle)]
 
@@ -52,15 +56,20 @@ class Selector(RailStage):
         output_data : PqHandle
             A handle giving access to a table with selected sample
         """
-        
-        self.run()
-        
+        self.set_data('input', sample)        
+        self.run()        
+        self.finalize()
         return self.get_handle('output')
 
     def run(self):
-        
-        self.set_data('input', sample)
-        
-        self.select()
-        
-        self.finalize(dropRows = self.args['dropRows'])
+        data = self.get_data('input')
+        selection_mask = self._select()
+        if self.config['drop_rows']:
+            out_data = data[selection_mask.astype(bool)]
+        else:
+            out_data = data.copy()
+            out_data.insert(0, 'flag', selection_mask)
+        self.add_data("output", out_data)
+            
+    def _select(self):  # pragma: no cover
+        raise NotImplementedError("Selector._select()")

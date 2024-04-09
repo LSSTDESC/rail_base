@@ -8,7 +8,7 @@ from rail.core.stage import RailStage
 from rail.core.data import PqHandle
 
 
-class Degrader(RailStage):
+class Degrader(RailStage):  # pragma: no cover
     """Base class Degraders, which apply various degradations to synthetic 
     photometric data.
 
