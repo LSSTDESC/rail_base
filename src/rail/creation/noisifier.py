@@ -28,10 +28,10 @@ class Noisifier(RailStage):
         
         
     def _initNoiseModel(self):  # pragma: no cover
-        raise NotImplementedError("Noisifier.initNoiseModel()")
+        raise NotImplementedError("Noisifier._initNoiseModel()")
         
     def _addNoise(self):  # pragma: no cover
-        raise NotImplementedError("Noisifier.addNoise()")
+        raise NotImplementedError("Noisifier._addNoise()")
 
     def __call__(self, sample, seed: int = None):
         """The main interface method for ``Noisifier``.
