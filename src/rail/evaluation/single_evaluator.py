@@ -7,6 +7,7 @@ The key feature is that the evaluate method.
 import numpy as np
 
 from ceci.config import StageParameter as Param
+import qp.metrics
 from qp.metrics import MetricInputType, MetricOutputType
 from qp.metrics.base_metric_classes import BaseMetric
 
@@ -51,8 +52,8 @@ class SingleEvaluator(Evaluator):
         Get the truth data from the data store under this stages 'truth' tag
         Puts the data into the data store under this stages 'output' tag
         """
-        input_data_handle = self.get_handle("input")
-        truth_data_handle = self.get_handle("truth")
+        input_data_handle = self.get_handle("input", allow_missing=True)
+        truth_data_handle = self.get_handle("truth", allow_missing=True)
 
         self._input_data_type = input_data_handle.check_pdf_or_point()
         self._truth_data_type = truth_data_handle.check_pdf_or_point()
@@ -114,9 +115,9 @@ class SingleEvaluator(Evaluator):
                     )
                     continue
                 for point_estimate_ in self.config.point_estimates:
-                    key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
                     point_data = np.squeeze(input_data.ancil[point_estimate_])
-                    for truth_point_estimate_ in self.config.truth_point_estimates:
+                    for truth_point_estimate_ in self.config.truth_point_estimates:                        
+                        key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
                         self._process_chunk_point_to_point(
                             this_metric,
                             key_val,
@@ -276,7 +277,7 @@ class SingleEvaluator(Evaluator):
                 print(f"{metric} with output type MetricOutputType.single_value does not support parallel processing yet")
                 return
 
-            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            accumulated_data = this_metric.accumulate(input_data, truth_data)
             if self.comm:
                 self._cached_data[key] = accumulated_data
             else:
@@ -313,7 +314,7 @@ class SingleEvaluator(Evaluator):
                     "single_value does not support parallel processing yet"
                 )
                 return
-            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            accumulated_data = this_metric.accumulate(input_data, truth_data)
             if self.comm:
                 self._cached_data[key] = accumulated_data
             else:
@@ -350,7 +351,7 @@ class SingleEvaluator(Evaluator):
                     "single_value does not support parallel processing yet"
                 )
                 return
-            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            accumulated_data = this_metric.accumulate(input_data, truth_data)
             if self.comm:
                 self._cached_data[key] = accumulated_data
             else:
@@ -386,7 +387,7 @@ class SingleEvaluator(Evaluator):
                     "single_value does not support parallel processing yet"
                 )
                 return
-            accumulated_data = this_metric.accumulate(estimate_data, reference_data)
+            accumulated_data = this_metric.accumulate(input_data, truth_data)
             if self.comm:
                 self._cached_data[key] = accumulated_data
             else:
