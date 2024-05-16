@@ -158,19 +158,23 @@ class Evaluator(RailStage):
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type != MetricOutputType.single_value and cached_metric.metric_output_type != MetricOutputType.single_distribution:
                     continue
-
-                if metric not in self._cached_data:
-                    print(f"Skipping {metric} which did not cache data")
+                matching_keys = []
+                for key_ in self._cached_data.keys():
+                    if key_.find(metric) == 0:
+                        matching_keys.append(key_)                        
+                if not matching_keys:
+                    print(f"Skipping {metric} which did not cache data {list(self._cached_data.keys())}")
                     continue
-                if self.comm:  # pragma: no cover
-                    self._cached_data[metric] = self.comm.gather(self._cached_data[metric])
+                for key_ in matching_keys:
+                    if self.comm:  # pragma: no cover
+                        self._cached_data[key_] = self.comm.gather(self._cached_data[key_])
 
-                if cached_metric.metric_output_type == MetricOutputType.single_value:
-                    summary_data[metric] = np.array([cached_metric.finalize(self._cached_data[metric])])
+                    if cached_metric.metric_output_type == MetricOutputType.single_value:
+                        summary_data[key_] = np.array([cached_metric.finalize(self._cached_data[key_])])
 
-                elif cached_metric.metric_output_type == MetricOutputType.single_distribution:
-                    # we expect `cached_metric.finalize` to return a qp.Ensemble
-                    single_distribution_summary_data[metric] = cached_metric.finalize(self._cached_data[metric])
+                    elif cached_metric.metric_output_type == MetricOutputType.single_distribution:
+                        # we expect `cached_metric.finalize` to return a qp.Ensemble
+                        single_distribution_summary_data[key_] = cached_metric.finalize(self._cached_data[key_])
 
             self._summary_handle = self.add_handle('summary', data=summary_data)
             self._single_distribution_summary_handle = self.add_handle('single_distribution_summary', data=single_distribution_summary_data)
@@ -329,6 +333,8 @@ class Evaluator(RailStage):
 
         if "all" in self.config.metrics:  # pragma: no cover
             metric_list = list(self._metric_dict.keys())
+            for exclude_ in self.config.exclude_metrics:
+                metric_list.remove(exclude_)
         else:
             metric_list = self.config.metrics
 
@@ -344,9 +350,14 @@ class Evaluator(RailStage):
 
             sub_dict = self.config.metric_config.get("general", {}).copy()
             sub_dict.update(self.config.metric_config.get(metric_name_, {}))
+            sub_dict.update(dict(limits=self.config.limits))
             self._metric_config_dict[metric_name_] = sub_dict
             this_metric_class = self._metric_dict[metric_name_]
-            this_metric = this_metric_class(**sub_dict)
+            try:
+                this_metric = this_metric_class(**sub_dict)
+            except TypeError:
+                sub_dict.pop('limits')
+                this_metric = this_metric_class(**sub_dict)
             self._cached_metrics[metric_name_] = this_metric
 
 
