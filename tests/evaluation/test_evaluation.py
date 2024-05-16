@@ -121,7 +121,8 @@ def test_dist_to_point_evaluator():
         _random_state=None,
         metric_config={
             'brier': {'limits':(0,3.1)},
-        }        
+        },
+        limits=[0., 3.1],
     )
 
     ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
