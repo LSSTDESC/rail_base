@@ -61,6 +61,8 @@ class DistToPointEvaluator(Evaluator):
 
     def _process_all(self, data_tuple):
         estimate_data = data_tuple[0]
-        reference_data = data_tuple[1][self.config.hdf5_groupname][self.config.reference_dictionary_key]
-
+        if self.config.hdf5_groupname:
+            reference_data = data_tuple[1][self.config.hdf5_groupname][self.config.reference_dictionary_key]
+        else:
+            reference_data = data_tuple[1][self.config.reference_dictionary_key]
         self._process_all_metrics(estimate_data, reference_data)
