@@ -188,9 +188,9 @@ class SingleEvaluator(Evaluator):
                 ):  # pragma: no cover
                     continue
                 for point_estimate_ in self.config.point_estimates:
-                    key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
                     point_data = input_data.ancil[point_estimate_]
                     for truth_point_estimate_ in self.config.truth_point_estimates:
+                        key_val = f"{metric}_{point_estimate_}_{truth_point_estimate_}"
                         self._process_all_point_to_point(
                             this_metric,
                             key_val,
