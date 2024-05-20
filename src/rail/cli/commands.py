@@ -100,3 +100,10 @@ def estimate(stage_name, stage_class, stage_module, model_file, dry_run, input_f
         data_path=input_file,
     )
 
+
+@options.pipeline_class()
+@options.output_yaml()
+def build_pipe(pipeline_class, output_yaml, **kwargs):
+    """Build a pipeline yaml file"""
+    scripts.build_pipeline(pipeline_class, output_yaml, **kwargs)
+    return 0

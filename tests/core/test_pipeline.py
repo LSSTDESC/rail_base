@@ -99,3 +99,18 @@ def test_golden_v2():
 
     pr = ceci.Pipeline.read("stage.yaml")
     pr.run()
+
+
+
+def test_make_pipeline():
+
+    __import__('rail.pipelines.estimation.train_z_pipeline')
+    RailPipeline.build_and_write(
+        'TrainZPipeline',
+        'trainz_pipe.yaml',
+    )
+
+    
+    pipe_read = ceci.Pipeline.read('trainz_pipe.yaml')
+
+    os.unlink('trainz_pipe.yaml')

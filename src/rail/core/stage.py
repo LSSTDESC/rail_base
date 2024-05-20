@@ -77,7 +77,43 @@ class RailPipeline(MiniPipeline):
 
     And end up with a fully specified pipeline.
     """
+    pipeline_classes = {}    
 
+    def __init_subclass__(cls):
+        cls.pipeline_classes[cls.__name__] = cls
+
+    @classmethod
+    def print_classes(cls):
+        for key, val in cls.pipeline_classes.items():
+            print(f"{key} {val}")
+
+    @classmethod
+    def get_pipeline_class(cls, name):
+        return cls.pipeline_classes[name]
+
+    @staticmethod
+    def build_and_write(
+        class_name,
+        output_yaml,
+        input_dict=None,
+        output_dir=',',
+        log_dir=',',
+    ):
+        pipe_class = RailPipeline.get_pipeline_class(class_name)
+        pipe = pipe_class()
+        if input_dict is None:
+            input_dict = pipe_class.default_input_dict
+        pipe.initialize(
+            input_dict,
+            dict(
+                output_dir=output_dir,
+                log_dir=log_dir,
+                resume=False,
+            ),
+            None,
+        )
+        pipe.save(output_yaml)
+    
     def __init__(self):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
