@@ -21,6 +21,11 @@ input_file = 'rubin_dm_dc2_example.pq'
 
 class TrainZPipeline(RailPipeline):
 
+    default_input_dict = dict(
+        input_train='dummy.in',
+        input_test='dummy.in',
+    )
+
     def __init__(self):
         RailPipeline.__init__(self)
 
@@ -41,13 +46,3 @@ class TrainZPipeline(RailPipeline):
             output=os.path.join(namer.get_data_dir(DataType.pdf, PdfType.pz), "output_trainz.hdf5"),
             hdf5_groupname='',
         )
-
-
-if __name__ == '__main__':    
-    pipe = TrainZPipeline()
-    input_dict = dict(
-        input_train='dummy.in',
-        input_test='dummy.in',
-    )
-    pipe.initialize(input_dict, dict(output_dir='.', log_dir='.', resume=False), None)
-    pipe.save('tmp_train_z.yml')

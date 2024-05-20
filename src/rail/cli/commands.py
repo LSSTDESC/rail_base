@@ -74,3 +74,12 @@ def get_data(verbose, **kwargs):
     """Downloads data from NERSC (if not already found)"""
     scripts.get_data(verbose, **kwargs)
     return 0
+
+
+@cli.command()
+@options.pipeline_class()
+@options.output_yaml()
+def build_pipe(pipeline_class, output_yaml, **kwargs):
+    """Build a pipeline yaml file"""
+    scripts.build_pipeline(pipeline_class, output_yaml, **kwargs)
+    return 0
