@@ -114,3 +114,17 @@ def test_load_pipeline():
 
     with pytest.raises(KeyError):
         RailPipeline.get_pipeline_class('Does not exist')
+
+
+def test_make_pipeline():
+
+    __import__('rail.pipelines.estimation.train_z_pipeline')
+    RailPipeline.build_and_write(
+        'TrainZPipeline',
+        'trainz_pipe.yaml',
+    )
+
+    
+    pipe_read = ceci.Pipeline.read('trainz_pipe.yaml')
+
+    os.unlink('trainz_pipe.yaml')
