@@ -9,8 +9,10 @@ __all__ = [
     "bpz_demo_data",
     "dry_run",
     "outdir",
+    "output_yaml",
     "from_source",
     "git_mode",
+    "pipeline_class",
     "print_all",
     "print_packages",
     "print_namespaces",
@@ -94,6 +96,19 @@ outdir = PartialOption(
     type=click.Path(),
     default=None,
     help="Output directory.",
+)
+
+output_yaml = PartialOption(
+    "--output_yaml",
+    type=click.Path(),
+    default=None,
+    help="Path for output yaml file",
+)
+
+pipeline_class =  PartialOption(
+    "--pipeline_class",
+    type=str,
+    help="Class for pipeline"
 )
 
 git_mode = PartialOption(

@@ -3,6 +3,7 @@ import yaml
 
 import rail.stages
 from rail.core import RailEnv
+from rail.core.stage import RailPipeline
 from rail.cli.options import GitMode
 from rail.utils.path_utils import RAILDIR
 
@@ -173,3 +174,18 @@ def get_data(verbose, **kwargs):  # pragma: no cover
             print(f"Check file exists: {local_abs_path} ({os.path.exists(local_abs_path)})")
         if not os.path.exists(local_abs_path):
             os.system(f'curl -o {local_abs_path} {data_file["remote_path"]} --create-dirs')
+
+
+def build_pipeline(
+    pipeline_class,
+    output_yaml,
+    input_dict=None,
+    output_dir=',',
+    log_dir=',',
+):
+    tokens = pipeline_class.split('.')
+    module = '.'.join(tokens[:-1])
+    class_name = tokens[-1]
+
+    __import__(module)
+    RailPipeline.build_and_write(class_name, output_yaml, input_dict, output_dir, log_dir)
