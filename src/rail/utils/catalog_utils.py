@@ -130,6 +130,7 @@ class RomanRubinCatalogConfig(CatalogConfigBase):
     ref_band = 'i'
     redshift_col='redshift'
     hdf5_groupname = ''
+    redshift_col='true_redshift',
 
 
 apply_defaults = CatalogConfigBase.apply
