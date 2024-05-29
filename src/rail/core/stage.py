@@ -348,8 +348,12 @@ class RailStage(PipelineStage):
             total_chunks_needed = ceil(self._input_length / self.config.chunk_size)
             # If the number of process is larger than we need, we wemove some of them
             if total_chunks_needed < self.size:  # pragma: no cover
-                color = self.rank + 1 <= total_chunks_needed
-                newcomm = self.comm.Split(color=color, key=self.rank)
+                if self.comm:
+                    color = self.rank + 1 <= total_chunks_needed
+                    newcomm = self.comm.Split(color=color, key=self.rank)
+                else:
+                    color = False
+                    newcomm = None
                 if color:
                     self.setup_mpi(newcomm)
                 else:
