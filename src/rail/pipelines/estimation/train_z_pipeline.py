@@ -7,8 +7,9 @@ import numpy as np
 
 # Various rail modules
 from rail.estimation.algos.train_z import TrainZInformer, TrainZEstimator
+from rail.evaluation.single_evaluator import SingleEvaluator
 
-from rail.utils.name_utils import NameFactory, DataType, CatalogType, ModelType, PdfType
+from rail.utils.name_utils import NameFactory, DataType, CatalogType, ModelType, PdfType, MetricType
 from rail.core.stage import RailStage, RailPipeline
 
 import ceci
@@ -34,7 +35,7 @@ class TrainZPipeline(RailPipeline):
 
         self.inform_trainz = TrainZInformer.build(
             aliases=dict(input='input_train'),
-            model=os.path.join(namer.get_data_dir(DataType.model, ModelType.estimator), "model_trainz.pkl"),            
+            model=os.path.join(namer.get_data_dir(DataType.models, ModelType.estimator), "model_trainz.pkl"),            
             hdf5_groupname='',
         )
 
@@ -43,6 +44,31 @@ class TrainZPipeline(RailPipeline):
             connections=dict(
                 model=self.inform_trainz.io.model,
             ),
-            output=os.path.join(namer.get_data_dir(DataType.pdf, PdfType.pz), "output_trainz.hdf5"),
+            output=os.path.join(namer.get_data_dir(DataType.pdfs, PdfType.pz), "output_trainz.hdf5"),
+            hdf5_groupname='',
+        )
+
+        self.evalute_trainz = SingleEvaluator.build(
+            aliases=dict(truth='input_test'),
+            connections=dict(
+                input=self.estimate_trainz.io.output,
+            ),
+            point_estimates=['mode'],
+            truth_point_estimates=["redshift"],
+            metrics=["all"],
+            metric_config=dict(brier=dict(limits=[0., 3.5])),
+            exclude_metrics=['rmse', 'ks', 'kld', 'cvm', 'ad', 'rbpe', 'outlier'],
+            output=os.path.join(
+                namer.get_data_dir(DataType.metrics, MetricType.per_object),
+                "output_trainz.hdf5",
+            ),
+            summary=os.path.join(
+                namer.get_data_dir(DataType.metrics, MetricType.summary_value),
+                "summary_trainz.hdf5"
+            ),
+            single_distribution_summary=os.path.join(
+                namer.get_data_dir(DataType.metrics, MetricType.summary_pdf),
+                "single_distribution_summary_trainz.hdf5"
+            ),
             hdf5_groupname='',
         )
