@@ -235,6 +235,7 @@ stages_config = PartialOption(
     default=None,
 )
 
+
 inputs = PartialArgument("inputs", nargs=-1)
 
 verbose_download = PartialOption(
