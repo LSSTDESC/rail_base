@@ -86,7 +86,7 @@ class Dc2CatalogConfig(CatalogConfigBase):
     band_template = "mag_{band}_lsst"
     band_err_template = "mag_err_{band}_lsst"
     ref_band = 'i'
-    redshift_col='true_redshift',
+    redshift_col='true_redshift'
           
 
 class RubinCatalogConfig(CatalogConfigBase):
@@ -97,7 +97,18 @@ class RubinCatalogConfig(CatalogConfigBase):
     band_template = "LSST_obs_{band}"
     band_err_template ="LSST_obs_{band}_err"
     ref_band = 'i'
-    redshift_col='true_redshift',
+    redshift_col='true_redshift'
+
+
+class RomanRubinCatalogConfig(CatalogConfigBase):
+
+    tag = 'roman_rubin'
+    bandlist = 'ugrizy'
+    maglims = [24., 27.66, 27.25, 26.6, 26.24, 25.35]
+    band_template = "LSST_obs_{band}"
+    band_err_template ="LSST_obs_{band}_err"
+    ref_band = 'i'
+    redshift_col='redshift'
 
 
 apply_defaults = CatalogConfigBase.apply
