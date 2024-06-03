@@ -2,6 +2,7 @@
 
 import os
 import sys
+import yaml
 from math import ceil
 
 from ceci import PipelineStage, MiniPipeline
@@ -89,22 +90,27 @@ class RailPipeline(MiniPipeline):
 
     @classmethod
     def get_pipeline_class(cls, name):
-        return cls.pipeline_classes[name]
+        try:
+            return cls.pipeline_classes[name]
+        except KeyError as msg:
+            raise KeyError(f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}") from msg
+            
 
     @staticmethod
     def build_and_write(
         class_name,
         output_yaml,
         input_dict=None,
-        output_dir=',',
-        log_dir=',',
+        output_dir='.',
+        log_dir='.',
     ):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
         pipe = pipe_class()
+        full_input_dict = pipe_class.default_input_dict.copy()
         if input_dict is None:
-            input_dict = pipe_class.default_input_dict
+            full_input_dict.update(**input_dict)
         pipe.initialize(
-            input_dict,
+            full_input_dict,
             dict(
                 output_dir=output_dir,
                 log_dir=log_dir,
