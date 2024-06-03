@@ -6,6 +6,7 @@ from rail.core import RailEnv
 from rail.core.stage import RailPipeline
 from rail.cli.options import GitMode
 from rail.utils.path_utils import RAILDIR
+from rail.utils import catalog_utils
 
 
 def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
@@ -185,13 +186,19 @@ def get_data(verbose, **kwargs):  # pragma: no cover
 def build_pipeline(
     pipeline_class,
     output_yaml,
-    input_dict=None,
-    output_dir=',',
-    log_dir=',',
+    catalog_tag=None,
+    output_dir='.',
+    **kwargs
 ):
     tokens = pipeline_class.split('.')
     module = '.'.join(tokens[:-1])
     class_name = tokens[-1]
 
+    if catalog_tag:
+        catalog_utils.apply_defaults(catalog_tag)
+
+    log_dir = os.path.join(output_dir, 'logs', class_name)
+    
+        
     __import__(module)
-    RailPipeline.build_and_write(class_name, output_yaml, input_dict, output_dir, log_dir)
+    RailPipeline.build_and_write(class_name, output_yaml, kwargs, output_dir, log_dir)

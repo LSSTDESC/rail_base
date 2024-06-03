@@ -7,6 +7,7 @@ import click
 __all__ = [
     "clear_output",
     "bpz_demo_data",
+    "catalog_tag",
     "dry_run",
     "outdir",
     "output_yaml",
@@ -14,6 +15,7 @@ __all__ = [
     "model_file",
     "git_mode",
     "pipeline_class",
+    "pipeline_yaml",
     "print_all",
     "print_packages",
     "print_namespaces",
@@ -22,10 +24,14 @@ __all__ = [
     "print_stages",
     "package_file",
     "skip",
+<<<<<<< HEAD
     "stage_class",
     "stage_module",
     "stage_name",
     "stages_config",
+=======
+    "stage_name",
+>>>>>>> 612ae19 (Added build_pipe and run_stage to rail cli)
     "inputs",
     "verbose_download",
 ]
@@ -91,6 +97,14 @@ dry_run = PartialOption(
     help="Dry run only",
     is_flag=True,
 )
+
+
+catalog_tag = PartialOption(
+    "--catalog_tag",
+    default=None,
+    help="Type of input catalog, used to determine column names",
+)
+
 
 from_source = PartialOption(
     "--from-source",
@@ -217,7 +231,6 @@ stages_config = PartialOption(
     help="Stage config file",
     default=None,
 )
-
 
 
 inputs = PartialArgument("inputs", nargs=-1)
