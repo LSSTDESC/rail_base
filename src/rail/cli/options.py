@@ -7,12 +7,14 @@ import click
 __all__ = [
     "clear_output",
     "bpz_demo_data",
+    "catalog_tag",
     "dry_run",
     "outdir",
     "output_yaml",
     "from_source",
     "git_mode",
     "pipeline_class",
+    "pipeline_yaml",
     "print_all",
     "print_packages",
     "print_namespaces",
@@ -21,6 +23,7 @@ __all__ = [
     "print_stages",
     "package_file",
     "skip",
+    "stage_name",
     "inputs",
     "verbose_download",
 ]
@@ -87,6 +90,14 @@ dry_run = PartialOption(
     is_flag=True,
 )
 
+
+catalog_tag = PartialOption(
+    "--catalog_tag",
+    default=None,
+    help="Type of input catalog, used to determine column names",
+)
+
+
 from_source = PartialOption(
     "--from-source",
     help="Install from source",
@@ -110,7 +121,13 @@ output_yaml = PartialOption(
 pipeline_class =  PartialOption(
     "--pipeline_class",
     type=str,
-    help="Class for pipeline"
+    help="Full class name for pipeline, e.g., rail.pipelines.estimation.train_z.TrainZPipeline",
+)
+
+pipeline_yaml =  PartialOption(
+    "--pipeline_yaml",
+    type=click.Path(),
+    help="Yaml for that defines pipeline",
 )
 
 git_mode = PartialOption(
@@ -169,6 +186,14 @@ skip = PartialOption(
     multiple=True,
     help="Skip files",
 )
+
+
+stage_name = PartialOption(
+    "--stage_name",
+    type=str,
+    help="Name of a pipeline stage",
+)
+
 
 inputs = PartialArgument("inputs", nargs=-1)
 
