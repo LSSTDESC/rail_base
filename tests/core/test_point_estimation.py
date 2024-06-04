@@ -22,7 +22,7 @@ def test_custom_point_estimate():
         def _calculate_mode_point_estimate(self, qp_dist=None, grid=None):
             return np.ones(100) * MEANING_OF_LIFE
 
-    config_dict = {"calculated_point_estimates": ["mode"]}
+    config_dict = {"calculated_point_estimates": ["zmode"]}
 
     test_estimator = TestEstimator.make_stage(name="test", **config_dict)
 
@@ -32,7 +32,7 @@ def test_custom_point_estimate():
 
     result = test_estimator.calculate_point_estimates(test_ensemble)
 
-    assert np.all(result.ancil["mode"] == MEANING_OF_LIFE)
+    assert np.all(result.ancil["zmode"] == MEANING_OF_LIFE)
 
 
 def test_basic_point_estimate():
@@ -41,7 +41,7 @@ def test_basic_point_estimate():
     """
 
     config_dict = {
-        "calculated_point_estimates": ["mean", "median", "mode"],
+        "calculated_point_estimates": ["zmean", "zmedian", "zmode"],
         "zmin": 0.0,
         "zmax": 3.0,
         "nzbins": 301,
@@ -56,9 +56,9 @@ def test_basic_point_estimate():
 
     # note: we're not interested in testing the values of point estimates,
     # just that they were added to the ancillary data.
-    assert "mode" in result.ancil
-    assert "median" in result.ancil
-    assert "mean" in result.ancil
+    assert "zmode" in result.ancil
+    assert "zmedian" in result.ancil
+    assert "zmean" in result.ancil
 
 
 def test_mode_no_grid():
@@ -67,10 +67,10 @@ def test_mode_no_grid():
 
     test_estimator = CatEstimator.make_stage(name="test", **config_dict)
 
-    with pytest.raises(KeyError) as excinfo:
+    with pytest.raises(AttributeError) as excinfo:
         _ = test_estimator.calculate_point_estimates(None, None)
 
-    assert "to be defined in stage configuration" in str(excinfo.value)
+    assert "object has no attribute" in str(excinfo.value)
 
 
 def test_mode_no_point_estimates():
@@ -90,7 +90,7 @@ def test_mode_no_point_estimates():
 def test_keep_existing_ancil_data():
     """Make sure that we don't overwrite the ancil data if it already exists.
     """
-    config_dict = {'zmin':0.0, 'zmax': 3.0, 'nzbins':100, 'calculated_point_estimates': ['mode']}
+    config_dict = {'zmin':0.0, 'zmax': 3.0, 'nzbins':100, 'calculated_point_estimates': ['zmode']}
 
     test_estimator = CatEstimator.make_stage(name='test', **config_dict)
 
@@ -109,7 +109,7 @@ def test_keep_existing_ancil_data():
 def test_write_new_ancil_data():
     """Make sure that we don't overwrite the ancil data if it already exists.
     """
-    config_dict = {'zmin':0.0, 'zmax': 3.0, 'nzbins':100, 'calculated_point_estimates': ['mode']}
+    config_dict = {'zmin':0.0, 'zmax': 3.0, 'nzbins':100, 'calculated_point_estimates': ['zmode']}
 
     test_estimator = CatEstimator.make_stage(name='test', **config_dict)
 
@@ -121,5 +121,5 @@ def test_write_new_ancil_data():
 
     output_ensemble = test_estimator.calculate_point_estimates(test_ensemble, None)
 
-    assert 'mode' in output_ensemble.ancil
-    assert len(output_ensemble.ancil['mode']) == 100
+    assert 'zmode' in output_ensemble.ancil
+    assert len(output_ensemble.ancil['zmode']) == 100

@@ -47,6 +47,11 @@ SHARED_PARAMS = StageConfig(
         msg="List of strings defining which point estimates to automatically calculate using `qp.Ensemble`."
         "Options include, 'mean', 'mode', 'median'.",
     ),
+    recompute_point_estimates=Param(
+        dtype=bool,
+        default=False,
+        msg="Force recomputation of point estimates",
+    )
 )
 
 

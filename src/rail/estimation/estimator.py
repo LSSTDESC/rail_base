@@ -29,7 +29,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
     config_options.update(
         chunk_size=10000,
         hdf5_groupname=SHARED_PARAMS["hdf5_groupname"],
-        calculated_point_estimates=SHARED_PARAMS["calculated_point_estimates"],
+    )
+    config_options.update(
+        **PointEstimationMixin.config_options.copy(),
     )
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", QPHandle)]
