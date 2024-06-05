@@ -27,7 +27,8 @@ class CatalogType(enum.Enum):
 
     truth = 0
     truth_reduced = 1
-    observed = 2
+    degraded = 2
+    observed = 3
 
 
 class ModelType(enum.Enum):
