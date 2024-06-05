@@ -198,7 +198,7 @@ def build_pipeline(
         catalog_utils.apply_defaults(catalog_tag)
 
     log_dir = os.path.join(output_dir, 'logs', class_name)
-    
-        
+
+
     __import__(module)
     RailPipeline.build_and_write(class_name, output_yaml, kwargs, output_dir, log_dir)
