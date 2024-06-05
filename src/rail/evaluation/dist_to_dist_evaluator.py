@@ -13,8 +13,8 @@ class DistToDistEvaluator(Evaluator):
     config_options = Evaluator.config_options.copy()
     config_options.update(
         limits=Param(
-            tuple,
-            (0.0, 3.0),
+            list,
+            [0.0, 3.0],
             required=False,
             msg="The default end points for calculating metrics on a grid.",
         ),

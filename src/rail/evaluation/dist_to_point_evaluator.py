@@ -13,8 +13,8 @@ class DistToPointEvaluator(Evaluator):
     config_options = Evaluator.config_options.copy()
     config_options.update(
         limits=Param(
-            tuple,
-            (0.0, 3.0),
+            list,
+            [0.0, 3.0],
             required=False,
             msg="The default end points for calculating metrics on a grid.",
         ),
@@ -26,13 +26,13 @@ class DistToPointEvaluator(Evaluator):
         ),
         quantile_grid=Param(
             list,
-            np.linspace(0, 1, 100),
+            list(np.linspace(0, 1, 100)),
             required=False,
             msg="The quantile value grid on which to evaluate the CDF values. (0, 1)",
         ),
         x_grid=Param(
             list,
-            np.linspace(0, 2.5, 301),
+            list(np.linspace(0, 2.5, 301)),
             required=False,
             msg="The x-value grid at which to evaluate the pdf values.",
         ),
