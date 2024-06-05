@@ -94,7 +94,7 @@ class RailPipeline(MiniPipeline):
             return cls.pipeline_classes[name]
         except KeyError as msg:
             raise KeyError(f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}") from msg
-            
+
 
     @staticmethod
     def build_and_write(
@@ -119,7 +119,7 @@ class RailPipeline(MiniPipeline):
             None,
         )
         pipe.save(output_yaml)
-    
+
     def __init__(self):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
