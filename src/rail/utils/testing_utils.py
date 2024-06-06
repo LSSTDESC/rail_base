@@ -4,7 +4,7 @@ import scipy.special
 from rail.core.stage import RailStage
 from rail.utils.path_utils import RAILDIR
 from rail.core.data import TableHandle
-
+import ceci
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
 validdata = os.path.join(RAILDIR, "rail/examples_data/testdata/validation_10gal.hdf5")
@@ -80,3 +80,22 @@ def one_algo(
         except FileNotFoundError:  # pragma: no cover
             pass
     return estim.data, estim_2.data, estim_3.data
+
+
+def check_stage_params(stage_class):
+
+    legal_types = (int, float, bool, list, dict, str, None)
+    
+    for key, val in stage_class.config_options.items():
+        if isinstance(val, ceci.config.StageConfig):
+            continue
+        if isinstance(val, ceci.config.StageParameter):
+            dtype = val.dtype
+        elif isinstance(val, type):
+            dtype = val
+        else:
+            dtype = type(val)
+        if dtype not in legal_types:
+            return f"Illegal parameter type for {stage_class.name}.{key} {dtype}"
+
+    return None
