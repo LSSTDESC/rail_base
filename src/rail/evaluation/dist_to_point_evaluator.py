@@ -26,13 +26,13 @@ class DistToPointEvaluator(Evaluator):
         ),
         quantile_grid=Param(
             list,
-            list(np.linspace(0, 1, 100)),
+            np.linspace(0, 1, 100).tolist(),
             required=False,
             msg="The quantile value grid on which to evaluate the CDF values. (0, 1)",
         ),
         x_grid=Param(
             list,
-            list(np.linspace(0, 2.5, 301)),
+            np.linspace(0, 2.5, 301).tolist(),
             required=False,
             msg="The x-value grid at which to evaluate the pdf values.",
         ),
