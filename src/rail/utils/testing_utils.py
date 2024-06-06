@@ -87,15 +87,20 @@ def check_stage_params(stage_class):
     legal_types = (int, float, bool, list, dict, str, None)
     
     for key, val in stage_class.config_options.items():
+        def_val_dtype = None
         if isinstance(val, ceci.config.StageConfig):
             continue
         if isinstance(val, ceci.config.StageParameter):
             dtype = val.dtype
+            if val.default is not None:
+                def_val_dtype = type(val.default)
         elif isinstance(val, type):
             dtype = val
         else:
             dtype = type(val)
         if dtype not in legal_types:
             return f"Illegal parameter type for {stage_class.name}.{key} {dtype}"
-
+        if def_val_dtype not in legal_types:
+            return f"Illegal parameter default value type for {stage_class.name}.{key} {def_val_dtype}"
+        
     return None
