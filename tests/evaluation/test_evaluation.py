@@ -85,7 +85,7 @@ def test_evaluation_stage():
     pdf = DS.add_data("pdf", pdf_ens, QPHandle)
     truth_table = dict(redshift=zspec)
     truth = DS.add_data("truth", truth_table, TableHandle)
-    evaluator = OldEvaluator.make_stage(name="Eval")
+    evaluator = OldEvaluator.make_stage(name="Eval", redshift_col="redshift")
     evaluator.evaluate(pdf, truth)
 
     os.remove(
