@@ -107,7 +107,7 @@ class RailPipeline(MiniPipeline):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
         pipe = pipe_class()
         full_input_dict = pipe_class.default_input_dict.copy()
-        if input_dict is None:
+        if input_dict is not None:
             full_input_dict.update(**input_dict)
         pipe.initialize(
             full_input_dict,
