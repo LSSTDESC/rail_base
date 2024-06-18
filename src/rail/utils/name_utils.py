@@ -8,30 +8,6 @@ import os
 from functools import partial
 
 
-def resolve_dict(source, interpolants):
-    """
-    Recursively resolve a dictionary using inteprolants
-    """
-    if source is not None:
-        sink = copy.deepcopy(source)
-        for k, v in source.items():
-            match v:
-                case dict():
-                    v_interpolated = resolve_dict(source[k], interpolants)
-                case list():
-                    v_interpolated = [resolve_dict(_v, interpolants) for _v in v]
-                case str():
-                    v_interpolated = v.format(**interpolants)
-                case _:
-                    raise ValueError("Cannot interpolate type!")
-
-            sink[k] = v_interpolated
-    else:
-        sink = None
-
-    return sink
-
-
 # class DataType(enum.Enum):
 # 
 #     pipelines = 0
@@ -79,67 +55,103 @@ def resolve_dict(source, interpolants):
 #     summary_pdf = 2
 
 
+def _resolve_dict(source, interpolants):
+    """
+    Recursively resolve a dictionary using inteprolants
+    """
+    if source is not None:
+        sink = copy.deepcopy(source)
+        for k, v in source.items():
+            match v:
+                case dict():
+                    v_interpolated = _resolve_dict(source[k], interpolants)
+                case list():
+                    v_interpolated = [_resolve_dict(_v, interpolants) for _v in v]
+                case str():
+                    v_interpolated = v.format(**interpolants)
+                case _:
+                    raise ValueError("Cannot interpolate type!")
+
+            sink[k] = v_interpolated
+    else:
+        sink = None
+
+    return sink
+
+def _resolve(templates, source, interpolants):
+    sink = copy.deepcopy(templates)
+    if (overrides := source) is not None:
+        for k, v in overrides.items():
+            sink[k] = v
+    for k, v in sink.items():
+        match v:
+            case partial():
+                sink[k] = v(**sink)
+            case _:
+                continue
+    sink = _resolve_dict(sink, interpolants)
+    return sink
+
+
 class NameFactory:
 
-    defaults = {
-        "root": os.getcwd(),
-        "project_root": os.path.join("{root}"),
-        "data_root": os.path.join("{root}"),
-        "project_dir": os.path.join(
-            "{project_root}",
-            "{project}",
-        ),
-        "project_data_dir": os.path.join(
-            "{data_root}",
-            "{project}",
-        ),
-        "catalogs_path": os.path.join(
-            "{project_data_dir}",
-            "catalogs",
-        ),
-        "pipelines_path": os.path.join(
-            "{project_dir}",
-            "pipelines",
-        ),
-        "models_path": os.path.join(
-            "{project_data_dir}",
-            "models",
-        ),
-        "pdfs_path": os.path.join(
-            "{project_data_dir}",
-            "pdfs",
-        ),
-        "metrics_path": os.path.join(
-            "{project_data_dir}",
-            "metrics",
-        ),
-    }
-
-    def __init__(self, project, config={}):
-        self.project = project
+    def __init__(self, config={}, templates={}, interpolants={}):
 
         self._config = copy.deepcopy(config)
-        for k, v in self.defaults.items():
-            self.defaults[k] = partial(v.format, **self.defaults)
-        # if (common := self._config.get("CommonPaths")) is not None:
-        #     for k, v in self.defaults.items():
-        #         self.defaults[k] = v(**self.defaults)
-        # self.defaults["project"] = self.project
+        self._templates = copy.deepcopy(templates)
+        self._interpolants = {}
 
-    def resolve(self, source, interpolants):
-        sink = copy.deepcopy(self.defaults)
-        sink["project"] = self.project
-        if (overrides := source) is not None:
-            for k, v in overrides.items():
-                sink[k] = v
-        for k, v in sink.items():
-            match v:
-                case partial():
-                    sink[k] = v(**sink)
-                case _:
-                    continue
-        sink = resolve_dict(sink, interpolants)
-        return sink
+        self.templates = {}
+        for k, v in templates.items():
+            self.templates[k] = partial(v.format, **templates)
+        # if (common := self._config.get("CommonPaths")) is not None:
+        #     for k, v in self.templates.items():
+        #         self.templates[k] = v(**self.templates)
+        # self.templates["project"] = self.project
+
+        self.interpolants = interpolants
+
+    @property
+    def interpolants(self):
+        return self._interpolants
+
+    @interpolants.setter
+    def interpolants(self, config):
+        for key, value in config.items():
+            new_value = value.format(**self.interpolants)
+            self.interpolants[key] = new_value
+
+    @interpolants.deleter
+    def interpolants(self):
+        self._interpolants = {}
+
+    # def get_interpolants(self, config):
+    #     interpolants = {}
+
+    #     for key, value in config.items():
+    #         new_value = value.format(**interpolants)
+    #         interpolants[key] = new_value
+
+    #     return interpolants
+
+    def resolve_from_config(self, config):
+        # interpolants = self.get_interpolants(config)
+        # self.interpolants = config
+        resolved = _resolve(
+            self.templates,
+            config,
+            self.interpolants,
+        )
+        config.update(resolved)
+
+        return resolved
+
+    def resolve_path(self, config, path_key, **kwargs):
+        if (path_value := config.get(path_key)) is not None:
+            formatted = path_value.format(**kwargs, **self.interpolants)
+        else:
+            raise ValueError(f"Path '{path_key}' not found in {config}")
+        return formatted
 
     # def get_project_dir(self, root, project):
     #     return self.project_directory_template.format(root=root, project=project)
