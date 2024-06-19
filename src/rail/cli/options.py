@@ -22,6 +22,7 @@ __all__ = [
     "print_modules",
     "print_tree",
     "print_stages",
+    "project_yaml",
     "package_file",
     "skip",
 <<<<<<< HEAD
@@ -191,6 +192,13 @@ print_stages = PartialOption(
     "--print-stages",
     help="Print RAIL stages",
     is_flag=True,
+)
+
+project_yaml = PartialOption(
+    "--project_yaml",
+    type=click.Path(),
+    default=None,
+    help="File with project description",
 )
 
 package_file = PartialOption(

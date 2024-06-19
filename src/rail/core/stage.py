@@ -100,12 +100,14 @@ class RailPipeline(MiniPipeline):
     def build_and_write(
         class_name,
         output_yaml,
+        namer,
         input_dict=None,
         output_dir='.',
         log_dir='.',
     ):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
-        pipe = pipe_class()
+        pipe = pipe_class(namer)
+        
         full_input_dict = pipe_class.default_input_dict.copy()
         if input_dict is not None:
             full_input_dict.update(**input_dict)
@@ -119,7 +121,7 @@ class RailPipeline(MiniPipeline):
             None,
         )
         pipe.save(output_yaml)
-    
+
     def __init__(self):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 

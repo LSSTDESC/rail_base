@@ -6,6 +6,7 @@ from rail.core import RailEnv
 from rail.core.stage import RailPipeline
 from rail.cli.options import GitMode
 from rail.utils.path_utils import RAILDIR
+from rail.utils.name_utils import NameFactory
 from rail.utils import catalog_utils
 
 
@@ -186,6 +187,7 @@ def get_data(verbose, **kwargs):  # pragma: no cover
 def build_pipeline(
     pipeline_class,
     output_yaml,
+    project_yaml=None,
     catalog_tag=None,
     output_dir='.',
     **kwargs
@@ -199,6 +201,7 @@ def build_pipeline(
 
     log_dir = os.path.join(output_dir, 'logs', class_name)
 
+    namer = NameFactory.build_from_yaml(project_yaml, relative=True)
 
     __import__(module)
-    RailPipeline.build_and_write(class_name, output_yaml, kwargs, output_dir, log_dir)
+    RailPipeline.build_and_write(class_name, output_yaml, namer, kwargs, output_dir, log_dir)
