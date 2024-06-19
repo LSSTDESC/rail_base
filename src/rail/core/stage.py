@@ -116,6 +116,7 @@ class RailPipeline(MiniPipeline):
     def build_and_write(
         class_name,
         output_yaml,
+        namer,
         input_dict=None,
         stages_config=None,
         output_dir='.',
@@ -139,7 +140,7 @@ class RailPipeline(MiniPipeline):
         )
         pipe.save(output_yaml)
 
-    def __init__(self):
+    def __init__(self, project=None):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
     def __setattr__(self, name, value):

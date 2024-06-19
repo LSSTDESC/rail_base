@@ -14,7 +14,6 @@ from rail.core.stage import RailStage, RailPipeline
 import ceci
 
 
-namer = NameFactory()
 
 input_file = 'rubin_dm_dc2_example.pq'
 
@@ -26,7 +25,7 @@ class TrainZPipeline(RailPipeline):
         input_test='dummy.in',
     )
 
-    def __init__(self):
+    def __init__(self, namer, selection='default', flavor='baseline'):
         RailPipeline.__init__(self)
 
         DS = RailStage.data_store
