@@ -5,59 +5,53 @@ Utility code to help define standard paths for various data products
 import copy
 # import enum
 import os
+import re
+import yaml
 from functools import partial
 
 
-# class DataType(enum.Enum):
-# 
-#     pipelines = 0
-#     catalogs = 1
-#     models = 2
-#     pdfs = 3
-#     metrics = 4
+def _get_required_interpolants(template):
+    """ Get the list of interpolants required to format a template string 
+
+    Notes
+    -----
+    'interpolants' are strings that must be replaced in to format a string, 
+    e.g., in "{project_dir}/models" "{project_dir}" would an interpolant
+    """
+    return re.findall('{.*?}', template)
 
 
-# class PipelineType(enum.Enum):
-# 
-#     inform = 0
-#     estimate = 1
-#     evaluate = 2
-#     summarize = 3
+def _format_template(template, **kwargs):
+    """ Resolve a specific template 
 
+    This is fault-tolerant and will not raise KeyError if some 
+    of the required interpolants are missing, but rather just
+    leave them untouched
+    """
+    
+    required_interpolants = re.findall('{.*?}', template)
+    interpolants = kwargs.copy()
 
-# class CatalogType(enum.Enum):
-# 
-#     truth = 0
-#     truth_reduced = 1
-#     degraded = 2
-#     observed = 3
-
-
-# class ModelType(enum.Enum):
-# 
-#     creator = 0
-#     degrarder = 1
-#     estimator = 2
-#     summarizer = 3
-#     evaluator = 4
-
-
-# class PdfType(enum.Enum):
-# 
-#     pz = 0
-#     nz = 1
-
-
-# class MetricType(enum.Enum):
-# 
-#     per_object = 0
-#     summary_value = 1
-#     summary_pdf = 2
+    for interpolant_ in required_interpolants:
+        interpolants.setdefault(interpolant_.replace('}', '').replace('{', ''), interpolant_)
+    return template.format(**interpolants)
 
 
 def _resolve_dict(source, interpolants):
-    """
-    Recursively resolve a dictionary using inteprolants
+    """ Recursively resolve a dictionary using interpolants
+
+    Parameters
+    ----------
+    source: dict
+        Dictionary of string templates
+
+    interpolants: dict
+        Dictionary of strings used to resolve templates
+        
+    Returns
+    -------
+    sink : dict
+        Dictionary of resolved templates
     """
     if source is not None:
         sink = copy.deepcopy(source)
@@ -78,7 +72,28 @@ def _resolve_dict(source, interpolants):
 
     return sink
 
+
 def _resolve(templates, source, interpolants):
+    """ Resolve a set of templates using interpolants and allow for overrides
+
+    Parameters
+    ----------
+    templates: dict
+        Dictionary of string templates
+
+    source: dict
+        Dictionary of overrides
+
+    interpolants: dict
+        Dictionary of strings used to resolve templates
+    
+    
+    Returns
+    -------
+    sink : dict
+        Dictionary of resoluved templates
+    """
+
     sink = copy.deepcopy(templates)
     if (overrides := source) is not None:
         for k, v in overrides.items():
@@ -94,49 +109,90 @@ def _resolve(templates, source, interpolants):
 
 
 class NameFactory:
+    """ Class define standard paths for various data products
+
+
+    """
+    
+    config_template = dict(
+        CommonPaths = dict(
+            root='.',
+            scratch_root='.',
+            project='',
+            project_dir='{root}/{project}',
+            project_scratch_dir='{scratch_root}/{project}',
+            catalogs_dir='{root}/catalogs',
+            models_dir='{project_dir}/models',
+            pdfs_dir='{project_scratch_dir}/pdfs',
+            tomo_dir='{project_scratch_dir}/tomo',
+            pipelines_dir='{project_dir}/pipelines',
+            metrics_dir='{project_scratch_dir}/metrics',
+        ),
+        PathTemplates = dict(
+            truth_catalog_path="{catalogs_dir}/truth",
+            reduced_catalog_path="{catalogs_dir}/reduced_{selection}",
+            degraded_catalog_path="{catalogs_dir}/degraded_{selection}_{flavor}",
+            estimator_model_path="{models_dir}/estimator/model_{selection}_{algorithm}_{flavor}.{model_suffix}",
+            pz_pdf_path="{pdfs_dir}/pz/output_{selection}_{algorithm}_{flavor}.hdf5",
+            nz_pdf_path="{pdfs_dir}/nz/output_{selection}_{algorithm}_{flavor}_{nzmethod}.hdf5",
+            single_nz_pdf_path="{pdfs_dir}/nz/single_nz_{selection}_{algorithm}_{flavor}_{nzmethod}.hdf5",
+            tomography_path="{tomo_dir}/tomo_bins_{selection}_{tomomethod}.hdf5",
+            per_object_metrics_path="{metrics_dir}/per_object/output_{selection}_{algorithm}_{flavor}.hdf5",
+            summary_value_metrics_path="{metrics_dir}/summary_value/summary_{selection}_{algorithm}_{flavor}.hdf5",
+            summary_pdf_metrics_path="{metrics_dir}/summary_pdf/single_distribution_summary_{selection}_{algorithm}_{flavor}.hdf5",
+        ),
+    )
 
     def __init__(self, config={}, templates={}, interpolants={}):
-
-        self._config = copy.deepcopy(config)
-        self._templates = copy.deepcopy(templates)
+        """ C'tor 
+        
+        """
+        self._config = copy.deepcopy(self.config_template)
+        for key, val in config.items():
+            if key in self._config:
+                self._config[key].update(**config[key])
+        self._templates = copy.deepcopy(self._config['PathTemplates'])
+        self._templates.update(**templates)
         self._interpolants = {}
 
         self.templates = {}
         for k, v in templates.items():
             self.templates[k] = partial(v.format, **templates)
-        # if (common := self._config.get("CommonPaths")) is not None:
-        #     for k, v in self.templates.items():
-        #         self.templates[k] = v(**self.templates)
-        # self.templates["project"] = self.project
 
+        self.interpolants = self._config['CommonPaths']
         self.interpolants = interpolants
 
     @property
     def interpolants(self):
+        """ Return the dict of interpolants that are used to resolve templates """
         return self._interpolants
 
     @interpolants.setter
     def interpolants(self, config):
+        """ Update the dict of interpolants that are used to resolve templates """
         for key, value in config.items():
             new_value = value.format(**self.interpolants)
             self.interpolants[key] = new_value
 
     @interpolants.deleter
     def interpolants(self):
+        """ Reset the dict of interpolants that are used to resolve templates"""        
         self._interpolants = {}
 
-    # def get_interpolants(self, config):
-    #     interpolants = {}
-
-    #     for key, value in config.items():
-    #         new_value = value.format(**interpolants)
-    #         interpolants[key] = new_value
-
-    #     return interpolants
-
+        
     def resolve_from_config(self, config):
-        # interpolants = self.get_interpolants(config)
-        # self.interpolants = config
+        """ Resolve all the templates in a dict
+
+        Parameters
+        ----------
+        config: dict
+            Dictionary containing templates to be resolved
+
+        Returns
+        -------
+        resolved: dict
+            Dictionary with resolved versions of the templates
+        """
         resolved = _resolve(
             self.templates,
             config,
@@ -147,22 +203,126 @@ class NameFactory:
         return resolved
 
     def resolve_path(self, config, path_key, **kwargs):
+        """ Resolve a particular template in a config dict
+
+        Parameters
+        ----------
+        config: dict
+            Dictionary containing templates to be resolved
+
+        path_key: str
+            Key for the specific template
+
+        Returns
+        -------
+        formatted: str
+            Resolved version of the template
+        """ 
         if (path_value := config.get(path_key)) is not None:
             formatted = path_value.format(**kwargs, **self.interpolants)
         else:
             raise ValueError(f"Path '{path_key}' not found in {config}")
         return formatted
 
-    # def get_project_dir(self, root, project):
-    #     return self.project_directory_template.format(root=root, project=project)
 
-    # def get_data_dir(self, data_type, data_subtype):
-    #     if data_subtype is None:
-    #         return f"{data_type}"
-    #     return self.data_directory_template.format(data_type=data_type.name, data_subtype=data_subtype.name)
+    def get_template(self, section_key, path_key):
+        """ Return the template for a particular file type
 
-    # def get_full_dir(self, root, project, data_type, data_subtype):
-    #     return os.path.join(
-    #         self.get_project_dir(root, project),
-    #         self.get_data_dir(data_type, data_subtype),
-    #     )
+        Parameters
+        ----------
+        section_key: str
+            Which part of the config to look in
+            E.g., (CommonPaths, PathTemplates, Files)
+
+        path_key: str
+            Key for the specific template
+
+        Returns
+        -------
+        the_template: str
+            Template for file of this type
+        """
+        try:
+            section = self._config[section_key]
+        except KeyError as msg:
+            raise KeyError(
+                f"Config section {section_key} not present: available sections are {list(self._config.keys())}",
+            )
+        try:
+            return section[path_key]
+        except KeyError as msg:
+            raise KeyError(
+                f"Config key {path_key} not present in {section_key}:"
+                f"available paths are {list(section.keys())}",
+            )
+
+    def resolve_template(self, section_key, path_key, **kwargs):
+        """ Return the template for a particular file type
+
+        Parameters
+        ----------
+        section_key: str
+            Which part of the config to look in
+            E.g., (CommonPaths, PathTemplates, Files)
+
+        path_key: str
+            Key for the specific template
+
+        Returns
+        -------
+        resovled: str
+            Resolved path
+        """
+        template = self.get_template(section_key, path_key)
+        return _format_template(template, **self.interpolants, **kwargs)
+
+    def resolve_path_template(self, path_key, **kwargs):
+        """ Return a particular path templated
+
+        Parameters
+        ----------
+        path_key: str
+            Key for the specific template
+
+        Returns
+        -------
+        resovled: str
+            Resolved path
+        """
+        template = self.get_template('PathTemplates', path_key)
+        return _format_template(template, **self.interpolants, **kwargs)
+
+    
+    @staticmethod
+    def build_from_yaml(yaml_file=None, relative=False):
+        """ Build a NameFactory from a yaml file
+
+        Parameters
+        ----------
+        yaml_file: str | None
+            Path to the yaml file in question.  If `None` will use default configuration
+
+        relative: bool
+            If `True` will define relative paths w.r.t. {root}/{project}
+            This is useful if you want to set the ceci output_dir to {root}/{project}
+
+        Returns
+        -------
+        name_factory: NameFactory
+            Newly created factory
+        """
+        if yaml_file is None:
+            return NameFactory()        
+        with open(yaml_file, 'r') as fin:
+            config_dict = yaml.safe_load(fin)
+            # Make the file paths relative to the project dir
+            if relative:
+                config_dict['CommonPaths'].update(
+                    root='.',
+                    project='',
+                )
+        return NameFactory(
+            config_dict,
+            config_dict.get('PathTemplates', {}),
+            config_dict.get("CommonPaths", {}),
+        )

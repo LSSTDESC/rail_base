@@ -81,17 +81,18 @@ def get_data(verbose, **kwargs):
 @cli.command()
 @options.pipeline_class()
 @options.output_yaml()
+@options.project_yaml()
 @options.catalog_tag()
 @options.outdir()
 @options.inputs()
-def build_pipe(pipeline_class, output_yaml, catalog_tag, outdir, inputs):
+def build_pipe(pipeline_class, output_yaml, project_yaml, catalog_tag, outdir, inputs):
     """Build a pipeline yaml file"""
     input_dict = {}
     for input_ in inputs:
         tokens = input_.split('=')
         assert len(tokens) == 2
         input_dict[tokens[0]] = tokens[1]    
-    scripts.build_pipeline(pipeline_class, output_yaml, catalog_tag, outdir, **input_dict)
+    scripts.build_pipeline(pipeline_class,  output_yaml, project_yaml, catalog_tag, outdir, **input_dict)
     return 0
 
 

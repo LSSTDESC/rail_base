@@ -9,13 +9,12 @@ import numpy as np
 from rail.estimation.algos.train_z import TrainZInformer, TrainZEstimator
 from rail.evaluation.single_evaluator import SingleEvaluator
 
-from rail.utils.name_utils import NameFactory, DataType, CatalogType, ModelType, PdfType, MetricType
+from rail.utils.name_utils import NameFactory
 from rail.core.stage import RailStage, RailPipeline
 
 import ceci
 
 
-namer = NameFactory()
 
 input_file = 'rubin_dm_dc2_example.pq'
 
@@ -27,15 +26,25 @@ class TrainZPipeline(RailPipeline):
         input_test='dummy.in',
     )
 
-    def __init__(self):
+    def __init__(self, namer, selection='default', flavor='baseline'):
         RailPipeline.__init__(self)
 
         DS = RailStage.data_store
         DS.__class__.allow_overwrite = True
 
+        path_kwargs = dict(
+            selection=selection,
+            algorithm='train_z',
+            flavor=flavor,
+        )
+        
         self.inform_trainz = TrainZInformer.build(
             aliases=dict(input='input_train'),
-            model=os.path.join(namer.get_data_dir(DataType.models, ModelType.estimator), "model_trainz.pkl"),            
+            model=namer.resolve_path_template(
+                'estimator_model_path',
+                model_suffix='pkl',
+                **path_kwargs,
+            ),
             hdf5_groupname='',
         )
 
@@ -44,7 +53,10 @@ class TrainZPipeline(RailPipeline):
             connections=dict(
                 model=self.inform_trainz.io.model,
             ),
-            output=os.path.join(namer.get_data_dir(DataType.pdfs, PdfType.pz), "output_trainz.hdf5"),
+            output=namer.resolve_path_template(
+                'pz_pdf_path',
+                **path_kwargs,
+            ),
             hdf5_groupname='',
         )
 
@@ -58,17 +70,17 @@ class TrainZPipeline(RailPipeline):
             metrics=["all"],
             metric_config=dict(brier=dict(limits=[0., 3.5])),
             exclude_metrics=['rmse', 'ks', 'kld', 'cvm', 'ad', 'rbpe', 'outlier'],
-            output=os.path.join(
-                namer.get_data_dir(DataType.metrics, MetricType.per_object),
-                "output_trainz.hdf5",
+            output=namer.resolve_path_template(
+                'per_object_metrics_path', 
+                **path_kwargs,
             ),
-            summary=os.path.join(
-                namer.get_data_dir(DataType.metrics, MetricType.summary_value),
-                "summary_trainz.hdf5"
+            summary=namer.resolve_path_template(
+                'summary_value_metrics_path',
+                **path_kwargs,
             ),
-            single_distribution_summary=os.path.join(
-                namer.get_data_dir(DataType.metrics, MetricType.summary_pdf),
-                "single_distribution_summary_trainz.hdf5"
+            single_distribution_summary=namer.resolve_path_template(
+                'summary_pdf_metrics_path',
+                **path_kwargs,
             ),
             hdf5_groupname='',
         )
