@@ -122,25 +122,12 @@ class NameFactory:
             project_dir='{root}/{project}',
             project_scratch_dir='{scratch_root}/{project}',
             catalogs_dir='{root}/catalogs',
-            models_dir='{project_dir}/models',
-            pdfs_dir='{project_scratch_dir}/pdfs',
-            tomo_dir='{project_scratch_dir}/tomo',
             pipelines_dir='{project_dir}/pipelines',
-            metrics_dir='{project_scratch_dir}/metrics',
         ),
         PathTemplates = dict(
             pipeline_path="{pipelines_dir}/{pipeline}_{flavor}.yaml",
-            truth_catalog_path="{catalogs_dir}",
-            reduced_catalog_path="{catalogs_dir}"
-            degraded_catalog_path="{catalogs_dir}"
-            estimator_model_path="{models_dir}/estimator/model_{selection}_{algorithm}_{flavor}.{model_suffix}",
-            pz_pdf_path="{pdfs_dir}/pz/output_{selection}_{algorithm}_{flavor}.hdf5",
-            nz_pdf_path="{pdfs_dir}/nz/output_{selection}_{algorithm}_{flavor}_{nzmethod}.hdf5",
-            single_nz_pdf_path="{pdfs_dir}/nz/single_nz_{selection}_{algorithm}_{flavor}_{nzmethod}.hdf5",
-            tomography_path="{tomo_dir}/tomo_bins_{selection}_{tomomethod}.hdf5",
-            per_object_metrics_path="{metrics_dir}/per_object/output_{selection}_{algorithm}_{flavor}.hdf5",
-            summary_value_metrics_path="{metrics_dir}/summary_value/summary_{selection}_{algorithm}_{flavor}.hdf5",
-            summary_pdf_metrics_path="{metrics_dir}/summary_pdf/single_distribution_summary_{selection}_{algorithm}_{flavor}.hdf5",
+            ceci_output_dir="{project_dir}/data/{selection}_{flavor}",
+            ceci_file_path="{tag}_{stage}.{suffix}",
         ),
     )
 
