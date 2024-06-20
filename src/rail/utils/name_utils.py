@@ -129,9 +129,10 @@ class NameFactory:
             metrics_dir='{project_scratch_dir}/metrics',
         ),
         PathTemplates = dict(
-            truth_catalog_path="{catalogs_dir}/truth",
-            reduced_catalog_path="{catalogs_dir}/reduced_{selection}",
-            degraded_catalog_path="{catalogs_dir}/degraded_{selection}_{flavor}",
+            pipeline_path="{pipelines_dir}/{pipeline}_{flavor}.yaml",
+            truth_catalog_path="{catalogs_dir}",
+            reduced_catalog_path="{catalogs_dir}"
+            degraded_catalog_path="{catalogs_dir}"
             estimator_model_path="{models_dir}/estimator/model_{selection}_{algorithm}_{flavor}.{model_suffix}",
             pz_pdf_path="{pdfs_dir}/pz/output_{selection}_{algorithm}_{flavor}.hdf5",
             nz_pdf_path="{pdfs_dir}/nz/output_{selection}_{algorithm}_{flavor}_{nzmethod}.hdf5",
@@ -162,6 +163,12 @@ class NameFactory:
         self.interpolants = self._config['CommonPaths']
         self.interpolants = interpolants
 
+    def get_path_templates(self):
+        return self._config['PathTemplates']
+
+    def get_common_paths(self):
+        return self._config['CommonPaths']
+        
     @property
     def interpolants(self):
         """ Return the dict of interpolants that are used to resolve templates """
@@ -217,9 +224,9 @@ class NameFactory:
         -------
         formatted: str
             Resolved version of the template
-        """ 
+        """        
         if (path_value := config.get(path_key)) is not None:
-            formatted = path_value.format(**kwargs, **self.interpolants)
+            formatted = _format_template(path_value, **kwargs, **self.interpolants)
         else:
             raise ValueError(f"Path '{path_key}' not found in {config}")
         return formatted
@@ -290,8 +297,28 @@ class NameFactory:
             Resolved path
         """
         template = self.get_template('PathTemplates', path_key)
-        return _format_template(template, **self.interpolants, **kwargs)
+        interp_dict = self.interpolants.copy()
+        interp_dict.update(**kwargs)
+        return _format_template(template, **interp_dict)
 
+
+    def resolve_common_path(self, path_key, **kwargs):
+        """ Return a particular common path template
+
+        Parameters
+        ----------
+        path_key: str
+            Key for the specific template
+
+        Returns
+        -------
+        resovled: str
+            Resolved path
+        """
+        template = self.get_template('CommonPaths', path_key)
+        interp_dict = self.interpolants.copy()
+        interp_dict.update(**kwargs)
+        return _format_template(template, **interp_dict)    
     
     @staticmethod
     def build_from_yaml(yaml_file=None, relative=False):
