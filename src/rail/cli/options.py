@@ -25,6 +25,7 @@ __all__ = [
     "package_file",
     "skip",
     "stage_name",
+    "stages_config",
     "inputs",
     "verbose_download",
 ]
@@ -201,6 +202,14 @@ stage_name = PartialOption(
     type=str,
     help="Name of a pipeline stage",
 )
+
+stages_config = PartialOption(
+    "--stages_config",
+    type=str,
+    help="Stage config file",
+    default=None,
+)
+
 
 
 inputs = PartialArgument("inputs", nargs=-1)

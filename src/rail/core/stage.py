@@ -102,11 +102,13 @@ class RailPipeline(MiniPipeline):
         output_yaml,
         namer,
         input_dict=None,
+        stages_config=None,
         output_dir='.',
         log_dir='.',
+        **kwargs,
     ):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
-        pipe = pipe_class(namer)
+        pipe = pipe_class(namer, **kwargs)
         
         full_input_dict = pipe_class.default_input_dict.copy()
         if input_dict is not None:
@@ -118,7 +120,7 @@ class RailPipeline(MiniPipeline):
                 log_dir=log_dir,
                 resume=False,
             ),
-            None,
+            stages_config,
         )
         pipe.save(output_yaml)
 
