@@ -25,14 +25,10 @@ __all__ = [
     "project_yaml",
     "package_file",
     "skip",
-<<<<<<< HEAD
     "stage_class",
     "stage_module",
     "stage_name",
     "stages_config",
-=======
-    "stage_name",
->>>>>>> 612ae19 (Added build_pipe and run_stage to rail cli)
     "inputs",
     "verbose_download",
 ]
@@ -239,7 +235,6 @@ stages_config = PartialOption(
     help="Stage config file",
     default=None,
 )
-
 
 inputs = PartialArgument("inputs", nargs=-1)
 

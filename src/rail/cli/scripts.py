@@ -189,6 +189,7 @@ def build_pipeline(
     output_yaml,
     project_yaml=None,
     catalog_tag=None,
+    stages_config=None,
     output_dir='.',
     **kwargs
 ):
@@ -204,4 +205,4 @@ def build_pipeline(
     namer = NameFactory.build_from_yaml(project_yaml, relative=True)
 
     __import__(module)
-    RailPipeline.build_and_write(class_name, output_yaml, namer, kwargs, output_dir, log_dir)
+    RailPipeline.build_and_write(class_name, output_yaml, namer, kwargs, stages_config, output_dir, log_dir)
