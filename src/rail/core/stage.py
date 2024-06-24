@@ -116,7 +116,6 @@ class RailPipeline(MiniPipeline):
     def build_and_write(
         class_name,
         output_yaml,
-        namer,
         input_dict=None,
         stages_config=None,
         output_dir='.',

@@ -105,7 +105,6 @@ def estimate(stage_name, stage_class, stage_module, model_file, dry_run, input_f
 
 @options.pipeline_class()
 @options.output_yaml()
-@options.project_yaml()
 @options.catalog_tag()
 @options.stages_config()
 @options.outdir()

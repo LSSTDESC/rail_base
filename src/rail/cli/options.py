@@ -22,7 +22,6 @@ __all__ = [
     "print_modules",
     "print_tree",
     "print_stages",
-    "project_yaml",
     "package_file",
     "skip",
     "stage_class",
