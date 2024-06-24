@@ -94,7 +94,15 @@ class RailPipeline(MiniPipeline):
             return cls.pipeline_classes[name]
         except KeyError as msg:
             raise KeyError(f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}") from msg
-            
+
+    @staticmethod
+    def load_pipeline_class(class_name):        
+        tokens = class_name.split('.')
+        module = '.'.join(tokens[:-1])
+        class_name = tokens[-1]
+        __import__(module)
+        pipe_class = RailPipeline.get_pipeline_class(class_name)
+        return pipe_class
 
     @staticmethod
     def build_and_write(
@@ -107,7 +115,7 @@ class RailPipeline(MiniPipeline):
         **kwargs,
     ):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
-        pipe = pipe_class(namer, **kwargs)
+        pipe = pipe_class(**kwargs)
         
         full_input_dict = pipe_class.default_input_dict.copy()
         if input_dict is not None:
