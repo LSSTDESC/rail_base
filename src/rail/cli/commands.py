@@ -104,7 +104,6 @@ def estimate(stage_name, stage_class, stage_module, model_file, dry_run, input_f
 
 @options.pipeline_class()
 @options.output_yaml()
-@options.project_yaml()
 @options.catalog_tag()
 @options.stages_config()
 @options.outdir()
@@ -116,7 +115,7 @@ def build_pipe(pipeline_class, output_yaml, project_yaml, catalog_tag, stages_co
         tokens = input_.split('=')
         assert len(tokens) == 2
         input_dict[tokens[0]] = tokens[1]    
-    scripts.build_pipeline(pipeline_class,  output_yaml, project_yaml, catalog_tag, stages_config, outdir, **input_dict)
+    scripts.build_pipeline(pipeline_class,  output_yaml, project_yaml, catalog_tag, input_dict, stages_config, outdir)
     return 0
 
 

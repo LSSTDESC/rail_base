@@ -9,7 +9,6 @@ import numpy as np
 from rail.estimation.algos.train_z import TrainZInformer, TrainZEstimator
 from rail.evaluation.single_evaluator import SingleEvaluator
 
-from rail.utils.name_utils import NameFactory
 from rail.core.stage import RailStage, RailPipeline
 
 import ceci
@@ -22,7 +21,7 @@ class TrainZPipeline(RailPipeline):
         input_test='dummy.in',
     )
 
-    def __init__(self, namer):
+    def __init__(self):
         RailPipeline.__init__(self)
 
         DS = RailStage.data_store
