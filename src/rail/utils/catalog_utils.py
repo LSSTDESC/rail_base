@@ -15,14 +15,26 @@ class CatalogConfigBase:
     band_err_template = ''
     ref_band = ''
     redshift_col = ''
+
+    _active_tag = None
+    _active_class = None
     
     def __init_subclass__(cls, **kwargs):        
         cls.sub_classes[cls.tag] = cls
 
     @classmethod
+    def active_tag(cls):
+        return cls._active_tag
+
+    @classmethod
+    def active_class(cls):
+        return cls._active_class
+
+    @classmethod
     def apply(cls, tag):
-        sub_cls = cls.sub_classes[tag]
-        sub_cls._apply()
+        cls._active_tag = None
+        cls._active_class = cls.sub_classes[tag]
+        cls._active_class._apply()
         
     @classmethod
     def _apply(cls):
@@ -33,6 +45,10 @@ class CatalogConfigBase:
     @classmethod
     def _apply_hook(cls):
         return 
+
+    @classmethod
+    def band_name_dict(cls):
+        return {band: cls.band_template.format(band=band) for band in cls.bandlist}
 
     @classmethod
     def _build_maglim_dict(cls):
