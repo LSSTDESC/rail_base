@@ -49,6 +49,13 @@ class RailStageBuild:
     def __init__(self, stage_class, **kwargs):
         self.stage_class = stage_class
         self._kwargs = kwargs
+        self._stage = None
+
+    @property
+    def io(self):
+        if self._stage:
+            return self._stage.io
+        return None
 
     def build(self, name):
         """Actually build the stage, this is called by the pipeline the stage
@@ -64,8 +71,8 @@ class RailStageBuild:
         stage : `RailStage`
             The newly built stage
         """
-        stage = self.stage_class.make_and_connect(name=name, **self._kwargs)
-        return stage
+        self._stage = self.stage_class.make_and_connect(name=name, **self._kwargs)
+        return self._stage
 
 
 class RailPipeline(MiniPipeline):
