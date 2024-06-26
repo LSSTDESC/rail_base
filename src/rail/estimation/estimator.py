@@ -11,7 +11,7 @@ from rail.core.stage import RailStage
 from rail.core.point_estimation import PointEstimationMixin
 
 # for backwards compatibility, to avoid break stuff that imports it from here
-
+from rail.estimation.informer import CatInformer  # pylint: disable=unused-import
 
 class CatEstimator(RailStage, PointEstimationMixin):
     """The base class for making photo-z posterior estimates from catalog-like inputs
