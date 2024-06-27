@@ -8,7 +8,7 @@ import qp
 from ceci.config import StageParameter as Param
 from rail.estimation.summarizer import PZSummarizer
 from rail.estimation.informer import PzInformer
-from rail.core.data import QPHandle
+from rail.core.data import QPHandle, TableHandle
 
 
 class PointEstHistInformer(PzInformer):
@@ -100,7 +100,7 @@ class PointEstHistMaksedSummarizer(PointEstHistSummarizer):
     config_options.update(
         selected_bin=Param(int, -1, msg="bin to use"),
     )
-    inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]]
+    inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
     def _setup_iterator(self):
@@ -108,6 +108,7 @@ class PointEstHistMaksedSummarizer(PointEstHistSummarizer):
 
         for it in zip(*itrs):
             first = True
+            mask = None
             for s, e, d in it:
                 if first:
                     start = s
