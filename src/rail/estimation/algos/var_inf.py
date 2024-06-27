@@ -67,19 +67,25 @@ class VarInfStackSummarizer(PZSummarizer):
         PZSummarizer.__init__(self, args, comm=comm)
         self.zgrid = None
 
-    def run(self):
-        # Redefining the chunk size so that all of the data is distributed at once in the
-        # nodes. This would fill all the memory if not enough nodes are allocated
 
-        input_data = self.get_handle("input", allow_missing=True)
+    def _setup_iterator(self):
+        input_handle = self.get_handle("input", allow_missing=True)
         try:
             self.config.hdf5_groupname
         except Exception:
             self.config.hdf5_groupname = None
-        input_length = input_data.size(groupname=self.config.hdf5_groupname)
-        self.config.chunk_size = np.ceil(input_length / self.size)
+        input_length = input_handle.size(groupname=self.config.hdf5_groupname)
+        chunk_size = int(np.ceil(input_length / self.size))
 
-        iterator = self.input_iterator("input")
+        iterator = self.input_iterator("input", chunk_size=chunk_size)
+        return iterator
+    
+        
+    def run(self):
+        # Redefining the chunk size so that all of the data is distributed at once in the
+        # nodes. This would fill all the memory if not enough nodes are allocated
+
+        iterator = self._setup_iterator()
         self.zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
         first = True
         for s, e, test_data in iterator:
