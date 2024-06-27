@@ -45,9 +45,11 @@ class PointEstHistSummarizer(PZSummarizer):
     def _setup_iterator(self):
         itr = self.input_iterator("input")
         for s, e, d in itr:
-            yield s, e, d, np.ones(len(d))
+            yield s, e, d, np.ones(e-s, dtype=bool)
 
     def run(self):
+        handle = self.get_handle("input", allow_missing=True)
+        self._input_length = handle.size()
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
@@ -86,16 +88,16 @@ class PointEstHistSummarizer(PZSummarizer):
         for i in range(self.config.nsamples):
             bootstrap_indeces = bootstrap_matrix[:, i]
             # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
-            chunk_mask = (bootstrap_indeces >= start) & (bootstrap_indeces < end) & mask
+            chunk_mask = (bootstrap_indeces >= start) & (bootstrap_indeces < end)
             bootstrap_indeces = bootstrap_indeces[chunk_mask] - start
-            zarr = zb[bootstrap_indeces]
+            zarr = np.where(mask, zb, np.nan)[bootstrap_indeces]
             hist_vals[i] += np.histogram(zarr, bins=self.zgrid)[0]
 
 
-class PointEstHistMaksedSummarizer(PointEstHistSummarizer):
+class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     """Summarizer which simply histograms a point estimate"""
 
-    name = "PointEstHistMaskSummarizer"
+    name = "PointEstHistMaskedSummarizer"
     config_options = PointEstHistSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, -1, msg="bin to use"),
@@ -117,7 +119,7 @@ class PointEstHistMaksedSummarizer(PointEstHistSummarizer):
                     first = False
                 else:
                     if self.config.selected_bin < 0:
-                        mask = np.ones(len(d))
+                        mask = np.ones(pz_data.npdf, dtype=bool)
                     else:
                         mask = d['class_id'] == self.config.selected_bin
             yield start, end, pz_data, mask

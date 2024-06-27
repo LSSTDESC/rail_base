@@ -43,10 +43,12 @@ class NaiveStackSummarizer(PZSummarizer):
     def _setup_iterator(self):
         itr = self.input_iterator("input")
         for s, e, d in itr:
-            yield s, e, d, np.ones(len(d))
+            yield s, e, d, np.ones(e-s, dtype=bool)
 
 
     def run(self):
+        handle = self.get_handle("input", allow_missing=True)
+        self._input_length = handle.size()
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
@@ -74,16 +76,18 @@ class NaiveStackSummarizer(PZSummarizer):
 
     def _process_chunk(self, start, end, data, mask, _first, bootstrap_matrix, yvals, bvals):
         pdf_vals = data.pdf(self.zgrid)
+        squeeze_mask = np.squeeze(mask)
         yvals += np.expand_dims(
-            np.sum(np.where(np.isfinite(pdf_vals[mask]), pdf_vals[mask], 0.0), axis=0), 0
+            np.sum(np.where(np.isfinite(pdf_vals[squeeze_mask,:]), pdf_vals[squeeze_mask], 0.0), axis=0), 0
         )
         # qp_d is the normalized probability of the stack, we need to know how many galaxies were
         for i in range(self.config.nsamples):
             bootstrap_draws = bootstrap_matrix[:, i]
             # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
-            chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end) & mask
+            chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end)
             bootstrap_draws = bootstrap_draws[chunk_mask] - start
-            bvals[i] += np.sum(pdf_vals[bootstrap_draws], axis=0)
+            zarr = np.where(np.expand_dims(mask, -1), pdf_vals, 0.)[bootstrap_draws]
+            bvals[i] += np.sum(zarr, axis=0)
 
 
 class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
@@ -110,7 +114,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     first = False
                 else:
                     if self.config.selected_bin < 0:
-                        mask = np.ones(len(d))
+                        mask = np.ones(pz_data.npdf, dtype=bool)
                     else:
                         mask = d['class_id'] == self.config.selected_bin
             yield start, end, pz_data, mask
