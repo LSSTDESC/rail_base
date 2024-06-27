@@ -65,6 +65,7 @@ class TrueNZHistogrammer(RailStage):
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
         
+
         first = True
         for s, e, data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s} - {e}")
