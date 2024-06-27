@@ -130,6 +130,7 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
                     mask = d['class_id'] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
+
             yield start, end, pz_data, mask
 
     def summarize(self, input_data, tomo_bins=None):

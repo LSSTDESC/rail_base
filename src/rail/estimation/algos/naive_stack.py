@@ -123,8 +123,8 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     mask = d['class_id'] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
+
             yield start, end, pz_data, mask
-<<<<<<< HEAD
 
     def summarize(self, input_data, tomo_bins=None):
         """Override the Summarizer.summarize() method to take tomo bins
@@ -151,5 +151,3 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
-=======
->>>>>>> 282dc24 (WIP, delinting)
