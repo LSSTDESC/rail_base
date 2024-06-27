@@ -48,7 +48,7 @@ class NaiveStackSummarizer(PZSummarizer):
         for s, e, d in itr:
             yield s, e, d, np.ones(len(d))
 
-        
+
     def run(self):
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
@@ -89,8 +89,6 @@ class NaiveStackSummarizer(PZSummarizer):
             bvals[i] += np.sum(pdf_vals[bootstrap_draws], axis=0)
 
 
-
-
 class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     name = "NaiveStackMaskedSummarizer"
     config_options = NaiveStackSummarizer.config_options.copy()
@@ -106,6 +104,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
 
         for it in zip(*itrs):
             first = True
+            mask = None
             for s, e, d in it:
                 if first:
                     start = s
@@ -118,5 +117,3 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     else:
                         mask = d['class_id'] == self.config.selected_bin
             yield start, end, pz_data, mask
-
-
