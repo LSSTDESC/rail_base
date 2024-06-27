@@ -98,6 +98,7 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     """Summarizer which simply histograms a point estimate"""
 
     name = "PointEstHistMaskedSummarizer"
+
     config_options = PointEstHistSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, -1, msg="bin to use"),
@@ -156,5 +157,3 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
-
-            

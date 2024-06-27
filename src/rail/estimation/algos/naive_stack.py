@@ -43,12 +43,19 @@ class NaiveStackSummarizer(PZSummarizer):
     def _setup_iterator(self):
         itr = self.input_iterator("input")
         for s, e, d in itr:
+<<<<<<< HEAD
             yield s, e, d, np.ones(e-s, dtype=bool)
 
 
     def run(self):
         handle = self.get_handle("input", allow_missing=True)
         self._input_length = handle.size()
+=======
+            yield s, e, d, np.ones(len(d))
+
+        
+    def run(self):
+>>>>>>> 6bf7e40 (WIP, first go at doing masked summarizers)
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
@@ -151,5 +158,3 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
-
-            
