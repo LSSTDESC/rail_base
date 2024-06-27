@@ -5,6 +5,7 @@ A summarizer-like stage that simple makes a histogram the true nz
 import numpy as np
 import qp
 
+from ceci.config import StageParameter as Param
 from rail.core.common_params import SHARED_PARAMS
 from rail.core.stage import RailStage
 from rail.core.data import QPHandle, TableHandle
@@ -20,6 +21,9 @@ class TrueNZHistogrammer(RailStage):
         zmax=SHARED_PARAMS,
         nzbins=SHARED_PARAMS,
         redshift_col=SHARED_PARAMS,
+        selected_bin=Param(int, -1, msg="Which tomography bin to consider"),
+        chunk_size=10000,
+        hdf5_groupname="",
     )
     inputs = [("input", TableHandle), ("tomography_bins", TableHandle)]
     outputs = [("true_NZ", QPHandle)]
@@ -30,8 +34,12 @@ class TrueNZHistogrammer(RailStage):
         self.bincents = None
 
     def _setup_iterator(self):
-        itrs = [self.input_iterator('input'), self.input_iterator('tomography_bins')]
 
+        itrs = [
+            self.input_iterator('input'),
+            self.input_iterator('tomography_bins'),
+        ]
+        
         for it in zip(*itrs):
             first = True
             mask = None
@@ -43,7 +51,7 @@ class TrueNZHistogrammer(RailStage):
                     first = False
                 else:
                     if self.config.selected_bin < 0:
-                        mask = np.ones(len(d))
+                        mask = np.ones(e-s, dtype=bool)
                     else:
                         mask = d['class_id'] == self.config.selected_bin
             yield start, end, pz_data, mask
@@ -76,5 +84,6 @@ class TrueNZHistogrammer(RailStage):
     def _process_chunk(
         self, _start, _end, data, mask, _first, single_hist,
     ):
-        zb = data[self.config.redshift_col][mask]
+        squeeze_mask = np.squeeze(mask)
+        zb = data[self.config.redshift_col][squeeze_mask]
         single_hist += np.histogram(zb, bins=self.zgrid)[0]
