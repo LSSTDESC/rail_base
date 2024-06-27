@@ -344,9 +344,11 @@ class RailStage(PipelineStage):
         except Exception:
             groupname = None
 
+        chunk_size = kwargs.get('chunk_size', self.config.chunk_size)
+
         if handle.path and handle.path != "None":  # pylint: disable=no-else-return
             self._input_length = handle.size(groupname=groupname)
-            total_chunks_needed = ceil(self._input_length / self.config.chunk_size)
+            total_chunks_needed = ceil(self._input_length / chunk_size)
             # If the number of process is larger than we need, we wemove some of them
             if total_chunks_needed < self.size:  # pragma: no cover
                 if self.comm:
@@ -361,7 +363,7 @@ class RailStage(PipelineStage):
                     sys.exit()
             kwcopy = dict(
                 groupname=groupname,
-                chunk_size=self.config.chunk_size,
+                chunk_size=chunk_size,
                 rank=self.rank,
                 parallel_size=self.size,
             )
