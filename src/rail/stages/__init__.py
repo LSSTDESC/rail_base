@@ -15,6 +15,7 @@ from rail.estimation.algos.train_z import TrainZInformer, TrainZEstimator
 from rail.estimation.algos.var_inf import VarInfStackInformer, VarInfStackSummarizer
 from rail.estimation.algos.uniform_binning import UniformBinningClassifier
 from rail.estimation.algos.equal_count import EqualCountClassifier
+from rail.estimation.algos.true_nz import TrueNZHistogrammer
 
 from rail.creation.degrader import Degrader
 
@@ -59,6 +60,7 @@ __all__ = [
     "VarInfStackSummarizer",
     "UniformBinningClassifier",
     "EqualCountClassifier",
+    "TrueNZHistogrammer",
     "Degrader",
     "AddColumnOfRandom",
     "QuantityCut",
