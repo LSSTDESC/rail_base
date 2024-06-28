@@ -85,7 +85,7 @@ class NaiveStackSummarizer(PZSummarizer):
             # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
             chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end)
             bootstrap_draws = bootstrap_draws[chunk_mask] - start
-            zarr = np.where(np.expand_dims(mask, -1), pdf_vals, 0.)[bootstrap_draws]
+            zarr = np.where(squeeze_mask, pdf_vals.T, 0.).T[bootstrap_draws]
             bvals[i] += np.sum(zarr, axis=0)
 
 
