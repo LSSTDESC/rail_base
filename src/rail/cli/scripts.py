@@ -3,8 +3,10 @@ import yaml
 
 import rail.stages
 from rail.core import RailEnv
+from rail.core.stage import RailPipeline
 from rail.cli.options import GitMode
 from rail.utils.path_utils import RAILDIR
+from rail.utils import catalog_utils
 
 
 def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
@@ -179,3 +181,27 @@ def get_data(verbose, **kwargs):  # pragma: no cover
             os.system(
                 f'curl -o {local_abs_path} {data_file["remote_path"]} --create-dirs'
             )
+
+
+def build_pipeline(
+    pipeline_class,
+    output_yaml,
+    catalog_tag=None,
+    input_dict=None,
+    stages_config=None,
+    output_dir='.',
+    log_dir=None,
+    **kwargs
+):
+    tokens = pipeline_class.split('.')
+    module = '.'.join(tokens[:-1])
+    class_name = tokens[-1]
+
+    if catalog_tag:
+        catalog_utils.apply_defaults(catalog_tag)
+
+    if log_dir is None:
+        log_dir = os.path.join(output_dir, 'logs', class_name)
+
+    __import__(module)
+    RailPipeline.build_and_write(class_name, output_yaml, input_dict, stages_config, output_dir, log_dir, **kwargs)

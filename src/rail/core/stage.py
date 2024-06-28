@@ -2,6 +2,7 @@
 
 import os
 import sys
+import yaml
 from math import ceil
 
 from ceci import PipelineStage, MiniPipeline
@@ -48,6 +49,13 @@ class RailStageBuild:
     def __init__(self, stage_class, **kwargs):
         self.stage_class = stage_class
         self._kwargs = kwargs
+        self._stage = None
+
+    @property
+    def io(self):
+        if self._stage:
+            return self._stage.io
+        return None
 
     def build(self, name):
         """Actually build the stage, this is called by the pipeline the stage
@@ -63,8 +71,8 @@ class RailStageBuild:
         stage : `RailStage`
             The newly built stage
         """
-        stage = self.stage_class.make_and_connect(name=name, **self._kwargs)
-        return stage
+        self._stage = self.stage_class.make_and_connect(name=name, **self._kwargs)
+        return self._stage
 
 
 class RailPipeline(MiniPipeline):
@@ -77,8 +85,60 @@ class RailPipeline(MiniPipeline):
 
     And end up with a fully specified pipeline.
     """
+    pipeline_classes = {}    
 
-    def __init__(self):
+    def __init_subclass__(cls):
+        cls.pipeline_classes[cls.__name__] = cls
+
+    @classmethod
+    def print_classes(cls):
+        for key, val in cls.pipeline_classes.items():
+            print(f"{key} {val}")
+
+    @classmethod
+    def get_pipeline_class(cls, name):
+        try:
+            return cls.pipeline_classes[name]
+        except KeyError as msg:
+            raise KeyError(f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}") from msg
+
+    @staticmethod
+    def load_pipeline_class(class_name):        
+        tokens = class_name.split('.')
+        module = '.'.join(tokens[:-1])
+        class_name = tokens[-1]
+        __import__(module)
+        pipe_class = RailPipeline.get_pipeline_class(class_name)
+        return pipe_class
+
+    @staticmethod
+    def build_and_write(
+        class_name,
+        output_yaml,
+        input_dict=None,
+        stages_config=None,
+        output_dir='.',
+        log_dir='.',
+        **kwargs,
+    ):
+        pipe_class = RailPipeline.get_pipeline_class(class_name)
+        pipe = pipe_class(**kwargs)
+        
+        full_input_dict = pipe_class.default_input_dict.copy()
+        if input_dict is not None:
+            full_input_dict.update(**input_dict)
+        pipe.initialize(
+            full_input_dict,
+            dict(
+                output_dir=output_dir,
+                log_dir=log_dir,
+                resume=False,
+            ),
+            stages_config,
+        )
+        pipe.save(output_yaml)
+
+    def __init__(self, project=None):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
     def __setattr__(self, name, value):
@@ -344,9 +404,11 @@ class RailStage(PipelineStage):
         except Exception:
             groupname = None
 
+        chunk_size = kwargs.get('chunk_size', self.config.chunk_size)
+
         if handle.path and handle.path != "None":  # pylint: disable=no-else-return
             self._input_length = handle.size(groupname=groupname)
-            total_chunks_needed = ceil(self._input_length / self.config.chunk_size)
+            total_chunks_needed = ceil(self._input_length / chunk_size)
             # If the number of process is larger than we need, we wemove some of them
             if total_chunks_needed < self.size:  # pragma: no cover
                 if self.comm:
@@ -361,7 +423,7 @@ class RailStage(PipelineStage):
                     sys.exit()
             kwcopy = dict(
                 groupname=groupname,
-                chunk_size=self.config.chunk_size,
+                chunk_size=chunk_size,
                 rank=self.rank,
                 parallel_size=self.size,
             )

@@ -7,10 +7,14 @@ import click
 __all__ = [
     "clear_output",
     "bpz_demo_data",
+    "catalog_tag",
     "dry_run",
     "outdir",
+    "output_yaml",
     "from_source",
     "git_mode",
+    "pipeline_class",
+    "pipeline_yaml",
     "print_all",
     "print_packages",
     "print_namespaces",
@@ -19,6 +23,8 @@ __all__ = [
     "print_stages",
     "package_file",
     "skip",
+    "stage_name",
+    "stages_config",
     "inputs",
     "verbose_download",
 ]
@@ -85,6 +91,14 @@ dry_run = PartialOption(
     is_flag=True,
 )
 
+
+catalog_tag = PartialOption(
+    "--catalog_tag",
+    default=None,
+    help="Type of input catalog, used to determine column names",
+)
+
+
 from_source = PartialOption(
     "--from-source",
     help="Install from source",
@@ -96,6 +110,25 @@ outdir = PartialOption(
     type=click.Path(),
     default=None,
     help="Output directory.",
+)
+
+output_yaml = PartialOption(
+    "--output_yaml",
+    type=click.Path(),
+    default=None,
+    help="Path for output yaml file",
+)
+
+pipeline_class =  PartialOption(
+    "--pipeline_class",
+    type=str,
+    help="Full class name for pipeline, e.g., rail.pipelines.estimation.train_z.TrainZPipeline",
+)
+
+pipeline_yaml =  PartialOption(
+    "--pipeline_yaml",
+    type=click.Path(),
+    help="Yaml for that defines pipeline",
 )
 
 git_mode = PartialOption(
@@ -141,6 +174,13 @@ print_stages = PartialOption(
     is_flag=True,
 )
 
+project_yaml = PartialOption(
+    "--project_yaml",
+    type=click.Path(),
+    default=None,
+    help="File with project description",
+)
+
 package_file = PartialOption(
     "--package-file",
     type=click.Path(),
@@ -154,6 +194,22 @@ skip = PartialOption(
     multiple=True,
     help="Skip files",
 )
+
+
+stage_name = PartialOption(
+    "--stage_name",
+    type=str,
+    help="Name of a pipeline stage",
+)
+
+stages_config = PartialOption(
+    "--stages_config",
+    type=str,
+    help="Stage config file",
+    default=None,
+)
+
+
 
 inputs = PartialArgument("inputs", nargs=-1)
 

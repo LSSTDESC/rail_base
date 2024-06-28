@@ -29,6 +29,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
     config_options.update(
         chunk_size=10000,
         hdf5_groupname=SHARED_PARAMS["hdf5_groupname"],
+        zmin=SHARED_PARAMS,
+        zmax=SHARED_PARAMS,
+        nzbins=SHARED_PARAMS,
     )
     config_options.update(
         **PointEstimationMixin.config_options.copy(),
