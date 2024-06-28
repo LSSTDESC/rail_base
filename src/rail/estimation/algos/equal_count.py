@@ -6,7 +6,7 @@ tomographic bins with uniform binning.
 import numpy as np
 from ceci.config import StageParameter as Param
 from rail.estimation.classifier import PZClassifier
-from rail.core.data import TableHandle
+from rail.core.data import Hdf5Handle
 
 
 class EqualCountClassifier(PZClassifier):
@@ -27,7 +27,7 @@ class EqualCountClassifier(PZClassifier):
         nbins=Param(int, 5, msg="Number of tomographic bins"),
         no_assign=Param(int, -99, msg="Value for no assignment flag"),
     )
-    outputs = [("output", TableHandle)]
+    outputs = [("output", Hdf5Handle)]
 
     def __init__(self, args, comm=None):
         PZClassifier.__init__(self, args, comm=comm)
@@ -37,7 +37,7 @@ class EqualCountClassifier(PZClassifier):
         npdf = test_data.npdf
 
         try:
-            zb = test_data.ancil[self.config.point_estimate]
+            zb = np.squeeze(test_data.ancil[self.config.point_estimate])
         except KeyError as msg:
             raise KeyError(
                 f"{self.config.point_estimate} is not contained in the data ancil, "
