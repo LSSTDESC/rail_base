@@ -80,7 +80,7 @@ class TrueNZHistogrammer(RailStage):
             qp_d = qp.Ensemble(
                 qp.hist,
                 data=dict(bins=self.zgrid, pdfs=np.atleast_2d(single_hist)),
-                ancil=dict(n_total=np.array([n_total])),
+                ancil=dict(n_total=np.array([n_total], dtype=int)),
             )
             self.add_data("true_NZ", qp_d)
 
