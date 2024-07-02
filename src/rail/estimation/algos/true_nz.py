@@ -62,9 +62,10 @@ class TrueNZHistogrammer(RailStage):
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
         )
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
+        breakpoint()
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
-
+        
         first = True
         for s, e, data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s} - {e}")
@@ -76,6 +77,7 @@ class TrueNZHistogrammer(RailStage):
             single_hist = self.comm.reduce(single_hist)
 
         if self.rank == 0:
+            breakpoint()
             n_total = single_hist.sum()
             qp_d = qp.Ensemble(
                 qp.hist,
@@ -90,7 +92,7 @@ class TrueNZHistogrammer(RailStage):
         squeeze_mask = np.squeeze(mask)
         zb = data[self.config.redshift_col][squeeze_mask]
         single_hist += np.histogram(zb, bins=self.zgrid)[0]
-
+        breakpoint()
 
     def histogram(self, catalog, tomo_bins):
         """The main interface method for ``TrueNZHistogrammer``.
