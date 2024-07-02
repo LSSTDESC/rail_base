@@ -36,8 +36,8 @@ class TrueNZHistogrammer(RailStage):
     def _setup_iterator(self):
 
         itrs = [
-            self.input_iterator('input'),
-            self.input_iterator('tomography_bins'),
+            self.input_iterator('input', groupname=self.config.hdf5_groupname),
+            self.input_iterator('tomography_bins', groupname=""),
         ]
         
         for it in zip(*itrs):
@@ -76,8 +76,11 @@ class TrueNZHistogrammer(RailStage):
             single_hist = self.comm.reduce(single_hist)
 
         if self.rank == 0:
+            n_total = single_hist.sum()
             qp_d = qp.Ensemble(
-                qp.hist, data=dict(bins=self.zgrid, pdfs=np.atleast_2d(single_hist))
+                qp.hist,
+                data=dict(bins=self.zgrid, pdfs=np.atleast_2d(single_hist)),
+                ancil=dict(n_total=np.array([n_total])),
             )
             self.add_data("true_NZ", qp_d)
 
@@ -87,3 +90,37 @@ class TrueNZHistogrammer(RailStage):
         squeeze_mask = np.squeeze(mask)
         zb = data[self.config.redshift_col][squeeze_mask]
         single_hist += np.histogram(zb, bins=self.zgrid)[0]
+
+
+    def histogram(self, catalog, tomo_bins):
+        """The main interface method for ``TrueNZHistogrammer``.
+
+        Creates histogram of N of Z_true.
+
+        This will attach the sample to this `Stage` (for introspection and
+        provenance tracking).
+
+        Then it will call the run() and finalize() methods, which need to be
+        implemented by the sub-classes.
+
+        The run() method will need to register the data that it creates to this
+        Estimator by using ``self.add_data('output', output_data)``.
+
+        Finally, this will return a PqHandle providing access to that output
+        data.
+
+        Parameters
+        ----------
+        catalog : table-like
+            The sample with the true NZ column
+
+        Returns
+        -------
+        output_data : QPHandle
+            A handle giving access to a the histogram in QP format
+        """
+        self.set_data("input", catalog)
+        self.set_data("tomography_bins", tomo_bins)
+        self.run()
+        self.finalize()
+        return self.get_handle("true_NZ")
