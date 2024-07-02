@@ -23,5 +23,18 @@ def test_true_nz():
     nz_hist = TrueNZHistogrammer.make_stage(name='true_nz', hdf5_groupname='photometry', redshift_col='redshift')
     out_hist = nz_hist.histogram(true_nz, tomo_bins)
 
+    assert out_hist.data.ancil['n_total'][0] == 10
+
+    check_vals = [0, 5, 0, 0, 0]
     
-    
+    for i in range(5):
+        nz_hist = TrueNZHistogrammer.make_stage(
+            name='true_nz',
+            hdf5_groupname='photometry',
+            redshift_col='redshift',
+            selected_bin=i,
+        )
+        out_hist = nz_hist.histogram(true_nz, tomo_bins)
+        assert out_hist.data.ancil['n_total'][0] == check_vals[i]
+
+        
