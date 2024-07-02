@@ -118,3 +118,28 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     else:
                         mask = d['class_id'] == self.config.selected_bin
             yield start, end, pz_data, mask
+
+    def summarize(self, input_data, tomo_bins):
+        """Override the Summarizer.summarize() method to take tomo bins
+        as an additional input
+
+        Parameters
+        ----------
+        input_data : `qp.Ensemble`
+            Per-galaxy p(z), and any ancilary data associated with it
+
+        tomo_bins : `table-like`
+            Tomographic bins file
+
+        Returns
+        -------
+        output: `qp.Ensemble`
+            Ensemble with n(z), and any ancilary data
+        """
+        self.set_data("input", input_data)
+        self.set_data("tomography_bins", tomo_bins)
+        self.run()
+        self.finalize()
+        return self.get_handle("output")
+
+            
