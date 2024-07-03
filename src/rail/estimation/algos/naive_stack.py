@@ -101,7 +101,15 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
 
 
     def _setup_iterator(self):
-        itrs = [self.input_iterator('input'), self.input_iterator('tomography_bins')]
+
+        selected_bin = self.config.selected_bin
+        if self.config.tomography_bins == 'none':
+            selected_bin = -1
+
+        if selected_bin == -1:
+            itrs = [self.input_iterator('input')]
+        else:
+            itrs = [self.input_iterator('input'), self.input_iterator('tomography_bins')]
 
         for it in zip(*itrs):
             first = True
@@ -117,9 +125,11 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                         mask = np.ones(pz_data.npdf, dtype=bool)
                     else:
                         mask = d['class_id'] == self.config.selected_bin
+            if mask is None:
+                mask = np.ones(pz_data.npdf, dtype=bool)
             yield start, end, pz_data, mask
 
-    def summarize(self, input_data, tomo_bins):
+    def summarize(self, input_data, tomo_bins=None):
         """Override the Summarizer.summarize() method to take tomo bins
         as an additional input
 
@@ -137,7 +147,10 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
             Ensemble with n(z), and any ancilary data
         """
         self.set_data("input", input_data)
-        self.set_data("tomography_bins", tomo_bins)
+        if tomo_bins is None:
+            self.config.tomography_bins = None
+        else:
+            self.set_data("tomography_bins", tomo_bins)
         self.run()
         self.finalize()
         return self.get_handle("output")

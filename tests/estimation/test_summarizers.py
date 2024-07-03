@@ -47,6 +47,7 @@ def one_mask_algo(key, summarizer_class, summary_kwargs):
     os.remove(
         summarizer.get_output(summarizer.get_aliased_tag("single_NZ"), final_name=True)
     )
+    
     return summary_ens
 
 
@@ -87,6 +88,7 @@ def test_naive_stack_masked():
     summary_config_dict = {}
     summarizer_class = naive_stack.NaiveStackMaskedSummarizer
     _ = one_mask_algo("NaiveStack", summarizer_class, summary_config_dict)
+    _ = one_algo("NaiveStack", summarizer_class, summary_config_dict)
 
 
 def test_point_estimate_hist_masekd():
@@ -96,3 +98,4 @@ def test_point_estimate_hist_masekd():
     summary_config_dict = {}
     summarizer_class = point_est_hist.PointEstHistMaskedSummarizer
     _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict)
+    _ = one_algo("PointEstimateHist", summarizer_class, summary_config_dict)
