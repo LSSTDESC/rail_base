@@ -15,6 +15,10 @@ from rail.core.common_params import SHARED_PARAMS
 from scipy.stats import lognorm
 from scipy.interpolate import InterpolatedUnivariateSpline
 from scipy.optimize import minimize
+from scipy.stats import multivariate_normal
+from scipy.stats import rv_histogram
+
+
 
 
 TEENY = 1.0e-15
@@ -103,6 +107,108 @@ class CosmicVarianceStackInformer(PzInformer):
         self.model = {"nz_model":self.nz_model, "amp":amp, "gamma":gamma, "midpoints": self.midpoints}
 
         self.add_data('model', self.model)
+
+
+
+class CosmicVarianceStackSummarizer(PZSummarizer):
+    """Cosmic Variance Included Summarizer"""
+
+    name = "CosmicVarianceStackSummarizer"
+    config_options = PZSummarizer.config_options.copy()
+    config_options.update(
+        zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
+        zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
+        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        ancil_type = Param(str, "zmean", msg="Type of point estimate used for histogram"),
+        )
+    inputs = [("input", QPHandle), ("model", ModelHandle)]
+    outputs = [("output", QPHandle)]
+
+    def __init__(self, args, comm=None):
+        PZSummarizer.__init__(self, args, comm=comm)
+
+    def model_varN_overN(self, amp, gamma):
+        return 1. + self.nz_model*(self.midpoints/amp)**gamma
+
+    def loss(self,vec): 
+        amp, gamma = vec
+        return np.sum((self.varN_overN - self.model_varN_overN(amp, gamma))**2)
+        
+    def rebin(self, breaks_new): 
+        list_rebinned = []
+        midpoints_new = breaks_new[:-1] + (breaks_new[1]-breaks_new[0])/2.
+        for el in self.pz: 
+            model = rv_histogram((el, convert_mids_to_breaks(self.midpoints)))
+            rebinned = np.array([model.cdf(breaks_new[i+1]) - model.cdf(breaks_new[i]) for i in range(len(breaks_new)-1)])
+            list_rebinned.append(rebinned/np.trapz(rebinned, midpoints_new))
+        list_rebinned = np.array(list_rebinned)
+        return list_rebinned
+    
+    def error(self, expect, mids, num_samples = 1000): 
+        var = (self.model_coeff_variation(mids) * expect)**2
+        mu = np.log(expect**2/np.sqrt(var + expect**2))
+        sig_2 = np.log(var/expect**2 + 1.)
+        samples = multivariate_normal.rvs(mu, np.diag(sig_2), size=1000)
+        pz = np.exp(samples)
+        pz = np.array([el/np.trapz(el, mids) for el in pz])
+        return pz, mu, np.diag(sig_2)
+
+    
+    def summarize(self, input_data, model):
+        
+        self.set_data("model", model)
+        model = self.get_data('model')
+        
+        self.nz_model = model["nz_model"]
+        self.amp = model["amp"]
+        self.gamma = model["gamma"]
+        self.midpoints = model["midpoints"]
+        self.breaks = convert_mids_to_breaks(self.midpoints)
+
+        self.set_data("input", input_data)
+        self.run()
+        self.finalize()
+        return self.get_handle("output")
+    
+    def run(self):
+        input_data = self.get_data('input')
+
+        point_est = input_data.ancil[self.config.ancil_type]
+
+        tomographic_binning_dnnz = np.histogram(point_est, bins = self.config.nzbins, range = (self.config.zmin,self.config.zmax))
+
+        nz = tomographic_binning_dnnz[0]
+        bins = (tomographic_binning_dnnz[1][1:] + tomographic_binning_dnnz[1][:-1])/2
+        norm = nz/np.trapz(nz,bins)
+
+        self.model_varN_overN = 1. + self.nz_model*(self.midpoints/self.amp)**self.gamma
+        model_coeff_variation = InterpolatedUnivariateSpline(self.midpoints, np.sqrt(self.model_varN_overN/self.nz_model), 
+                                                            ext=3, k=1)
+        
+        
+        self.model_coeff_variation = model_coeff_variation
+        self.num_tot = np.trapz(nz, bins)
+        model_pz_stacked = InterpolatedUnivariateSpline(bins, nz, k=1, ext=3)
+        pz_stacked_numgal = model_pz_stacked(self.midpoints)
+        self.expect = pz_stacked_numgal/np.sum(pz_stacked_numgal) * self.num_tot
+        self.pz, self.mu, self.cov = self.error(self.expect, self.midpoints)
+        
+        sample_nz = self.rebin(self.breaks)
+        
+        nzs = qp.Ensemble(qp.interp, data=dict(xvals=self.midpoints, yvals=sample_nz))
+        
+        self.add_data('output', nzs)
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
+        
 
 
 
