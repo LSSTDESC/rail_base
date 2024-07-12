@@ -168,7 +168,8 @@ class CosmicVarianceStackSummarizer(PZSummarizer):
 
     def rebin(self, breaks_new): 
         """
-        Rebin the sampled n(z) into the grdi defined in this module. 
+        Rebin the sampled n(z) into the grid defined in this module. 
+        This method is not used now. 
         """
         list_rebinned = []
         midpoints_new = breaks_new[:-1] + (breaks_new[1]-breaks_new[0])/2.
@@ -193,6 +194,10 @@ class CosmicVarianceStackSummarizer(PZSummarizer):
 
     
     def summarize(self, input_data, model):
+        """
+        This overwrites the summarize method of the PZSummarizer
+        because this module needs to read the informer
+        """
         # read the model
         self.set_data("model", model)
         model = self.get_data('model')
