@@ -229,7 +229,7 @@ class CosmicVarianceStackSummarizer(PZSummarizer):
         pz_stacked_numgal = model_pz_stacked(self.midpoints)
         # compute the n(z) realization of the sample, pz: realizations, mu: mean values, cov: covariance of the pz
         self.expect = pz_stacked_numgal/np.sum(pz_stacked_numgal) * self.num_tot
-        self.pz, self.mu, self.cov = self.error(self.expect, self.midpoints)
+        self.pz, self.mu, self.cov = self.error(self.expect+TEENY, self.midpoints)
         # if rebin, rebin the pz into , currently obsolete
         # sample_nz = self.rebin(self.breaks)
         
