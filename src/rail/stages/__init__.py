@@ -34,13 +34,6 @@ from rail.evaluation.single_evaluator import SingleEvaluator
 
 from rail.tools.table_tools import ColumnMapper, RowSelector, TableConverter
 
-
-def import_and_attach_all():
-    """Import all the packages in the rail ecosystem and attach them to this module"""
-    RailEnv.import_all_packages()
-    RailEnv.attach_stages(rail.stages)
-
-
 __all__ = [
     "CatEstimator",
     "CatClassifier",
@@ -79,3 +72,12 @@ __all__ = [
     "RowSelector",
     "TableConverter",
 ]
+
+
+def import_and_attach_all():
+    """Import all the packages in the rail ecosystem and attach them to this module"""
+    RailEnv.import_all_packages()
+    RailEnv.attach_stages(rail.stages)
+    for xx in dir(rail.stages):
+        rail.stages.__all__.append(xx)
+    
