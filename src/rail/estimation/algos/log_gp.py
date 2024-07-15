@@ -29,20 +29,27 @@ class EllipticalSliceSampler:
     def __init__(self, prior_mean: np.ndarray,
                  prior_cov: np.ndarray,
                  loglik: Callable):
+        """
+        Initialize the Elliptical Slice Sampler.
 
+        Parameters:
+        prior_mean (np.ndarray): Mean of the prior distribution.
+        prior_cov (np.ndarray): Covariance matrix of the prior distribution.
+        loglik (Callable): Log-likelihood function.
+        """
         self.prior_mean = prior_mean
         self.prior_cov = prior_cov
 
         self.loglik = loglik
 
-        self._n = len(prior_mean)  # dimensionality
-        self._chol = np.linalg.cholesky(prior_cov)  # cache cholesky
+        self._n = len(prior_mean)  # Dimensionality of the parameter space
+        self._chol = np.linalg.cholesky(prior_cov)  # Cholesky decomposition of the prior covariance matrix
 
-        # init state; cache prev states
+        # Initialize state with a sample from the prior distribution
         self._state_f = self._chol @ np.random.randn(self._n) + prior_mean
 
     def _indiv_sample(self):
-        """main algo for indiv samples"""
+        """Main algorithm for generating individual samples."""
         f = self._state_f  # previous cached state
         nu = self._chol @ np.random.randn(self._n)  # choose ellipse using prior
         log_y = self.loglik(f) + np.log(np.random.uniform())  # ll threshold
@@ -69,29 +76,51 @@ class EllipticalSliceSampler:
     def sample(self,
                n_samples: int,
                n_burn: int = 500) -> np.ndarray:
-        """Returns n_samples samples"""
+        """
+        Generate samples from the posterior distribution.
+
+        Parameters:
+        n_samples (int): Number of samples to generate.
+        n_burn (int): Number of burn-in samples to discard. Default is 500.
+
+        Returns:
+        np.ndarray: Array of generated samples.
+        """
         
         samples = []
         for i in range(n_samples):
             self._indiv_sample()
-            if i > n_burn:
+            if i > n_burn: # Discard burn-in samples
                 samples.append(self._state_f.copy())
 
         return np.stack(samples)
     
 
 def convert_s_to_nz(s): 
+    """
+    Convert a vector of log-probability to probabilities using the softmax function.
+
+    Parameters:
+    s (array-like): Input array of log-probability.
+
+    Returns:
+    np.ndarray: Array of probabilities.
+    """
     nz = np.array([np.exp(el)/np.sum(np.exp(s)) for el in s])
     return nz
 
 
 class LogLike(object): 
     
-    def __init__(self, pz_ensemble, zmid_wx, mean_wx, cov_wx): 
-        
-        # self.pz_at_zmid = pz_ensemble.pdf(zmid_wx)
-        # self.mu_pz = np.mean(np.log(self.pz_at_zmid), axis = 0)
-        # self.cov_pz = np.cov(np.log(self.pz_at_zmid).T)
+    def __init__(self, zmid_wx, mean_wx, cov_wx): 
+        """
+        Initialize the LogLike object.
+
+        Parameters:
+        zmid_wx (array-like): Midpoints of redshift bins where cluster redshift is defined.
+        mean_wx (array-like): Mean vector for the cluster redshift distribution.
+        cov_wx (array-like): Covariance matrix for the cluster redshift distribution.
+        """
         self.zmid_wx = zmid_wx
         self.mean_wx = mean_wx
         self.cov_wx = cov_wx
@@ -162,6 +191,16 @@ class LogisticGPSummarizer(PZSummarizer):
 
     
     def summarize(self, input_data, model):
+        """
+        Summarize the input data using the model.
+
+        Parameters:
+        input_data: Input pz distributions from photo-z methods
+        model: Model containing cluster redshift information.
+
+        Returns:
+        QPHandle: Handle to the output data.
+        """
         # read the model
         self.set_data("model", model)
         model = self.get_data('model')
@@ -176,10 +215,15 @@ class LogisticGPSummarizer(PZSummarizer):
         return self.get_handle("output")
     
     def sample_joint(self): 
+        """
+        Perform joint sampling of amplitude and s_vec using MCMC.
 
-        loglike_model = LogLike(self.qp_output, self.zmid_wx, self.signal_wx, self.cov_wx)
+        Returns:
+        tuple: Arrays of sampled amplitudes and s_vecs.
+        """
+        loglike_model = LogLike(self.zmid_wx, self.signal_wx, self.cov_wx)
         # TEENY = np.random.uniform(0,1e-16,len(self.zgrid_mid))
-        trace_amp = [55.6]
+        trace_amp = [50.0]
         trace_svec = [np.log(self.qp_output.pdf(self.zgrid_mid)[0])]
 
         log_pz = np.log(self.qp_output.pdf(self.zgrid_mid))
@@ -190,6 +234,8 @@ class LogisticGPSummarizer(PZSummarizer):
         for step in range(self.config.n_steps): 
             # print(step)
             #update amp 
+            if step%1000 == 0:
+                print("Step "+str(step))
             loss_amp_given_svec = loglike_model.loglike_amp_given_svec(self.zgrid_mid,trace_svec[-1])
             proposed_amp = np.random.normal(trace_amp[-1], 0.1)
 
@@ -210,7 +256,9 @@ class LogisticGPSummarizer(PZSummarizer):
         return np.array(trace_amp), np.array(trace_svec)
 
     def run(self):
-        
+        """
+        Execute the summarization process.
+        """
         input_data = self.get_data('input')
         self.qp_output = input_data
         
