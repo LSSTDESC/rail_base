@@ -20,7 +20,6 @@ from scipy.optimize import minimize
 from scipy.stats import multivariate_normal, rv_histogram
 from scipy.integrate import simps
 from typing import Callable
-from scipy.integrate import simps
 
 
 
@@ -181,7 +180,7 @@ class LogisticGPSummarizer(PZSummarizer):
         zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
         zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
         nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
-        n_steps=Param(int, 1000, msg="N-steps for MCMC sampling"),
+        n_steps=Param(int, 5000, msg="N-steps for MCMC sampling"),
         )
     inputs = [("input", QPHandle), ("model", ModelHandle)]
     outputs = [("output", QPHandle)]
@@ -232,7 +231,6 @@ class LogisticGPSummarizer(PZSummarizer):
         cov_pz = np.cov(log_pz.T)
 
         for step in range(self.config.n_steps): 
-            # print(step)
             #update amp 
             if step%1000 == 0:
                 print("Step "+str(step))
