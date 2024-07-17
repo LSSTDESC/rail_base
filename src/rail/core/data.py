@@ -282,7 +282,10 @@ class TableHandle(DataHandle):
         if path in [None, "none", "None"]:  # pragma: no cover
             return 0
         try:
-            return tables_io.io.getInputDataLength(path, **kwargs)
+            if not kwargs["groupname"]:
+                return tables_io.io.getInputDataLengthHdf5(path)
+            else:
+                return tables_io.io.getInputDataLengthHdf5(path, **kwargs)
         except Exception:
             return 0
 
