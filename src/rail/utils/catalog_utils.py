@@ -79,6 +79,7 @@ class CatalogConfigBase:
             ref_band=cls._build_ref_band(cls.ref_band),
             redshift_col=cls.redshift_col,
             nondetect_val=np.nan,
+            hdf5_groupname=cls.hdf5_groupname,
         )
         return base_dict
 
@@ -92,6 +93,7 @@ class HscCatalogConfig(CatalogConfigBase):
     band_err_template = '{band}_cmodel_magerr' 
     ref_band = 'i'
     redshift_col = 'specz_redshift'
+    hdf5_groupname = ''
 
     
 class Dc2CatalogConfig(CatalogConfigBase):
@@ -103,7 +105,8 @@ class Dc2CatalogConfig(CatalogConfigBase):
     band_err_template = "mag_err_{band}_lsst"
     ref_band = 'i'
     redshift_col='true_redshift'
-          
+    hdf5_groupname = ''
+
 
 class RubinCatalogConfig(CatalogConfigBase):
 
@@ -114,6 +117,7 @@ class RubinCatalogConfig(CatalogConfigBase):
     band_err_template ="LSST_obs_{band}_err"
     ref_band = 'i'
     redshift_col='true_redshift'
+    hdf5_groupname = ''
 
 
 class RomanRubinCatalogConfig(CatalogConfigBase):
@@ -125,6 +129,7 @@ class RomanRubinCatalogConfig(CatalogConfigBase):
     band_err_template ="LSST_obs_{band}_err"
     ref_band = 'i'
     redshift_col='redshift'
+    hdf5_groupname = ''
 
 
 apply_defaults = CatalogConfigBase.apply
