@@ -10,6 +10,7 @@ __all__ = [
     "dry_run",
     "outdir",
     "from_source",
+    "model_file",
     "git_mode",
     "print_all",
     "print_packages",
@@ -19,6 +20,10 @@ __all__ = [
     "print_stages",
     "package_file",
     "skip",
+    "stage_class",
+    "stage_module",
+    "stage_name",
+    "stages_config",
     "inputs",
     "verbose_download",
 ]
@@ -98,6 +103,40 @@ outdir = PartialOption(
     help="Output directory.",
 )
 
+<<<<<<< HEAD
+=======
+output_yaml = PartialOption(
+    "--output_yaml",
+    type=click.Path(),
+    default=None,
+    help="Path for output yaml file",
+)
+
+pipeline_class =  PartialOption(
+    "--pipeline_class",
+    type=str,
+    help="Full class name for pipeline, e.g., rail.pipelines.estimation.train_z.TrainZPipeline",
+)
+
+model_file =  PartialOption(
+    "--model_file",
+    type=str,
+    help="Model for pz estimation",
+)
+
+input_file =  PartialOption(
+    "--input_file",
+    type=str,
+    help="Input data file for pz estimation",
+)
+
+pipeline_yaml =  PartialOption(
+    "--pipeline_yaml",
+    type=click.Path(),
+    help="Yaml for that defines pipeline",
+)
+
+>>>>>>> 6c5f883 (added options)
 git_mode = PartialOption(
     "--git-mode",
     type=EnumChoice(GitMode),
@@ -154,6 +193,33 @@ skip = PartialOption(
     multiple=True,
     help="Skip files",
 )
+
+stage_class = PartialOption(
+    "--stage_class",
+    type=str,
+    help="Name of a pipeline stage python class",
+)
+
+stage_module = PartialOption(
+    "--stage_module",
+    type=str,
+    help="Import path for a python module",
+)
+
+stage_name = PartialOption(
+    "--stage_name",
+    type=str,
+    help="Name of a pipeline stage",
+)
+
+stages_config = PartialOption(
+    "--stages_config",
+    type=str,
+    help="Stage config file",
+    default=None,
+)
+
+
 
 inputs = PartialArgument("inputs", nargs=-1)
 
