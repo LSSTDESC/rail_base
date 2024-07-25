@@ -103,8 +103,6 @@ outdir = PartialOption(
     help="Output directory.",
 )
 
-<<<<<<< HEAD
-=======
 output_yaml = PartialOption(
     "--output_yaml",
     type=click.Path(),
