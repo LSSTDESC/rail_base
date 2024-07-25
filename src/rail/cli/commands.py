@@ -4,6 +4,7 @@ import click
 from rail.core import __version__
 from rail.cli import options, scripts
 from rail.interfaces.pz_factory import PZFactory
+from rail.interfaces.tool_factory import ToolFactory
 import ceci
 
 
