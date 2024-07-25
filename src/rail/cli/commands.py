@@ -2,6 +2,8 @@ import click
 
 from rail.core import __version__
 from rail.cli import options, scripts
+from rail.interfaces.pz_factory import PZFactory
+import ceci
 
 
 @click.group()
@@ -74,3 +76,27 @@ def get_data(verbose, **kwargs):
     """Downloads data from NERSC (if not already found)"""
     scripts.get_data(verbose, **kwargs)
     return 0
+
+
+@cli.command()
+@options.stage_name()
+@options.stage_class()
+@options.stage_module()
+@options.model_file()
+@options.dry_run()
+@options.input_file()
+def estimate(stage_name, stage_class, stage_module, model_file, dry_run, input_file):
+    """Run a pz estimation stage"""
+    stage = PZFactory.build_cat_estimator_stage(
+        stage_name=stage_name,
+        class_name=stage_class,
+        module_name=stage_module,
+        model_path=model_file,
+        data_path='dummy.in',
+    )
+
+    output = PZFactory.run_cat_estimator_stage(
+        stage,
+        data_path=input_file,
+    )
+
