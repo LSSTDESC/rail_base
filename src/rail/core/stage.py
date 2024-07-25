@@ -5,7 +5,8 @@ import sys
 import yaml
 from math import ceil
 
-from ceci import PipelineStage, MiniPipeline
+from ceci.stage import PipelineStage
+from ceci.pipeline import MiniPipeline
 from ceci.config import StageParameter as Param
 from rail.core.data import DATA_STORE, DataHandle
 
