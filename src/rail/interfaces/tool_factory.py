@@ -51,7 +51,7 @@ class ToolFactory:
             Newly constructed and configured Estimator instance
         """
         stage_class = PipelineStage.get_stage(class_name, module_name)
-        stage_obj = stage_class.make_stage(name=stage_name, model=model_path, input=data_path, **config_params)
+        stage_obj = stage_class.make_stage(name=stage_name, input=data_path, **config_params)
         cls._stage_dict[stage_name] = stage_obj
         return stage_obj
 
