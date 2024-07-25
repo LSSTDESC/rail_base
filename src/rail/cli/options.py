@@ -136,7 +136,6 @@ pipeline_yaml =  PartialOption(
     help="Yaml for that defines pipeline",
 )
 
->>>>>>> 6c5f883 (added options)
 git_mode = PartialOption(
     "--git-mode",
     type=EnumChoice(GitMode),
