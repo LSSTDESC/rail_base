@@ -139,3 +139,24 @@ def run_stage(pipeline_yaml, stage_name, dry_run, inputs):
         os.system(com)
     return 0
 
+
+@cli.command()
+@options.stage_name()
+@options.stage_class()
+@options.stage_module()
+@options.dry_run()
+@options.input_file()
+def run_tool(stage_name, stage_class, stage_module, dry_run, input_file):
+    """Run a pz estimation stage"""
+    stage = ToolFactory.build_tool_stage(
+        stage_name=stage_name,
+        class_name=stage_class,
+        module_name=stage_module,
+        data_path='dummy.in',
+    )
+
+    output = ToolFactory.run_tool_stage(
+        stage,
+        data_path=input_file,
+    )
+
