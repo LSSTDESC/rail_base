@@ -18,7 +18,7 @@ def test_pz_factory():
 
     input_file = find_rail_file('examples_data/testdata/validation_10gal.hdf5')
     
-    out_single = PZFactory.evaluate_single_pz(stage, {'d':np.array([1,1])})
+    out_single = PZFactory.estimate_single_pz(stage, {'d':np.array([1,1])})
     assert out_single.npdf == 1
 
     out_handle = PZFactory.run_cat_estimator_stage(

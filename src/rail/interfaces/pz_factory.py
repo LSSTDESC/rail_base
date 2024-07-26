@@ -97,7 +97,7 @@ class PZFactory:
         return stage_obj.estimate(handle)
 
     @staticmethod
-    def evaluate_single_pz(
+    def estimate_single_pz(
         stage_obj: CatEstimator,
         data_table: dict,
         input_size: int=1,
