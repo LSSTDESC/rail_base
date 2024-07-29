@@ -103,7 +103,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     def _setup_iterator(self):
 
         selected_bin = self.config.selected_bin
-        if self.config.tomography_bins == 'none':
+        if self.config.tomography_bins in ['none', None]:
             selected_bin = -1
 
         if selected_bin == -1:
@@ -121,10 +121,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    if self.config.selected_bin < 0:
-                        mask = np.ones(pz_data.npdf, dtype=bool)
-                    else:
-                        mask = d['class_id'] == self.config.selected_bin
+                    mask = d['class_id'] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
             yield start, end, pz_data, mask
