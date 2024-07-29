@@ -53,7 +53,7 @@ class RailStageBuild:
         self._stage = None
 
     @property
-    def io(self):
+    def io(self):  # pragma: no cover
         if self._stage:
             return self._stage.io
         return None

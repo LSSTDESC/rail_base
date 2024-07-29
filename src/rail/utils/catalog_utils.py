@@ -32,7 +32,7 @@ class CatalogConfigBase:
 
     @classmethod
     def apply(cls, tag):
-        cls._active_tag = None
+        cls._active_tag = tag
         cls._active_class = cls.sub_classes[tag]
         cls._active_class._apply()
         

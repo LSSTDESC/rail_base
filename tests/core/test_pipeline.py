@@ -1,4 +1,5 @@
 import os
+import pytest
 
 import ceci
 import numpy as np
@@ -99,3 +100,17 @@ def test_golden_v2():
 
     pr = ceci.Pipeline.read("stage.yaml")
     pr.run()
+
+
+def test_load_pipeline():
+    train_z_class = RailPipeline.load_pipeline_class(
+        'rail.pipelines.estimation.train_z_pipeline.TrainZPipeline'
+    )
+
+    check = RailPipeline.get_pipeline_class('TrainZPipeline')
+    assert check == train_z_class
+
+    RailPipeline.print_classes()
+
+    with pytest.raises(KeyError):
+        RailPipeline.get_pipeline_class('Does not exist')

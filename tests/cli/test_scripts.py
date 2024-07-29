@@ -39,4 +39,5 @@ def test_build_pipeline():
     scripts.build_pipeline(
         'rail.pipelines.estimation.train_z_pipeline.TrainZPipeline',
         'trainz_pipe.yaml',
+        input_dict = dict(input='dummy.ibn'),
     )
