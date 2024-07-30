@@ -139,7 +139,7 @@ class RailPipeline(MiniPipeline):
         )
         pipe.save(output_yaml)
 
-    def __init__(self, project=None):
+    def __init__(self):
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
     def __setattr__(self, name, value):

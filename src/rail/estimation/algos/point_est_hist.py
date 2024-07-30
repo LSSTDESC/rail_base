@@ -98,7 +98,6 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     """Summarizer which simply histograms a point estimate"""
 
     name = "PointEstHistMaskedSummarizer"
-
     config_options = PointEstHistSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, -1, msg="bin to use"),
@@ -130,7 +129,6 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
                     mask = d['class_id'] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
-
             yield start, end, pz_data, mask
 
     def summarize(self, input_data, tomo_bins=None):
@@ -158,3 +156,5 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
+
+

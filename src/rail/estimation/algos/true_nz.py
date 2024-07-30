@@ -64,7 +64,6 @@ class TrueNZHistogrammer(RailStage):
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
-        
 
         first = True
         for s, e, data, mask in iterator:

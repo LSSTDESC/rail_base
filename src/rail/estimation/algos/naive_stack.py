@@ -45,6 +45,7 @@ class NaiveStackSummarizer(PZSummarizer):
         for s, e, d in itr:
             yield s, e, d, np.ones(e-s, dtype=bool)
 
+
     def run(self):
         handle = self.get_handle("input", allow_missing=True)
         self._input_length = handle.size()
@@ -123,7 +124,6 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     mask = d['class_id'] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
-
             yield start, end, pz_data, mask
 
     def summarize(self, input_data, tomo_bins=None):
@@ -151,3 +151,5 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
+
+
