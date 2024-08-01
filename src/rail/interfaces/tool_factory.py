@@ -18,6 +18,39 @@ class ToolFactory:
         cls._stage_dict = {}
 
     @classmethod
+    def build_stage_instance(
+        cls,
+        stage_name: str, 
+        stage_class: type,
+        data_path: str = 'none',
+        **config_params: dict,
+    ) -> RailStage:
+        """ Build and configure a rail tool stage
+
+        Parameters
+        ----------
+        stage_name: str
+            Name of the stage instance, used to construct output file name
+
+        stage_class: type
+            Python class for the stage
+
+        data_path: str
+            Path to the input data, defaults to 'none' 
+
+        config_params: dict
+            Configuration parameters for the stage
+
+        Returns
+        -------
+        stage_obj: RailStage
+            Newly constructed and configured RailStage instance
+        """
+        stage_obj = stage_class.make_stage(name=stage_name, input=data_path, **config_params)
+        cls._stage_dict[stage_name] = stage_obj
+        return stage_obj
+
+    @classmethod
     def build_tool_stage(
         cls,
         stage_name: str,
@@ -49,11 +82,9 @@ class ToolFactory:
         -------
         stage_obj: CatEstimator
             Newly constructed and configured Estimator instance
-        """
+        """       
         stage_class = PipelineStage.get_stage(class_name, module_name)
-        stage_obj = stage_class.make_stage(name=stage_name, input=data_path, **config_params)
-        cls._stage_dict[stage_name] = stage_obj
-        return stage_obj
+        return cls.build_stage_instance(stage_name, stage_class, data_path, **config_params)
 
     @classmethod
     def get_tool_stage(

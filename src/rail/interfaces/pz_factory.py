@@ -19,6 +19,44 @@ class PZFactory:
         cls._stage_dict = {}
 
     @classmethod
+    def build_stage_instance(
+        cls,
+        stage_name: str, 
+        stage_class: type,
+        model_path: str,
+        data_path: str = 'none',
+        **config_params: dict,
+    ) -> CatEstimator:
+        """ Build and configure an estimator that can evalute
+        p(z) given an input catalog
+
+        Parameters
+        ----------
+        stage_name: str
+            Name of the stage instance, used to construct output file name
+
+        stage_class: type
+            Python class for the stage
+
+        model_path: str
+            Path to the model file used by this estimator
+
+        data_path: str
+            Path to the input data, defaults to 'none' 
+
+        config_params: dict
+            Configuration parameters for the stage
+
+        Returns
+        -------
+        stage_obj: CatEstimator
+            Newly constructed and configured Estimator instance
+        """
+        stage_obj = stage_class.make_stage(name=stage_name, model=model_path, input=data_path, **config_params)
+        cls._stage_dict[stage_name] = stage_obj
+        return stage_obj
+        
+    @classmethod
     def build_cat_estimator_stage(
         cls,
         stage_name: str,
@@ -57,9 +95,7 @@ class PZFactory:
             Newly constructed and configured Estimator instance
         """
         stage_class = PipelineStage.get_stage(class_name, module_name)
-        stage_obj = stage_class.make_stage(name=stage_name, model=model_path, input=data_path, **config_params)
-        cls._stage_dict[stage_name] = stage_obj
-        return stage_obj
+        return cls.build_stage_instance(stage_name, stage_class, model_path, data_path, **config_params)
 
     @classmethod
     def get_cat_estimator_stage(
