@@ -4,6 +4,7 @@ Abstract base classes defining Estimators of individual galaxy redshift uncertai
 
 import gc
 
+from ceci.config import StageParameter as Param
 from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import TableHandle, QPHandle, ModelHandle
 from rail.core.stage import RailStage
@@ -27,8 +28,11 @@ class CatEstimator(RailStage, PointEstimationMixin):
     name = "CatEstimator"
     config_options = RailStage.config_options.copy()
     config_options.update(
-        chunk_size=10000,
-        hdf5_groupname=SHARED_PARAMS["hdf5_groupname"],
+        chunk_size=Param(dtype=int, default=10000),
+        hdf5_groupname=SHARED_PARAMS,
+        zmin=SHARED_PARAMS,
+        zmax=SHARED_PARAMS,
+        nzbins=SHARED_PARAMS,
     )
     config_options.update(
         **PointEstimationMixin.config_options.copy(),
@@ -131,8 +135,11 @@ class CatEstimator(RailStage, PointEstimationMixin):
         qp_dstn = self.calculate_point_estimates(qp_dstn)
         if first:
             self._output_handle = self.add_handle("output", data=qp_dstn)
-            self._output_handle.initialize_write(
-                self._input_length, communicator=self.comm
-            )
+            if self.config.output_mode != 'return':
+                self._output_handle.initialize_write(
+                    self._input_length, communicator=self.comm
+                )
         self._output_handle.set_data(qp_dstn, partial=True)
-        self._output_handle.write_chunk(start, end)
+        if self.config.output_mode != 'return':
+            self._output_handle.write_chunk(start, end)
+        return qp_dstn
