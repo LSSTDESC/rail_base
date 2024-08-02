@@ -18,7 +18,7 @@ from rail.core.data import (
 )
 from rail.core.stage import RailStage
 from rail.utils.path_utils import RAILDIR
-from rail.utils.catalog_utils import CatalogConfigBase
+from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
 
 # def test_data_file():
 #    with pytest.raises(ValueError) as errinfo:
@@ -332,5 +332,13 @@ def test_catalog_utils():
     CatalogConfigBase.band_name_dict()['u'] = 'LSST_obs_u'
     assert CatalogConfigBase.active_tag() == 'rubin'
     assert CatalogConfigBase.active_class().tag == 'rubin'
+    
+    CatalogConfigBase.apply('roman_plus_rubin')
+    RomanPlusRubinCatalogConfig.band_name_dict()['u'] = 'LSST_obs_u'
+    assert CatalogConfigBase.active_tag() == 'roman_plus_rubin'
+    assert CatalogConfigBase.active_class().tag == 'roman_plus_rubin'    
+   
     CatalogConfigBase.apply('dc2')
     set_param_default('redshift_col', 'redshift')
+
+    
