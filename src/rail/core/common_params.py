@@ -15,6 +15,14 @@ lsst_def_maglims = dict(
     mag_z_lsst=27.98,
     mag_y_lsst=27.05,
 )
+lsst_def_a_env = dict(
+    mag_u_lsst=4.81,
+    mag_g_lsst=3.64,
+    mag_r_lsst=2.70,
+    mag_i_lsst=2.06,
+    mag_z_lsst=1.58,
+    mag_y_lsst=1.31,
+)
 
 
 SHARED_PARAMS = StageConfig(
@@ -37,6 +45,7 @@ SHARED_PARAMS = StageConfig(
         msg="Names of columns for magnitgude errors by filter band",
     ),
     mag_limits=Param(dict, lsst_def_maglims, msg="Limiting magnitdues by filter"),
+    band_a_env=Param(dict, lsst_def_a_env, msg="Redenning parameters"),
     ref_band=Param(str, "mag_i_lsst", msg="band to use in addition to colors"),
     redshift_col=Param(str, "redshift", msg="name of redshift column"),
     calculated_point_estimates=Param(
