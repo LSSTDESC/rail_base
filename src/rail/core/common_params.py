@@ -15,6 +15,7 @@ lsst_def_maglims = dict(
     mag_z_lsst=27.98,
     mag_y_lsst=27.05,
 )
+# default reddening parameters for LSST
 lsst_def_a_env = dict(
     mag_u_lsst=4.81,
     mag_g_lsst=3.64,
