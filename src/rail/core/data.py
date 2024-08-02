@@ -575,7 +575,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 def default_model_read(modelfile):
     """Default function to read model files, simply used pickle.load"""
     with open(modelfile, 'rb') as fin:
-        read_data = open(fin)
+        read_data = pickle.load(fin)
     if isinstance(read_data, Model):
         ret_data = read_data.data
     else:
