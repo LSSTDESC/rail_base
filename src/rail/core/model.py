@@ -168,7 +168,7 @@ class Model:
                 provenance = {}
             write_obj = cls(obj, creation_class_name, version, provenance)
 
-        write_obj.write(outpath)
+        write_obj.write(path)
         return write_obj
 
     def write(
