@@ -6,6 +6,8 @@ import enum
 import tables_io
 import qp
 
+from .model import Model
+
 
 class DataHandle:  # pylint: disable=too-many-instance-attributes
     """Class to act as a handle for a bit of data.  Associating it with a file and
@@ -572,7 +574,13 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 
 def default_model_read(modelfile):
     """Default function to read model files, simply used pickle.load"""
-    return pickle.load(open(modelfile, "rb"))
+    with open(modelfile, 'rb') as fin:
+        read_data = open(fin)
+    if isinstance(read_data, Model):
+        ret_data = read_data.data
+    else:
+        ret_data = read_data
+    return ret_data
 
 
 def default_model_write(model, path):
