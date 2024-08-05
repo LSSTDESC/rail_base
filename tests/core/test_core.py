@@ -16,6 +16,7 @@ from rail.core.data import (
     QPHandle,
     QPOrTableHandle,
 )
+from rail.core.model import Model
 from rail.core.stage import RailStage
 from rail.utils.path_utils import RAILDIR
 from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
@@ -231,14 +232,26 @@ def test_model_handle():
         "data",
         "CWW_HDFN_prior_copy.pkl",
     )
+    model_path_wrap = os.path.join(
+        RAILDIR,
+        "rail",
+        "examples_data",
+        "estimation_data",
+        "data",
+        "CWW_HDFN_prior_wrap.pkl",
+    )
     mh = ModelHandle("model", path=model_path)
-    mh2 = ModelHandle("model2", path=model_path)
-
+    mh2 = ModelHandle("model2", path=model_path)    
+    Model.wrap(model_path, model_path_wrap)
+    mh4 = ModelHandle("modelWrap", path=model_path_wrap)    
+    
     model1 = mh.read()
     model2 = mh2.read()
 
     model3 = mh.open()
-
+    
+    model4 = mh4.read()
+    
     assert model1 is model2
     assert model2 is model3
 
@@ -247,6 +260,9 @@ def test_model_handle():
         pickle.dump(obj=mh3.data, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
     os.remove(model_path_copy)
 
+
+
+    
 
 def test_data_store():
     DS = RailStage.data_store
