@@ -283,10 +283,7 @@ class TableHandle(DataHandle):
     def _size(self, path, **kwargs):
         if path in [None, "none", "None"]:  # pragma: no cover
             return 0
-        try:
-            return tables_io.io.getInputDataLength(path, **kwargs)
-        except Exception:
-            return 0
+        return tables_io.io.getInputDataLength(path, **kwargs)
 
     def _data_size(self, data, **kwargs):
         group_name = kwargs.get("groupname", None)

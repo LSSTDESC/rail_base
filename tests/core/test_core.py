@@ -35,9 +35,11 @@ def do_data_handle(datapath, handle_class):
         th.write()
 
     assert not th.has_data
-    check_size = th.size()
-    if check_size == 0:
-        print(f"Warning, failed to read size from {datapath}")
+    try:
+        check_size = th.size()
+    except NotImplementedError as msg:
+        if not isinstance(th, FitsHandle):
+            raise NotImplementedError(msg) from msg
 
     with pytest.raises(ValueError) as _errinfo:
         th.write_chunk(0, 1)
