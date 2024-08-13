@@ -30,6 +30,7 @@ SHARED_PARAMS = StageConfig(
     hdf5_groupname=Param(
         str, "photometry", msg="name of hdf5 group for data, if None, then set to ''"
     ),
+    chunk_size=Param(int, 10000, msg="Number of object per chunk for parallel processing"),
     zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
     zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
     nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),

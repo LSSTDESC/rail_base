@@ -5,6 +5,7 @@ Abstract base classes defining Summarizers of the redshift distribution of an en
 import numpy as np
 
 from rail.core.data import QPHandle, TableHandle, ModelHandle
+from rail.core.common_params import SHARED_PARAMS
 from rail.core.stage import RailStage
 
 # for backwards compatibility
@@ -22,7 +23,7 @@ class CatSummarizer(RailStage):
 
     name = "CatSummarizer"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=10000)
+    config_options.update(chunk_size=SHARED_PARAMS)
     inputs = [("input", TableHandle)]
     outputs = [("output", QPHandle)]
 
@@ -66,7 +67,7 @@ class PZSummarizer(RailStage):
 
     name = "PZtoNZSummarizer"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=10000)
+    config_options.update(chunk_size=SHARED_PARAMS)
     inputs = [("model", ModelHandle), ("input", QPHandle)]
     outputs = [("output", QPHandle)]
 
@@ -129,7 +130,7 @@ class SZPZSummarizer(RailStage):
 
     name = "SZPZtoNZSummarizer"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=10000)
+    config_options.update(chunk_size=SHARED_PARAMS)
     inputs = [
         ("input", TableHandle),
         ("spec_input", TableHandle),

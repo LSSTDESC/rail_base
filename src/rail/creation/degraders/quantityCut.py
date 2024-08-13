@@ -2,6 +2,7 @@
 
 from numbers import Number
 
+from ceci.config import StageParameter as Param
 import numpy as np
 from rail.creation.selector import Selector
 
@@ -15,7 +16,9 @@ class QuantityCut(Selector):
 
     name = "QuantityCut"
     config_options = Selector.config_options.copy()
-    config_options.update(cuts=dict)
+    config_options.update(
+        cuts=Param(dict, required=True, msg="Cuts to apply"),
+    )
 
     def __init__(self, args, **kwargs):
         """Constructor.

@@ -4,6 +4,7 @@ The key feature is that the __call__ method takes a pandas DataFrame and a seed,
 and returns a pandas DataFrame, and wraps the run method.
 """
 
+from ceci.config import StageParameter as Param
 from rail.core.stage import RailStage
 from rail.core.data import PqHandle
 
@@ -19,7 +20,9 @@ class Degrader(RailStage):  # pragma: no cover
 
     name = "Degrader"
     config_options = RailStage.config_options.copy()
-    config_options.update(seed=12345)
+    config_options.update(
+        seed=Param(int, default=12345, msg="Random number seed"),
+    )
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 

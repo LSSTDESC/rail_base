@@ -28,7 +28,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
     name = "CatEstimator"
     config_options = RailStage.config_options.copy()
     config_options.update(
-        chunk_size=Param(dtype=int, default=10000),
+        chunk_size=SHARED_PARAMS,
         hdf5_groupname=SHARED_PARAMS,
         zmin=SHARED_PARAMS,
         zmax=SHARED_PARAMS,

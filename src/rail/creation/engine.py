@@ -6,6 +6,7 @@ defined by the Creator.
 """
 
 import qp
+from ceci.config import StageParameter as Param
 from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle
 from rail.core.stage import RailStage
 
@@ -15,7 +16,9 @@ class Modeler(RailStage):  # pragma: no cover
 
     name = "Modeler"
     config_options = RailStage.config_options.copy()
-    config_options.update(seed=12345)
+    config_options.update(
+        seed=Param(int, default=12345, msg="Random number seed"),
+    )
     inputs = [("input", DataHandle)]
     outputs = [("model", ModelHandle)]
 
@@ -52,7 +55,10 @@ class Creator(RailStage):  # pragma: no cover
 
     name = "Creator"
     config_options = RailStage.config_options.copy()
-    config_options.update(n_samples=int, seed=12345)
+    config_options.update(
+        n_samples=Param(int, required=True, msg="Number of samples to create"),
+        seed=Param(int, default=12345, msg="Random number seed"),
+    )
     inputs = [("model", ModelHandle)]
     outputs = [("output", TableHandle)]
 
@@ -137,7 +143,9 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
 
     name = "PosteriorCalculator"
     config_options = RailStage.config_options.copy()
-    config_options.update(column=str)
+    config_options.update(
+        column=Param(str, required=True, msg="Column to compute posterior for"),
+    )
     inputs = [
         ("model", ModelHandle),
         ("input", TableHandle),

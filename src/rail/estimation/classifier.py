@@ -4,6 +4,7 @@ Abstract base classes defining classifiers.
 
 import gc
 from rail.core.data import QPHandle, TableHandle, ModelHandle, Hdf5Handle
+from rail.core.common_params import SHARED_PARAMS
 from rail.core.stage import RailStage
 
 
@@ -19,7 +20,10 @@ class CatClassifier(RailStage):  # pragma: no cover
 
     name = "CatClassifier"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=10000, hdf5_groupname=str)
+    config_options.update(
+        chunk_size=SHARED_PARAMS,
+        hdf5_groupname=SHARED_PARAMS,
+    )
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", TableHandle)]
 
@@ -102,7 +106,7 @@ class PZClassifier(RailStage):
 
     name = "PZClassifier"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=10000)
+    config_options.update(chunk_size=SHARED_PARAMS)
     inputs = [("input", QPHandle)]
     outputs = [("output", Hdf5Handle)]
 

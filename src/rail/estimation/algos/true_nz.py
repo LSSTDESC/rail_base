@@ -22,8 +22,8 @@ class TrueNZHistogrammer(RailStage):
         nzbins=SHARED_PARAMS,
         redshift_col=SHARED_PARAMS,
         selected_bin=Param(int, -1, msg="Which tomography bin to consider"),
-        chunk_size=10000,
-        hdf5_groupname="",
+        chunk_size=SHARED_PARAMS,
+        hdf5_groupname=SHARED_PARAMS,
     )
     inputs = [("input", TableHandle), ("tomography_bins", TableHandle)]
     outputs = [("true_NZ", QPHandle)]
