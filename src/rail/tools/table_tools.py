@@ -2,6 +2,7 @@
 
 import tables_io
 
+from ceci.config import StageParameter as Param
 from rail.core.stage import RailStage
 
 from rail.core.data import PqHandle, Hdf5Handle
@@ -21,7 +22,10 @@ class ColumnMapper(RailStage):
 
     name = "ColumnMapper"
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=100_000, columns=dict, inplace=False)
+    config_options.update(
+        columns=Param(dict, required=True, msg="Map of columns to rename"),
+        inplace=Param(bool, default=False, msg="Update file in place"),
+    )
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
@@ -70,7 +74,10 @@ class RowSelector(RailStage):
 
     name = "RowSelector"
     config_options = RailStage.config_options.copy()
-    config_options.update(start=int, stop=int)
+    config_options.update(
+        start=Param(int, required=True, msg="Starting row number"),
+        stop=Param(int, required=True, msg="Stoppig row number"),
+    )                       
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
@@ -112,7 +119,9 @@ class TableConverter(RailStage):
 
     name = "TableConverter"
     config_options = RailStage.config_options.copy()
-    config_options.update(output_format=str)
+    config_options.update(
+        output_format=Param(str, required=True, msg="Format of output table"),
+    )
     inputs = [("input", PqHandle)]
     outputs = [("output", Hdf5Handle)]
 
