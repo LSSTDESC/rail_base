@@ -493,7 +493,7 @@ class RailStage(PipelineStage):
             except Exception:
                 groupname = None
             
-            if groupname == None
+            if groupname == None:
                 col_list = list(data.keys())
             else:
                 col_list = list(data[groupname].keys())
