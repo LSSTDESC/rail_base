@@ -482,12 +482,15 @@ class RailStage(PipelineStage):
         handle.path = final_name
         return final_name
 
-    def check_column_names(self, data, columns_to_check, **kwargs):
+    def _check_column_names(self, data, columns_to_check, **kwargs):
         if isinstance(data, DataHandle):
             # directly grabbing the column names from file path
-            data.check_data_columns(columns_to_check, **kwargs)
+            # question: is parent_groupnane the same thing as hdf5_groupname?
+            # and where do we get it?
+            parent_groupname = kwargs.get("parent_groupname")
+            kwargs = data._kwargs
+            data._check_data_columns(path, columns_to_check, parent_groupname=parent_groupname, **kwargs)
         else:
-            # maybe do the type thing in tables_io directly??
             try:
                 groupname = kwargs.get("groupname", self.config.hdf5_groupname)
             except Exception:
@@ -502,6 +505,10 @@ class RailStage(PipelineStage):
             if len(intersection)<len(columns_to_check):
                 diff = set(columns_to_check) - intersection
                 raise KeyError("The following columns are not found: ", diff)
-
+                
+    def _get_stage_columns(self):
+        self.stage_columns = None
+                
+    
             
         

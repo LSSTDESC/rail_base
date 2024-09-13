@@ -242,9 +242,10 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
             return f"{tag}.{cls.suffix}"
         return tag  # pragma: no cover
     
-    def check_data_columns(self, columns_to_check, **kwargs):
-        self._check_data_columns(self.path, columns_to_check, **kwargs)
-
+    @classmethod
+    def _check_data_columns(cls, path, columns_to_check, parent_groupname=None, **kwargs):
+        raise NotImplementedError
+    
 
 class TableHandle(DataHandle):
     """DataHandle for single tables of data"""
@@ -325,8 +326,9 @@ class TableHandle(DataHandle):
         """Iterate over the data"""
         return tables_io.iteratorNative(path, **kwargs)
     
-    def _check_data_columns(cls, path, columns_to_check, **kwargs):
-        tables_io.io.check_columns(path, columns_to_check, **kwargs)
+    @classmethod
+    def _check_data_columns(cls, path, columns_to_check, parent_groupname=None, **kwargs):
+        tables_io.io.check_columns(path, columns_to_check, parent_groupname=parent_groupname, **kwargs)
 
 
 class Hdf5Handle(TableHandle):  # pragma: no cover

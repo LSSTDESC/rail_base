@@ -53,6 +53,18 @@ class TrainZInformer(CatInformer):
         zgrid = midpoints
         self.model = trainZmodel(zgrid, train_pdf, zmode)
         self.add_data("model", self.model)
+        
+        
+    def validate(self):
+        # this is the validate from ceci
+        self._get_stage_columns()
+        data = self.get_handle("input", allow_missing=True)
+        # where do we get the kwargs for tables_io.open()?
+        self._check_column_names(data, self.stage_columns, **kwargs)
+        
+    def _get_stage_columns(self):
+        self.stage_columns=[]
+        self.stage_columns.append(SHARED_PARAMS["redshift_col"])
 
 
 class TrainZEstimator(CatEstimator):

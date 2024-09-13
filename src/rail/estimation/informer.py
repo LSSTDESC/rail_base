@@ -61,18 +61,12 @@ class CatInformer(RailStage):
         model : ModelHandle
             Handle providing access to trained model
         """
-        
-        self._get_required_columns()
-        self.check_column_names(training_data, self.columns_to_check, **self._kwargs)
-        
+            
         self.set_data("input", training_data)
+        self.validate()
         self.run()
         self.finalize()
         return self.get_handle("model")
-    
-    def _get_required_columns(self):
-        # Modify this function for each type of informer
-        self.columns_to_check = None
 
 
 class PzInformer(RailStage):
@@ -125,7 +119,9 @@ class PzInformer(RailStage):
         model : ModelHandle
             Handle providing access to trained model
         """
+        
         self.set_data("input", training_data)
+        self.validate()
         self.run()
         self.finalize()
         return self.get_handle("model")
