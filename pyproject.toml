@@ -20,7 +20,8 @@ dependencies = [
     "pyyaml",
     "numpy<2.0.0",
     "click",
-    "ceci>=2.0.1",
+    #"ceci>=2.0.1",
+    "ceci@git+https://github.com/LSSTDESC/ceci"
     "qp-prob>=0.8.3",
     "scipy>=1.9.0",
 ]
