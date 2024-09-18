@@ -244,7 +244,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
     
     @classmethod
     def _check_data_columns(cls, path, columns_to_check, parent_groupname=None, **kwargs):
-        raise NotImplementedError
+        raise NotImplementedError # pragma: no cover
     
 
 class TableHandle(DataHandle):

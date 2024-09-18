@@ -100,6 +100,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
             Handle providing access to QP ensemble with output data
         """
         self.set_data("input", input_data)
+        self.validate()
         self.run()
         self.finalize()
         return self.get_handle("output")
