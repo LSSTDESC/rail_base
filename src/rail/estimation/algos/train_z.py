@@ -59,9 +59,9 @@ class TrainZInformer(CatInformer):
         # this is the validate from ceci
         self._get_stage_columns()
         data = self.get_handle("input", allow_missing=True)
-        # where do we get the kwargs for tables_io.open()?
-        kwargs = self._kwargs
-        self._check_column_names(data, self.stage_columns, **kwargs)
+        # **kwargs in the function below is omitted 
+        # as these params are not yet implemented
+        self._check_column_names(data, self.stage_columns)
         
     def _get_stage_columns(self):
         self.stage_columns=[]

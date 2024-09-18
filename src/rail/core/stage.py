@@ -488,16 +488,27 @@ class RailStage(PipelineStage):
         except Exception:
             groupname = None
         
-        if isinstance(data, DataHandle):
-            # directly grabbing the column names from file path
-            # question: is parent_groupnane the same thing as hdf5_groupname?
-            # and where do we get it?
-            data._check_data_columns(path, columns_to_check, parent_groupname=groupname, **kwargs)
+        if isinstance(data, DataHandle) and data.has_data == False:
+            if data.has_path == True:
+                # data handle only has a path, read the columns from the path
+                path = data.path
+                data._check_data_columns(path, columns_to_check, parent_groupname=groupname, **kwargs)
+            elif data.has_path == False:
+                print("The data handle does not contain data or path.")
+                    
         else:
-            if groupname == None:
-                col_list = list(data.keys())
+            # data has been read in, access the columns in the table/dictionary directly
+            if isinstance(data, DataHandle) and data.has_data == True:
+                if groupname == None:
+                    col_list = list(data.data.keys())
+                else:
+                    col_list = list(data.data[groupname].keys()) 
             else:
-                col_list = list(data[groupname].keys())
+                # data is passed as a table
+                if groupname == None:
+                    col_list = list(data.keys())
+                else:
+                    col_list = list(data[groupname].keys())
             # check columns
             intersection = set(columns_to_check).intersection(col_list)
             if len(intersection)<len(columns_to_check):

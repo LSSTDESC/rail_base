@@ -703,7 +703,7 @@ class DataStore(dict):
         if check is not None and not self.allow_overwrite:
             raise ValueError(
                 f"DataStore already has an item with key {key},"
-                "of type {type(check)}, created by {check.creator}"
+                f"of type {type(check)}, created by {check.creator}"
             )
         dict.__setitem__(self, key, value)
         return value
