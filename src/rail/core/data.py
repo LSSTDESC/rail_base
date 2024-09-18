@@ -243,7 +243,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         return tag  # pragma: no cover
     
     @classmethod
-    def _check_data_columns(cls, path, columns_to_check, **kwargs):
+    def _check_data_columns(cls, path, columns_to_check, parent_groupname=None, **kwargs):
         """Checking if certain columns required by the stage is present in the data"""
         # path: the path to data file
         # columns_to_check: list of columns required by the specific stage
