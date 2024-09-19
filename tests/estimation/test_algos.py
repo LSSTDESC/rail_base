@@ -1,6 +1,7 @@
 import os
 import numpy as np
 import scipy.special
+import pytest
 
 from rail.utils.testing_utils import one_algo
 from rail.core.stage import RailStage
