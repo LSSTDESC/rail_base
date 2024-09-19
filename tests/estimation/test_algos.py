@@ -73,6 +73,7 @@ def test_train_pz_with_wrong_columns():
 
     # ! create training data to be a data handle with path only
     # ! however it seems that with set_data() one always reads in the data
+    # ! hence the way we make the data here:
     training_data = DS.add_handle("pq", PqHandle, path=datapath_pq)
     
     train_config_dict = dict(
