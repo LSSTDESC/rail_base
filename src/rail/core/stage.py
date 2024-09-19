@@ -505,7 +505,7 @@ class RailStage(PipelineStage):
                     col_list = list(data.data[groupname].keys()) 
             else:
                 # data is passed as a table
-                if if groupname in [None, ""]:
+                if groupname in [None, ""]:
                     col_list = list(data.keys())
                 else:
                     col_list = list(data[groupname].keys())
