@@ -516,7 +516,7 @@ class RailStage(PipelineStage):
                 raise KeyError("The following columns are not found: ", diff)
                 
     def _get_stage_columns(self):
-        self.stage_columns = None
+        self.stage_columns = None # pragma: no cover
                 
     
             

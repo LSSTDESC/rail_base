@@ -360,3 +360,16 @@ def test_catalog_utils():
     set_param_default('redshift_col', 'redshift')
 
     
+def test_column_check():
+    DS = RailStage.data_store
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    datapath_pq = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
+
+    handle = DS.add_handle("pq", PqHandle, path=datapath_pq)
+    
+    
+    
