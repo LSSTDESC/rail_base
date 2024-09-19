@@ -6,6 +6,7 @@ from rail.utils.testing_utils import one_algo
 from rail.core.stage import RailStage
 from rail.estimation.algos import random_gauss, train_z
 from rail.utils.path_utils import RAILDIR
+from rail.core.data import PqHandle
 
 sci_ver_str = scipy.__version__.split(".")
 
