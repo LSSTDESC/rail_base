@@ -486,7 +486,7 @@ class RailStage(PipelineStage):
         try:
             groupname = kwargs.get("groupname", self.config.hdf5_groupname)
         except Exception:
-            groupname = None
+            groupname = None # pragma: no cover
         
         if isinstance(data, DataHandle) and data.has_data == False:
             if data.has_path == True:
@@ -494,7 +494,7 @@ class RailStage(PipelineStage):
                 path = data.path
                 data._check_data_columns(path, columns_to_check, parent_groupname=groupname, **kwargs)
             elif data.has_path == False:
-                print("The data handle does not contain data or path.")
+                print("The data handle does not contain data or path.") # pragma: no cover
                     
         else:
             # data has been read in, access the columns in the table/dictionary directly
