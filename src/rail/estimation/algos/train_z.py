@@ -56,7 +56,7 @@ class TrainZInformer(CatInformer):
         
         
     def validate(self):
-        # this is the validate from ceci
+        """Validation which checks if the required column names by the stage exist in the data"""
         self._get_stage_columns()
         data = self.get_handle("input", allow_missing=True)
         # **kwargs in the function below is omitted 
@@ -64,8 +64,7 @@ class TrainZInformer(CatInformer):
         self._check_column_names(data, self.stage_columns)
         
     def _get_stage_columns(self):
-        self.stage_columns=[]
-        self.stage_columns.append(self.config.redshift_col)
+        self.stage_columns=[self.config.redshift_col]
 
 
 class TrainZEstimator(CatEstimator):

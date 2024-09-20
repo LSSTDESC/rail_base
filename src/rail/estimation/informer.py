@@ -43,7 +43,7 @@ class CatInformer(RailStage):
         This will attach the input_data to this `Informer`
         (for introspection and provenance tracking).
 
-        Then it will call the run() and finalize() methods, which need to
+        Then it will call the run(), validate() and finalize() methods, which need to
         be implemented by the sub-classes.
 
         The run() method will need to register the model that it creates to this Estimator
@@ -101,7 +101,7 @@ class PzInformer(RailStage):
         This will attach the input_data to this `Informer`
         (for introspection and provenance tracking).
 
-        Then it will call the run() and finalize() methods, which need to
+        Then it will call the run(), validate() and finalize() methods, which need to
         be implemented by the sub-classes.
 
         The run() method will need to register the model that it creates to this Estimator

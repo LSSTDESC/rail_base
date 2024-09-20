@@ -74,7 +74,7 @@ class RandomGaussEstimator(CatEstimator):
 
         
     def validate(self):
-        # this is the validate from ceci
+        """Validation which checks if the required column names by the stage exist in the data"""
         self._get_stage_columns()
         data = self.get_handle("input", allow_missing=True)
         # **kwargs in the function below is omitted 
@@ -82,5 +82,4 @@ class RandomGaussEstimator(CatEstimator):
         self._check_column_names(data, self.stage_columns)
         
     def _get_stage_columns(self):
-        self.stage_columns=[]
-        self.stage_columns.append(self.config.column_name)
+        self.stage_columns=[self.config.column_name]
