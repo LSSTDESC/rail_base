@@ -80,8 +80,9 @@ class CosmicVarianceStackInformer(PzInformer):
     inputs = [("input", TableHandle)]
     outputs = [("model", ModelHandle)]
 
-    def __init__(self, args, comm=None):
-        PzInformer.__init__(self, args, comm=comm)
+    def __init__(self, args, **kwargs):
+        
+        super().__init__(args, **kwargs)
 
     def model_varN_overN(self, amp, gamma):
         """
@@ -163,8 +164,8 @@ class CosmicVarianceStackSummarizer(PZSummarizer):
     inputs = [("input", QPHandle), ("model", ModelHandle)]
     outputs = [("output", QPHandle)]
 
-    def __init__(self, args, comm=None):
-        PZSummarizer.__init__(self, args, comm=comm)
+    def __init__(self, args, **kwargs):
+        super().__init__(args, **kwargs)
 
     def rebin(self, breaks_new): 
         """

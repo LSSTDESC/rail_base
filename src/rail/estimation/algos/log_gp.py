@@ -181,12 +181,13 @@ class LogisticGPSummarizer(PZSummarizer):
         zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
         nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
         n_steps=Param(int, 5000, msg="N-steps for MCMC sampling"),
+        afterburner = Param(int, 2000, msg = 'Remove the samples before chain converge')
         )
     inputs = [("input", QPHandle), ("model", ModelHandle)]
     outputs = [("output", QPHandle)]
 
-    def __init__(self, args, comm=None):
-        PZSummarizer.__init__(self, args, comm=comm)
+    def __init__(self, args, **kwargs):
+        super().__init__(args, **kwargs)
 
     
     def summarize(self, input_data, model):
@@ -247,9 +248,12 @@ class LogisticGPSummarizer(PZSummarizer):
                 trace_amp.append(trace_amp[-1])
 
             #update svec
+            
+            
+            
             loss_svec_given_amp = loglike_model.loglike_svec_given_amp(self.zgrid_mid, trace_amp[-1])
             sample_svec = EllipticalSliceSampler(mean_pz,cov_pz, loss_svec_given_amp)
-
+            
             trace_svec.append(sample_svec.sample(20, 10)[-1])
         return np.array(trace_amp), np.array(trace_svec)
 
@@ -269,7 +273,7 @@ class LogisticGPSummarizer(PZSummarizer):
         
         self.trace_nz0 = np.array([convert_s_to_nz(el) for el in self.trace_bin0[:, 1:]])
         
-        nzs = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid_mid, yvals=self.trace_nz0))
+        nzs = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid_mid, yvals=self.trace_nz0[self.config.afterburner:]))
         
         self.add_data('output', nzs)
         
