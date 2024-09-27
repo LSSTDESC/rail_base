@@ -102,7 +102,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        results = self.get_handle("output")
+        results.read(force = True)
+        return results
 
     def run(self):
         self.open_model(**self.config)
