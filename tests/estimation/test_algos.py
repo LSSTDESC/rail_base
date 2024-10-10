@@ -1,9 +1,13 @@
+import os
 import numpy as np
 import scipy.special
+import pytest
 
 from rail.utils.testing_utils import one_algo
 from rail.core.stage import RailStage
 from rail.estimation.algos import random_gauss, train_z
+from rail.utils.path_utils import RAILDIR
+from rail.core.data import PqHandle, TableHandle
 
 sci_ver_str = scipy.__version__.split(".")
 
@@ -54,3 +58,129 @@ def test_train_pz():
     )
     assert np.isclose(results.ancil["zmode"], zb_expected).all()
     assert np.isclose(results.ancil["zmode"], rerun_results.ancil["zmode"]).all()
+    
+    
+    
+def test_train_pz_with_wrong_columns_path():
+    
+    DS = RailStage.data_store
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    datapath_pq = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
+
+    # ! create training data to be a data handle with path only
+    # ! however it seems that with set_data() one always reads in the data
+    # ! hence the way we make the data here:
+    training_data1 = DS.add_handle("pq1", PqHandle, path=datapath_pq)
+    
+    train_config_dict = dict(
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+        hdf5_groupname=None,
+        model="model_train_z.tmp",
+        redshift_col="REDSHIFT",
+    )
+    
+    train_algo = train_z.TrainZInformer
+    train_pz = train_algo.make_stage(**train_config_dict)
+    train_pz._get_stage_columns()
+    with pytest.raises(KeyError):
+        # testing the case where only path exist
+        train_pz._check_column_names(training_data1, train_pz.stage_columns)
+
+
+def test_train_pz_with_wrong_columns_nogroupname():
+    
+    DS = RailStage.data_store
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    datapath_pq = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
+
+    training_data2 = DS.read_file("pq2", PqHandle, path=datapath_pq)
+    
+    train_config_dict = dict(
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+        hdf5_groupname=None,
+        model="model_train_z.tmp",
+        redshift_col="REDSHIFT",
+    )
+    
+    train_algo = train_z.TrainZInformer
+    train_pz = train_algo.make_stage(**train_config_dict)
+    train_pz._get_stage_columns()
+    with pytest.raises(KeyError):
+        # testing the case where data handle has no hdf5 group name
+        train_pz._check_column_names(training_data2, train_pz.stage_columns)
+        
+
+def test_train_pz_with_wrong_columns_table():
+    
+    DS = RailStage.data_store
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    datapath_pq = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
+    )
+
+    # ! create training data to be a table
+    # ! however it seems that with set_data() one always reads in the data handle
+    # ! hence the way we make the data here:
+    training_data2 = DS.read_file("pq2", PqHandle, path=datapath_pq)
+    training_data3 = training_data2.data
+    
+    train_config_dict = dict(
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+        hdf5_groupname=None,
+        model="model_train_z.tmp",
+        redshift_col="REDSHIFT",
+    )
+    
+    train_algo = train_z.TrainZInformer
+    train_pz = train_algo.make_stage(**train_config_dict)
+    train_pz._get_stage_columns()
+    with pytest.raises(KeyError):
+        # testing the case where data is a table
+        train_pz._check_column_names(training_data3, train_pz.stage_columns)
+        
+        
+def test_train_pz_with_wrong_columns_table_wgroupname():
+    
+    DS = RailStage.data_store
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
+
+    # ! create training data to be a table
+    # ! however it seems that with set_data() one always reads in the data handle
+    # ! hence the way we make the data here:
+    training_data2 = DS.read_file("training_data", TableHandle, traindata)
+    training_data3 = training_data2.data
+    
+    train_config_dict = dict(
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+        hdf5_groupname="photometry",
+        model="model_train_z.tmp",
+        redshift_col="REDSHIFT",
+    )
+    
+    train_algo = train_z.TrainZInformer
+    train_pz = train_algo.make_stage(**train_config_dict)
+    train_pz._get_stage_columns()
+    with pytest.raises(KeyError):
+        # testing the case where data is a table
+        train_pz._check_column_names(training_data3, train_pz.stage_columns)

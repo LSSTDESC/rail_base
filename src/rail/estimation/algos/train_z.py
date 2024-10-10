@@ -53,6 +53,18 @@ class TrainZInformer(CatInformer):
         zgrid = midpoints
         self.model = trainZmodel(zgrid, train_pdf, zmode)
         self.add_data("model", self.model)
+        
+        
+    def validate(self):
+        """Validation which checks if the required column names by the stage exist in the data"""
+        self._get_stage_columns()
+        data = self.get_handle("input", allow_missing=True)
+        # **kwargs in the function below is omitted 
+        # as these params are not yet implemented
+        self._check_column_names(data, self.stage_columns)
+        
+    def _get_stage_columns(self):
+        self.stage_columns=[self.config.redshift_col]
 
 
 class TrainZEstimator(CatEstimator):
@@ -85,3 +97,4 @@ class TrainZEstimator(CatEstimator):
         )
         qp_d.set_ancil(dict(zmode=zmode))
         self._do_chunk_output(qp_d, start, end, first)
+
