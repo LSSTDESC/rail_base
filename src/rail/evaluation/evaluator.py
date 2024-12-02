@@ -481,7 +481,6 @@ class OldEvaluator(RailStage):
         out_table = {}
         for pit_metric in pit_metrics:
             value = PIT_METRICS[pit_metric]()
-
             # The result objects of some meta-metrics are bespoke scipy objects with inconsistent fields.
             # Here we do our best to store the relevant fields in `out_table`.
             if isinstance(value, list):  # pragma: no cover
@@ -489,11 +488,10 @@ class OldEvaluator(RailStage):
             elif pit_metric== 'OutRate':
                 out_table[f"PIT_{pit_metric}_stat"] = [value]
             else:
-
                 out_table[f"PIT_{pit_metric}_stat"] = [
                     getattr(value, "statistic", None)
                 ]
-                if getattr(value, "p_value", None) is not None:
+                if getattr(value, "pvalue", None) is not None:
                     out_table[f"PIT_{pit_metric}_pval"] = [getattr(value, "p_value", None)]
                 if getattr(value, "significance_level", None) is not None:
                     out_table[f"PIT_{pit_metric}_significance_level"] = [
