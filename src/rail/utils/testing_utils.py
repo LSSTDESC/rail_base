@@ -108,11 +108,11 @@ def check_stage_params(stage_class):
     return None
 
 
-def build_and_read_pipeline(pipeline_class):
+def build_and_read_pipeline(pipeline_class, **kwargs):
     short_name = pipeline_class.split('.')[-1]
     yaml_file = f"{short_name}.yml"
     config_yaml_file = f"{short_name}_config.yml"
-    build_pipeline(pipeline_class, yaml_file, 'rubin')
+    build_pipeline(pipeline_class, yaml_file, 'rubin', **kwargs)
     pr = ceci.Pipeline.read(yaml_file)    
     os.unlink(yaml_file)
     os.unlink(config_yaml_file)
