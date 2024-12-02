@@ -241,7 +241,15 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         if cls.suffix:
             return f"{tag}.{cls.suffix}"
         return tag  # pragma: no cover
-
+    
+    @classmethod
+    def _check_data_columns(cls, path, columns_to_check, **kwargs):
+        """Checking if certain columns required by the stage is present in the data"""
+        # path: the path to data file
+        # columns_to_check: list of columns required by the specific stage
+        # kwargs: other key arguments required by specific data type, see below
+        raise NotImplementedError # pragma: no cover
+    
 
 class TableHandle(DataHandle):
     """DataHandle for single tables of data"""
@@ -321,6 +329,10 @@ class TableHandle(DataHandle):
     def _iterator(cls, path, **kwargs):
         """Iterate over the data"""
         return tables_io.iteratorNative(path, **kwargs)
+    
+    @classmethod
+    def _check_data_columns(cls, path, columns_to_check, parent_groupname=None, **kwargs):
+        tables_io.io.check_columns(path, columns_to_check, parent_groupname=parent_groupname, **kwargs)
 
 
 class Hdf5Handle(TableHandle):  # pragma: no cover
@@ -695,7 +707,7 @@ class DataStore(dict):
         if check is not None and not self.allow_overwrite:
             raise ValueError(
                 f"DataStore already has an item with key {key},"
-                "of type {type(check)}, created by {check.creator}"
+                f"of type {type(check)}, created by {check.creator}"
             )
         dict.__setitem__(self, key, value)
         return value

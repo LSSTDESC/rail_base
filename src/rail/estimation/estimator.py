@@ -80,7 +80,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
         This will attach the input data (defined in ``inputs`` as "input") to this
         ``Estimator`` (for introspection and provenance tracking). Then call the
-        ``run()`` and ``finalize()`` methods.
+        ``run()``, ``validate()``, and ``finalize()`` methods.
 
         The run method will call ``_process_chunk()``, which needs to be implemented
         in the subclass, to process input data in batches. See ``RandomGaussEstimator``
@@ -100,6 +100,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
             Handle providing access to QP ensemble with output data
         """
         self.set_data("input", input_data)
+        self.validate()
         self.run()
         self.finalize()
         results = self.get_handle("output")

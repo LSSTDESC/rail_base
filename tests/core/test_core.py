@@ -360,3 +360,4 @@ def test_catalog_utils():
     set_param_default('redshift_col', 'redshift')
 
     
+    
