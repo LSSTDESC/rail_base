@@ -4,7 +4,7 @@ import yaml
 import rail.stages
 from rail.core import RailEnv
 from rail.core.stage import RailPipeline
-from rail.cli.options import GitMode
+from rail.cli.rail.options import GitMode
 from rail.utils.path_utils import RAILDIR
 from rail.utils import catalog_utils
 
