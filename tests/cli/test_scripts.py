@@ -2,7 +2,7 @@ import glob
 import os
 import pytest
 from rail.cli.rail import scripts
-from rail.cli..rail.options import args_to_dict, GitMode
+from rail.cli.rail.options import args_to_dict, GitMode
 
 
 
