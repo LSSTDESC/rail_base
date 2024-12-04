@@ -39,7 +39,7 @@ dev = [
 ]
 
 [project.scripts]
-rail = "rail.cli.commands:cli"
+rail = "rail.cli.rail.commands:cli"
 
 [build-system]
 requires = [
