@@ -6,7 +6,7 @@ import ceci
 from rail.core.stage import RailStage
 from rail.utils.path_utils import RAILDIR
 from rail.core.data import TableHandle
-from rail.cli.scripts import build_pipeline
+from rail.cli.rail.scripts import build_pipeline
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
 validdata = os.path.join(RAILDIR, "rail/examples_data/testdata/validation_10gal.hdf5")
