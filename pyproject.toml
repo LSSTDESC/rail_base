@@ -18,7 +18,7 @@ dynamic = ["version"]
 dependencies = [
     "deprecated",
     "pyyaml",
-    "numpy<2.0.0",
+    "numpy",
     "click",
     #"ceci>=2.0.1",
     "ceci@git+https://github.com/LSSTDESC/ceci",
