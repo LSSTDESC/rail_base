@@ -261,9 +261,7 @@ def test_model_handle():
     with mh3.open(mode="w") as fout:
         pickle.dump(obj=mh3.data, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
     os.remove(model_path_copy)
-
-
-
+    os.remove(model_path_wrap)
     
 
 def test_data_store():

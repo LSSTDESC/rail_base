@@ -168,7 +168,7 @@ class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
                 for key_ in self._cached_data:
                     if key_.find(metric) == 0:
                         matching_keys.append(key_)
-                if not matching_keys:
+                if not matching_keys:  # pragma: no cover
                     print(
                         f"Skipping {metric} which did not cache data {list(self._cached_data.keys())}"
                     )
@@ -389,7 +389,7 @@ class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
             this_metric_class = self._metric_dict[metric_name_]
             try:
                 this_metric = this_metric_class(**sub_dict)
-            except (TypeError, KeyError):
+            except (TypeError, KeyError):  # pragma: no cover
                 sub_dict.pop("limits")
                 this_metric = this_metric_class(**sub_dict)
             self._cached_metrics[metric_name_] = this_metric

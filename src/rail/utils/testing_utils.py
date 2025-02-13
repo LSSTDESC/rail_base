@@ -100,9 +100,9 @@ def check_stage_params(stage_class):
             dtype = val
         else:
             dtype = type(val)
-        if dtype not in legal_types:
+        if dtype not in legal_types:  # pragma: no cover
             return f"Illegal parameter type for {stage_class.name}.{key} {dtype}"
-        if def_val_dtype not in legal_types:
+        if def_val_dtype not in legal_types:  # pragma: no cover
             return f"Illegal parameter default value type for {stage_class.name}.{key} {def_val_dtype}"
 
     return None

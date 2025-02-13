@@ -64,10 +64,15 @@ def test_naive_stack():
     """Basic end to end test for the Naive stack informer to estimator stages"""
     naive_stack_informer_stage = naive_stack.NaiveStackInformer.make_stage()
     naive_stack_informer_stage.inform("")
-
+    
     summary_config_dict = {}
     summarizer_class = naive_stack.NaiveStackSummarizer
     _ = one_algo("NaiveStack", summarizer_class, summary_config_dict)
+    os.remove(
+        naive_stack_informer_stage.get_output(
+            naive_stack_informer_stage.get_aliased_tag("model"), final_name=True
+        )
+    )
 
 
 def test_point_estimate_hist():
@@ -80,6 +85,11 @@ def test_point_estimate_hist():
     summary_config_dict = {}
     summarizer_class = point_est_hist.PointEstHistSummarizer
     _ = one_algo("PointEstimateHist", summarizer_class, summary_config_dict)
+    os.remove(
+        point_est_informer_stage.get_output(
+            point_est_informer_stage.get_aliased_tag("model"), final_name=True
+        )
+    )
 
 
 def test_var_inference_stack():
@@ -90,6 +100,11 @@ def test_var_inference_stack():
     summary_config_dict = {}
     summarizer_class = var_inf.VarInfStackSummarizer
     _ = one_algo("VariationalInference", summarizer_class, summary_config_dict)
+    os.remove(
+        var_inf_informer_stage.get_output(
+            var_inf_informer_stage.get_aliased_tag("model"), final_name=True
+        )
+    )
 
 
 def test_naive_stack_masked():
@@ -102,7 +117,7 @@ def test_naive_stack_masked():
     _ = one_algo("NaiveStack", summarizer_class, summary_config_dict)
 
 
-def test_point_estimate_hist_masekd():
+def test_point_estimate_hist_masked():
     """Basic end to end test for the point estimate histogram informer to estimator
     stages
     """

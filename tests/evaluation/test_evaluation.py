@@ -26,22 +26,6 @@ OUTRATE = 0.0
 SIGMAD = 0.0046489
 
 
-def _get_files():
-    possible_local_file = "./examples_data/evaluation_data/data/output_fzboost.hdf5"
-    if os.path.exists(possible_local_file):
-        pdfs_file = os.path.abspath(possible_local_file)
-    else:
-        pdfs_file = "examples_data/evaluation_data/data/output_fzboost.hdf5"
-        try:
-            os.makedirs(os.path.dirname(pdfs_file))
-        except FileExistsError:
-            pass
-        curl_com = f"curl -o {pdfs_file} https://portal.nersc.gov/cfs/lsst/PZ/output_fzboost.hdf5"
-        os.system(curl_com)
-    ztrue_file = find_rail_file("examples_data/testdata/test_dc2_validation_9816.hdf5")
-    return pdfs_file, ztrue_file
-
-
 def construct_test_ensemble():
     np.random.seed(87)
     nmax = 2.5
@@ -93,10 +77,12 @@ def test_evaluation_stage():
     )
 
 
-def test_dist_to_dist_evaluator():
+def test_dist_to_dist_evaluator(get_evaluation_files: tuple[str, str]):
+    pdfs_file, _ztrue_file = get_evaluation_files
+    assert pdfs_file
+
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
-    pdfs_file, _ztrue_file = _get_files()
     stage_dict = dict(
         # metrics=['cvm', 'ks', 'rmse', 'kld', 'ad'],
         metrics=["rmse"],
@@ -113,11 +99,26 @@ def test_dist_to_dist_evaluator():
     _dtd_results = dtd_stage.evaluate(ensemble, ensemble)
     _dtd_results_single = dtd_stage_single.evaluate(ensemble, ensemble)
 
+    for stage in [dtd_stage, dtd_stage_single]:
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("output"), final_name=True
+            )
+        )
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("summary"), final_name=True
+            )
+        )
 
-def test_dist_to_point_evaluator():
+    
+
+def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
+    pdfs_file, ztrue_file = get_evaluation_files
+    assert pdfs_file
+    
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
-    pdfs_file, ztrue_file = _get_files()
     stage_dict = dict(
         metrics=["cdeloss", "pit", "brier"],
         _random_state=None,
@@ -151,11 +152,31 @@ def test_dist_to_point_evaluator():
     with qp_dict_handle.open() as qp_dict_data:
         assert qp_dict_data
 
+    for stage in [dtp_stage, dtp_stage_single]:
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("output"), final_name=True
+            )
+        )
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("summary"), final_name=True
+            )
+        )
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("single_distribution_summary"), final_name=True
+            )
+        )
 
-def test_point_to_point_evaluator():
+
+        
+def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]):
+    pdfs_file, ztrue_file = get_evaluation_files
+    assert pdfs_file
+
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
-    pdfs_file, ztrue_file = _get_files()
     stage_dict = dict(
         metrics=[
             "point_stats_ez",
@@ -181,11 +202,24 @@ def test_point_to_point_evaluator():
     _ptp_results = ptp_stage.evaluate(ensemble, ztrue_data)
     _ptp_results_single = ptp_stage_single.evaluate(ensemble, ztrue_data)
 
+    for stage in [ptp_stage, ptp_stage_single]:
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("output"), final_name=True
+            )
+        )
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("summary"), final_name=True
+            )
+        )
 
-def test_single_evaluator():
+
+def test_single_evaluator(get_evaluation_files: tuple[str, str]):
+    pdfs_file, ztrue_file = get_evaluation_files
+    assert pdfs_file
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
-    pdfs_file, ztrue_file = _get_files()
     stage_dict = dict(
         metrics=[
             "cvm",
@@ -212,3 +246,15 @@ def test_single_evaluator():
 
     _single_results = single_stage.evaluate(ensemble_d, ztrue_data_d)
     _single_results_single = single_stage_single.evaluate(ensemble_d, ztrue_data_d)
+
+    for stage in [single_stage, single_stage_single]:
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("output"), final_name=True
+            )
+        )
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("summary"), final_name=True
+            )
+        )

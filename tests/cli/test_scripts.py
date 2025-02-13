@@ -55,3 +55,6 @@ def test_build_pipeline():
         'trainz_pipe.yaml',
         input_dict = dict(input='dummy.ibn'),
     )
+
+    os.unlink('trainz_pipe.yaml')
+    os.unlink('trainz_pipe_config.yml')
