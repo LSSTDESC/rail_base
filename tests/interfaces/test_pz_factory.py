@@ -21,7 +21,7 @@ def test_pz_factory():
     out_single = PZFactory.estimate_single_pz(stage, {"d": np.array([1, 1])})
     assert out_single.npdf == 1
 
-    out_handle = PZFactory.run_cat_estimator_stage(
+    _out_handle = PZFactory.run_cat_estimator_stage(
         stage,
         input_file,
     )
@@ -37,9 +37,9 @@ def test_pz_factory():
 
     try:
         os.unlink("inprogress_output_train_z.hdf5")
-    except:
+    except FileNotFoundError:
         pass
     try:
         os.unlink("output_train_z.hdf5")
-    except:
+    except FileNotFoundError:
         pass

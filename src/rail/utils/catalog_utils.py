@@ -9,6 +9,8 @@ class CatalogConfigBase:
     tag = None
     bandlist = ""
     maglims = []
+    a_env = []
+    hdf5_groupname = ""
     band_template = ""
     band_err_template = ""
     ref_band = ""

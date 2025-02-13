@@ -70,6 +70,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
         ),
     )
 
+    inputs = []
     outputs = [
         ("output", Hdf5Handle),
         ("summary", Hdf5Handle),

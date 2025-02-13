@@ -110,7 +110,7 @@ def estimate(
         catalog_utils.apply_defaults(catalog_tag)
 
     if stages_config not in [None, "none", "None"]:
-        with open(stages_config) as fin:
+        with open(stages_config, 'r', encoding='utf-8') as fin:
             config_data = yaml.safe_load(fin)
             if stage_name in config_data:
                 kwargs = config_data[stage_name]
@@ -141,10 +141,11 @@ def estimate(
         pprint.pprint(print_dict)
         return 0
 
-    output = PZFactory.run_cat_estimator_stage(
+    _output = PZFactory.run_cat_estimator_stage(
         stage,
         data_path=input_file,
     )
+    return 0
 
 
 @cli.command()
@@ -203,7 +204,16 @@ def run_tool(stage_name, stage_class, stage_module, dry_run, input_file):
         data_path="dummy.in",
     )
 
-    output = ToolFactory.run_tool_stage(
+    if dry_run:
+        print(f"Running stage {stage.name} of type {type(stage)} on {input_file}")
+        print("Stage config:   ")
+        print_dict = stage.config.to_dict().copy()
+        pprint.pprint(print_dict)
+        return 0
+
+    _output = ToolFactory.run_tool_stage(
         stage,
         data_path=input_file,
     )
+
+    return 0

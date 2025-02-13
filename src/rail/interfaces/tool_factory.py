@@ -1,5 +1,4 @@
 from ceci.stage import PipelineStage
-from qp import Ensemble
 
 from rail.core.data import DataHandle
 from rail.core.stage import RailStage

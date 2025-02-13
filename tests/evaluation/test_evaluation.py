@@ -11,7 +11,6 @@ from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.evaluator import OldEvaluator
 from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
 from rail.evaluation.single_evaluator import SingleEvaluator
-from rail.utils.path_utils import find_rail_file
 
 # values for metrics
 OUTRATE = 0.0

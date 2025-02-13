@@ -1,13 +1,9 @@
 import os
-
-import numpy as np
-import pytest
 import qp
 
 from rail.core.data import TableHandle
 from rail.core.stage import RailStage
 from rail.estimation.algos.true_nz import TrueNZHistogrammer
-from rail.utils.path_utils import RAILDIR
 
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True

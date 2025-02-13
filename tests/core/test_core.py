@@ -29,7 +29,7 @@ def do_data_handle(datapath, handle_class):
 
     assert not th.has_data
     try:
-        check_size = th.size()
+        _check_size = th.size()
     except NotImplementedError as msg:
         if not isinstance(th, FitsHandle):
             raise NotImplementedError(msg) from msg
@@ -243,7 +243,7 @@ def test_model_handle():
 
     model3 = mh.open()
 
-    model4 = mh4.read()
+    _model4 = mh4.read()
 
     assert model1 is model2
     assert model2 is model3

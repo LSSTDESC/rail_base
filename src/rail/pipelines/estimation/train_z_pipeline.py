@@ -1,12 +1,6 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# Prerquisites, os, and numpy
-import os
-
-import ceci
-import numpy as np
-
 from rail.core.stage import RailPipeline, RailStage
 # Various rail modules
 from rail.estimation.algos.train_z import TrainZEstimator, TrainZInformer

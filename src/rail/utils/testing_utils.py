@@ -3,7 +3,6 @@
 import os
 
 import ceci
-import scipy.special
 
 from rail.cli.rail.scripts import build_pipeline
 from rail.core.data import TableHandle
@@ -114,6 +113,6 @@ def build_and_read_pipeline(pipeline_class, **kwargs):
     yaml_file = f"{short_name}.yml"
     config_yaml_file = f"{short_name}_config.yml"
     build_pipeline(pipeline_class, yaml_file, "rubin", **kwargs)
-    pr = ceci.Pipeline.read(yaml_file)
+    _pr = ceci.Pipeline.read(yaml_file)
     os.unlink(yaml_file)
     os.unlink(config_yaml_file)
