@@ -4,8 +4,6 @@ Abstract base classes defining Estimators of individual galaxy redshift uncertai
 
 import gc
 
-from ceci.config import StageParameter as Param
-
 from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import ModelHandle, QPHandle, TableHandle
 from rail.core.point_estimation import PointEstimationMixin

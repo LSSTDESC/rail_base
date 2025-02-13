@@ -53,7 +53,8 @@ class Model:
             and creation_class_name != self.creation_class_name
         ):
             raise TypeError(
-                f"Model.creation_class_name does not match.  {creation_class_name} != {self.creation_class_name}"
+                "Model.creation_class_name does not match.  "
+                f"{creation_class_name} != {self.creation_class_name}"
             )
         if version is not None and version != self.version:
             raise TypeError(

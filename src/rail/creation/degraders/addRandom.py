@@ -23,7 +23,7 @@ class AddColumnOfRandom(Noisifier):
 
         Does standard Noisifier initialization
         """
-        super().__init__(args, **kwargs)
+        Noisifier.__init__(self, args, **kwargs)
 
     def _initNoiseModel(self):  # pragma: no cover
         np.random.seed(self.config.seed)

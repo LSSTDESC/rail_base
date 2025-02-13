@@ -4,7 +4,6 @@ import os
 import sys
 from math import ceil
 
-import yaml
 from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
 from ceci.stage import PipelineStage

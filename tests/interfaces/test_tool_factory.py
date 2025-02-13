@@ -1,6 +1,5 @@
 import os
 
-import numpy as np
 import pytest
 
 from rail.interfaces import ToolFactory
@@ -18,7 +17,7 @@ def test_tool_factory():
 
     input_file = find_rail_file("examples_data/testdata/rubin_dm_dc2_example.pq")
 
-    out_handle = ToolFactory.run_tool_stage(
+    _out_handle = ToolFactory.run_tool_stage(
         stage,
         input_file,
     )
@@ -34,9 +33,9 @@ def test_tool_factory():
 
     try:
         os.unlink("inprogress_output_pq_to_hdf.hdf5")
-    except:
+    except FileNotFoundError:
         pass
     try:
         os.unlink("output_pq_to_hdf.hdf5")
-    except:
+    except FileNotFoundError:
         pass
