@@ -1,8 +1,8 @@
 # pylint: disable=no-member
-import pytest
 import numpy as np
-
+import pytest
 import qp
+
 from rail.estimation.estimator import CatEstimator
 
 

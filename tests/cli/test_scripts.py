@@ -1,21 +1,22 @@
 import glob
 import os
-import pytest
-from rail.cli.rail import scripts
-from rail.cli.rail.options import args_to_dict, GitMode
 
+import pytest
+
+from rail.cli.rail import scripts
+from rail.cli.rail.options import GitMode, args_to_dict
 
 
 def test_args_to_dict():
-    args = ['x=3', 'y=2']
+    args = ["x=3", "y=2"]
     as_dict = args_to_dict(args)
-    assert as_dict['x'] == '3'
-    assert as_dict['y'] == '2'
+    assert as_dict["x"] == "3"
+    assert as_dict["y"] == "2"
 
     with pytest.raises(ValueError):
-        args_to_dict(['x'])
+        args_to_dict(["x"])
     with pytest.raises(ValueError):
-        args_to_dict(['x=3=3'])
+        args_to_dict(["x=3=3"])
 
 
 def test_render_nb():
@@ -51,10 +52,10 @@ def test_info():
 
 def test_build_pipeline():
     scripts.build_pipeline(
-        'rail.pipelines.estimation.train_z_pipeline.TrainZPipeline',
-        'trainz_pipe.yaml',
-        input_dict = dict(input='dummy.ibn'),
+        "rail.pipelines.estimation.train_z_pipeline.TrainZPipeline",
+        "trainz_pipe.yaml",
+        input_dict=dict(input="dummy.ibn"),
     )
 
-    os.unlink('trainz_pipe.yaml')
-    os.unlink('trainz_pipe_config.yml')
+    os.unlink("trainz_pipe.yaml")
+    os.unlink("trainz_pipe_config.yml")

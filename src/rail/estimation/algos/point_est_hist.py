@@ -4,11 +4,11 @@ A summarizer that simple makes a histogram of a point estimate
 
 import numpy as np
 import qp
-
 from ceci.config import StageParameter as Param
-from rail.estimation.summarizer import PZSummarizer
-from rail.estimation.informer import PzInformer
+
 from rail.core.data import QPHandle, TableHandle
+from rail.estimation.informer import PzInformer
+from rail.estimation.summarizer import PZSummarizer
 
 
 class PointEstHistInformer(PzInformer):
@@ -45,7 +45,7 @@ class PointEstHistSummarizer(PZSummarizer):
     def _setup_iterator(self):
         itr = self.input_iterator("input")
         for s, e, d in itr:
-            yield s, e, d, np.ones(e-s, dtype=bool)
+            yield s, e, d, np.ones(e - s, dtype=bool)
 
     def run(self):
         handle = self.get_handle("input", allow_missing=True)
@@ -81,7 +81,15 @@ class PointEstHistSummarizer(PZSummarizer):
             self.add_data("single_NZ", qp_d)
 
     def _process_chunk(
-        self, start, end, test_data, mask, _first, bootstrap_matrix, single_hist, hist_vals
+        self,
+        start,
+        end,
+        test_data,
+        mask,
+        _first,
+        bootstrap_matrix,
+        single_hist,
+        hist_vals,
     ):
         zb = test_data.ancil[self.config.point_estimate]
         single_hist += np.histogram(zb[mask], bins=self.zgrid)[0]
@@ -106,15 +114,17 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
     def _setup_iterator(self):
-
         selected_bin = self.config.selected_bin
-        if self.config.tomography_bins in ['none', None]:
+        if self.config.tomography_bins in ["none", None]:
             selected_bin = -1
 
         if selected_bin == -1:
-            itrs = [self.input_iterator('input')]
+            itrs = [self.input_iterator("input")]
         else:
-            itrs = [self.input_iterator('input'), self.input_iterator('tomography_bins')]
+            itrs = [
+                self.input_iterator("input"),
+                self.input_iterator("tomography_bins"),
+            ]
 
         for it in zip(*itrs):
             first = True
@@ -126,7 +136,7 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    mask = d['class_id'] == self.config.selected_bin
+                    mask = d["class_id"] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
             yield start, end, pz_data, mask
@@ -156,5 +166,3 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
-
-            

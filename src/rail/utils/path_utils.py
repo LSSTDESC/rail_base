@@ -1,6 +1,7 @@
 """ Utility functions """
 
 import os
+
 import rail
 import rail.core
 

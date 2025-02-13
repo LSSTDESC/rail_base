@@ -62,15 +62,15 @@ class EnumChoice(click.Choice):
 
 def args_to_dict(args):
     """Convert a series of command line key=value statements
-    to a dict"""    
+    to a dict"""
     out_dict = {}
     for arg_ in args:
-        tokens = arg_.split('=')
+        tokens = arg_.split("=")
         if len(tokens) != 2:
             raise ValueError(f"Poorly formed argument {arg_}.  Should by key=value")
         out_dict[tokens[0]] = tokens[1]
     return out_dict
-        
+
 
 class PartialOption:
     """Wraps click.option with partial arguments for convenient reuse"""
@@ -136,25 +136,25 @@ output_yaml = PartialOption(
     help="Path for output yaml file",
 )
 
-pipeline_class =  PartialOption(
+pipeline_class = PartialOption(
     "--pipeline_class",
     type=str,
     help="Full class name for pipeline, e.g., rail.pipelines.estimation.train_z.TrainZPipeline",
 )
 
-model_file =  PartialOption(
+model_file = PartialOption(
     "--model_file",
     type=str,
     help="Model for pz estimation",
 )
 
-input_file =  PartialOption(
+input_file = PartialOption(
     "--input_file",
     type=str,
     help="Input data file for pz estimation",
 )
 
-pipeline_yaml =  PartialOption(
+pipeline_yaml = PartialOption(
     "--pipeline_yaml",
     type=click.Path(),
     help="Yaml for that defines pipeline",

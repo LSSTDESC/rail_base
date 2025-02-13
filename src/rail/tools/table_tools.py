@@ -1,11 +1,10 @@
 """ Stages that implement utility functions """
 
 import tables_io
-
 from ceci.config import StageParameter as Param
-from rail.core.stage import RailStage
 
-from rail.core.data import PqHandle, Hdf5Handle
+from rail.core.data import Hdf5Handle, PqHandle
+from rail.core.stage import RailStage
 
 
 class ColumnMapper(RailStage):
@@ -77,7 +76,7 @@ class RowSelector(RailStage):
     config_options.update(
         start=Param(int, required=True, msg="Starting row number"),
         stop=Param(int, required=True, msg="Stoppig row number"),
-    )                       
+    )
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 

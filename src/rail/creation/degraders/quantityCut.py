@@ -2,8 +2,9 @@
 
 from numbers import Number
 
-from ceci.config import StageParameter as Param
 import numpy as np
+from ceci.config import StageParameter as Param
+
 from rail.creation.selector import Selector
 
 

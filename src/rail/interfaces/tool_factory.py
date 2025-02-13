@@ -1,31 +1,31 @@
-
-from qp import Ensemble
 from ceci.stage import PipelineStage
-from rail.core.stage import RailStage
+from qp import Ensemble
+
 from rail.core.data import DataHandle
+from rail.core.stage import RailStage
 
 
 class ToolFactory:
-    """ Factory class to provide a unified interface to 
+    """Factory class to provide a unified interface to
     rail tool stages
     """
-    
+
     _stage_dict = {}
 
     @classmethod
     def reset(cls):
-        """ Reset the dictionary of cached stage objects """
+        """Reset the dictionary of cached stage objects"""
         cls._stage_dict = {}
 
     @classmethod
     def build_stage_instance(
         cls,
-        stage_name: str, 
+        stage_name: str,
         stage_class: type,
-        data_path: str = 'none',
+        data_path: str = "none",
         **config_params: dict,
     ) -> RailStage:
-        """ Build and configure a rail tool stage
+        """Build and configure a rail tool stage
 
         Parameters
         ----------
@@ -36,7 +36,7 @@ class ToolFactory:
             Python class for the stage
 
         data_path: str
-            Path to the input data, defaults to 'none' 
+            Path to the input data, defaults to 'none'
 
         config_params: dict
             Configuration parameters for the stage
@@ -46,7 +46,9 @@ class ToolFactory:
         stage_obj: RailStage
             Newly constructed and configured RailStage instance
         """
-        stage_obj = stage_class.make_stage(name=stage_name, input=data_path, **config_params)
+        stage_obj = stage_class.make_stage(
+            name=stage_name, input=data_path, **config_params
+        )
         cls._stage_dict[stage_name] = stage_obj
         return stage_obj
 
@@ -56,10 +58,10 @@ class ToolFactory:
         stage_name: str,
         class_name: str,
         module_name: str,
-        data_path: str = 'none',
+        data_path: str = "none",
         **config_params: dict,
     ) -> RailStage:
-        """ Build and configure a rail tool stage
+        """Build and configure a rail tool stage
 
         Parameters
         ----------
@@ -73,7 +75,7 @@ class ToolFactory:
             Name of the python module that constains the class, used to import it
 
         data_path: str
-            Path to the input data, defaults to 'none' 
+            Path to the input data, defaults to 'none'
 
         config_params: dict
             Configuration parameters for the stage
@@ -82,16 +84,18 @@ class ToolFactory:
         -------
         stage_obj: CatEstimator
             Newly constructed and configured Estimator instance
-        """       
+        """
         stage_class = PipelineStage.get_stage(class_name, module_name)
-        return cls.build_stage_instance(stage_name, stage_class, data_path, **config_params)
+        return cls.build_stage_instance(
+            stage_name, stage_class, data_path, **config_params
+        )
 
     @classmethod
     def get_tool_stage(
         cls,
         stage_name: str,
     ) -> RailStage:
-        """ Return a tool stage"""
+        """Return a tool stage"""
         try:
             return cls._stage_dict[stage_name]
         except KeyError as msg:
@@ -105,7 +109,7 @@ class ToolFactory:
         stage_obj: RailStage,
         data_path: str,
     ) -> DataHandle:
-        """ Run a p(z) estimator on an input data file
+        """Run a p(z) estimator on an input data file
 
         Parameters
         ----------
@@ -116,8 +120,7 @@ class ToolFactory:
         -------
         data_handle: DataHandle
             Object that can give access to the data
-        """        
-        RailStage.data_store.clear()        
-        handle = stage_obj.get_handle('input', path=data_path, allow_missing=True)        
+        """
+        RailStage.data_store.clear()
+        handle = stage_obj.get_handle("input", path=data_path, allow_missing=True)
         return stage_obj(handle)
-

@@ -1,12 +1,12 @@
 import os
-import pytest
 
 import ceci
 import numpy as np
+import pytest
 
 from rail.core.stage import RailPipeline, RailStage
-from rail.utils.path_utils import RAILDIR
 from rail.tools.table_tools import ColumnMapper, TableConverter
+from rail.utils.path_utils import RAILDIR
 
 
 def test_pipeline():
@@ -120,13 +120,13 @@ def test_golden_v2():
 
 def test_load_pipeline():
     train_z_class = RailPipeline.load_pipeline_class(
-        'rail.pipelines.estimation.train_z_pipeline.TrainZPipeline'
+        "rail.pipelines.estimation.train_z_pipeline.TrainZPipeline"
     )
 
-    check = RailPipeline.get_pipeline_class('TrainZPipeline')
+    check = RailPipeline.get_pipeline_class("TrainZPipeline")
     assert check == train_z_class
 
     RailPipeline.print_classes()
 
     with pytest.raises(KeyError):
-        RailPipeline.get_pipeline_class('Does not exist')
+        RailPipeline.get_pipeline_class("Does not exist")

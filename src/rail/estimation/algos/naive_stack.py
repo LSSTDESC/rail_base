@@ -4,11 +4,11 @@ A summarizer that simple makes a histogram of a point estimate
 
 import numpy as np
 import qp
-
 from ceci.config import StageParameter as Param
-from rail.estimation.summarizer import PZSummarizer
-from rail.estimation.informer import PzInformer
+
 from rail.core.data import QPHandle, TableHandle
+from rail.estimation.informer import PzInformer
+from rail.estimation.summarizer import PZSummarizer
 
 
 class NaiveStackInformer(PzInformer):
@@ -43,8 +43,7 @@ class NaiveStackSummarizer(PZSummarizer):
     def _setup_iterator(self):
         itr = self.input_iterator("input")
         for s, e, d in itr:
-            yield s, e, d, np.ones(e-s, dtype=bool)
-
+            yield s, e, d, np.ones(e - s, dtype=bool)
 
     def run(self):
         handle = self.get_handle("input", allow_missing=True)
@@ -61,7 +60,9 @@ class NaiveStackSummarizer(PZSummarizer):
         first = True
         for s, e, test_data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s} - {e}")
-            self._process_chunk(s, e, test_data, mask, first, bootstrap_matrix, yvals, bvals)
+            self._process_chunk(
+                s, e, test_data, mask, first, bootstrap_matrix, yvals, bvals
+            )
             first = False
         if self.comm is not None:  # pragma: no cover
             bvals, yvals = self._join_histograms(bvals, yvals)
@@ -74,11 +75,19 @@ class NaiveStackSummarizer(PZSummarizer):
             self.add_data("output", sample_ens)
             self.add_data("single_NZ", qp_d)
 
-    def _process_chunk(self, start, end, data, mask, _first, bootstrap_matrix, yvals, bvals):
+    def _process_chunk(
+        self, start, end, data, mask, _first, bootstrap_matrix, yvals, bvals
+    ):
         pdf_vals = data.pdf(self.zgrid)
         squeeze_mask = np.squeeze(mask)
         yvals += np.expand_dims(
-            np.sum(np.where(np.isfinite(pdf_vals[squeeze_mask,:]), pdf_vals[squeeze_mask], 0.0), axis=0), 0
+            np.sum(
+                np.where(
+                    np.isfinite(pdf_vals[squeeze_mask, :]), pdf_vals[squeeze_mask], 0.0
+                ),
+                axis=0,
+            ),
+            0,
         )
         # qp_d is the normalized probability of the stack, we need to know how many galaxies were
         for i in range(self.config.nsamples):
@@ -86,7 +95,7 @@ class NaiveStackSummarizer(PZSummarizer):
             # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
             chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end)
             bootstrap_draws = bootstrap_draws[chunk_mask] - start
-            zarr = np.where(squeeze_mask, pdf_vals.T, 0.).T[bootstrap_draws]
+            zarr = np.where(squeeze_mask, pdf_vals.T, 0.0).T[bootstrap_draws]
             bvals[i] += np.sum(zarr, axis=0)
 
 
@@ -99,17 +108,18 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
-
     def _setup_iterator(self):
-
         selected_bin = self.config.selected_bin
-        if self.config.tomography_bins in ['none', None]:
+        if self.config.tomography_bins in ["none", None]:
             selected_bin = -1
 
         if selected_bin == -1:
-            itrs = [self.input_iterator('input')]
+            itrs = [self.input_iterator("input")]
         else:
-            itrs = [self.input_iterator('input'), self.input_iterator('tomography_bins')]
+            itrs = [
+                self.input_iterator("input"),
+                self.input_iterator("tomography_bins"),
+            ]
 
         for it in zip(*itrs):
             first = True
@@ -121,7 +131,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    mask = d['class_id'] == self.config.selected_bin
+                    mask = d["class_id"] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(pz_data.npdf, dtype=bool)
             yield start, end, pz_data, mask
@@ -151,5 +161,3 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
         self.run()
         self.finalize()
         return self.get_handle("output")
-
-            

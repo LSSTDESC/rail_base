@@ -5,14 +5,15 @@ Abstract base classes defining Estimators of individual galaxy redshift uncertai
 import gc
 
 from ceci.config import StageParameter as Param
+
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import TableHandle, QPHandle, ModelHandle
-from rail.core.stage import RailStage
-
+from rail.core.data import ModelHandle, QPHandle, TableHandle
 from rail.core.point_estimation import PointEstimationMixin
-
+from rail.core.stage import RailStage
 # for backwards compatibility, to avoid break stuff that imports it from here
-from rail.estimation.informer import CatInformer  # pylint: disable=unused-import
+from rail.estimation.informer import \
+    CatInformer  # pylint: disable=unused-import
+
 
 class CatEstimator(RailStage, PointEstimationMixin):
     """The base class for making photo-z posterior estimates from catalog-like inputs
@@ -104,7 +105,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self.run()
         self.finalize()
         results = self.get_handle("output")
-        results.read(force = True)
+        results.read(force=True)
         return results
 
     def run(self):
@@ -138,11 +139,11 @@ class CatEstimator(RailStage, PointEstimationMixin):
         qp_dstn = self.calculate_point_estimates(qp_dstn)
         if first:
             self._output_handle = self.add_handle("output", data=qp_dstn)
-            if self.config.output_mode != 'return':
+            if self.config.output_mode != "return":
                 self._output_handle.initialize_write(
                     self._input_length, communicator=self.comm
                 )
         self._output_handle.set_data(qp_dstn, partial=True)
-        if self.config.output_mode != 'return':
+        if self.config.output_mode != "return":
             self._output_handle.write_chunk(start, end)
         return qp_dstn

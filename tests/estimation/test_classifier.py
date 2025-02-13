@@ -1,13 +1,13 @@
 import os
+
 import numpy as np
 import pytest
 
-from rail.utils.path_utils import RAILDIR
-from rail.core.stage import RailStage
 from rail.core.data import QPHandle
-from rail.estimation.algos.uniform_binning import UniformBinningClassifier
+from rail.core.stage import RailStage
 from rail.estimation.algos.equal_count import EqualCountClassifier
-
+from rail.estimation.algos.uniform_binning import UniformBinningClassifier
+from rail.utils.path_utils import RAILDIR
 
 DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
@@ -34,11 +34,7 @@ def test_UniformBinningClassifier(input_param):
     )
 
     _out_data = tomo.classify(input_data)
-    os.remove(
-        tomo.get_output(
-            tomo.get_aliased_tag("output"), final_name=True
-        )
-    )
+    os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
 def test_UniformBinningClassifier_binsize():
@@ -77,11 +73,7 @@ def test_UniformBinningClassifier_binsize():
             (zb[out_data["class_id"] == -99] < 0.0)
             | (zb[out_data["class_id"] == -99] >= 2.0)
         ).all()
-    os.remove(
-        tomo.get_output(
-            tomo.get_aliased_tag("output"), final_name=True
-        )
-    )
+    os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
 def test_UniformBinningClassifier_ancil():
@@ -117,11 +109,7 @@ def test_EqualCountClassifier(input_param):
     )
 
     _out_data = tomo.classify(input_data)
-    os.remove(
-        tomo.get_output(
-            tomo.get_aliased_tag("output"), final_name=True
-        )
-    )
+    os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
 def test_EqualCountClassifier_nobj():
@@ -155,11 +143,7 @@ def test_EqualCountClassifier_nobj():
             (zb[out_data["class_id"] == -99] < 0.0)
             | (zb[out_data["class_id"] == -99] >= 2.0)
         ).all()
-    os.remove(
-        tomo.get_output(
-            tomo.get_aliased_tag("output"), final_name=True
-        )
-    )
+    os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
 def test_EqualCountClassifier_ancil():

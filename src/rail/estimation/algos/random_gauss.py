@@ -6,12 +6,12 @@ random_width*(1+zmode).
 
 import numpy as np
 import qp
-
-from scipy.stats import norm
 from ceci.config import StageParameter as Param
+from scipy.stats import norm
+
+from rail.core.data import TableHandle
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
-from rail.core.data import TableHandle
 
 
 class RandomGaussInformer(CatInformer):

@@ -5,7 +5,6 @@ from rail.core.common_params import SHARED_PARAMS
 
 
 class PointEstimationMixin:
-
     config_options = dict(
         calculated_point_estimates=SHARED_PARAMS,
         recompute_point_estimates=SHARED_PARAMS,

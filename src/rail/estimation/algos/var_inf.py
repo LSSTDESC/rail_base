@@ -4,12 +4,13 @@ A summarizer that simple makes a histogram of a point estimate
 
 import numpy as np
 import qp
+from ceci.config import StageParameter as Param
 from scipy.special import digamma
 from scipy.stats import dirichlet
-from ceci.config import StageParameter as Param
-from rail.estimation.summarizer import PZSummarizer
-from rail.estimation.informer import PzInformer
+
 from rail.core.data import QPHandle
+from rail.estimation.informer import PzInformer
+from rail.estimation.summarizer import PZSummarizer
 
 TEENY = 1.0e-15
 
@@ -64,7 +65,6 @@ class VarInfStackSummarizer(PZSummarizer):
         super().__init__(args, **kwargs)
         self.zgrid = None
 
-
     def _setup_iterator(self):
         input_handle = self.get_handle("input", allow_missing=True)
         try:
@@ -76,8 +76,7 @@ class VarInfStackSummarizer(PZSummarizer):
 
         iterator = self.input_iterator("input", chunk_size=chunk_size)
         return iterator
-    
-        
+
     def run(self):
         # Redefining the chunk size so that all of the data is distributed at once in the
         # nodes. This would fill all the memory if not enough nodes are allocated

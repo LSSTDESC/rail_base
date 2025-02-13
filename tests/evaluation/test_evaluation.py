@@ -4,14 +4,14 @@ import numpy as np
 import qp
 
 import rail.evaluation.metrics.pointestimates as pe
-from rail.core.data import QPHandle, TableHandle, QPOrTableHandle
+from rail.core.data import QPHandle, QPOrTableHandle, TableHandle
 from rail.core.stage import RailStage
-from rail.utils.path_utils import find_rail_file
-from rail.evaluation.evaluator import OldEvaluator
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
+from rail.evaluation.evaluator import OldEvaluator
 from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
 from rail.evaluation.single_evaluator import SingleEvaluator
+from rail.utils.path_utils import find_rail_file
 
 # values for metrics
 OUTRATE = 0.0
@@ -100,23 +100,14 @@ def test_dist_to_dist_evaluator(get_evaluation_files: tuple[str, str]):
     _dtd_results_single = dtd_stage_single.evaluate(ensemble, ensemble)
 
     for stage in [dtd_stage, dtd_stage_single]:
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("output"), final_name=True
-            )
-        )
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("summary"), final_name=True
-            )
-        )
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
-    
 
 def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
-    
+
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
     stage_dict = dict(
@@ -153,16 +144,8 @@ def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
         assert qp_dict_data
 
     for stage in [dtp_stage, dtp_stage_single]:
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("output"), final_name=True
-            )
-        )
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("summary"), final_name=True
-            )
-        )
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
         os.remove(
             stage.get_output(
                 stage.get_aliased_tag("single_distribution_summary"), final_name=True
@@ -170,7 +153,6 @@ def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
         )
 
 
-        
 def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]):
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
@@ -203,16 +185,8 @@ def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]):
     _ptp_results_single = ptp_stage_single.evaluate(ensemble, ztrue_data)
 
     for stage in [ptp_stage, ptp_stage_single]:
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("output"), final_name=True
-            )
-        )
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("summary"), final_name=True
-            )
-        )
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 
 def test_single_evaluator(get_evaluation_files: tuple[str, str]):
@@ -248,13 +222,5 @@ def test_single_evaluator(get_evaluation_files: tuple[str, str]):
     _single_results_single = single_stage_single.evaluate(ensemble_d, ztrue_data_d)
 
     for stage in [single_stage, single_stage_single]:
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("output"), final_name=True
-            )
-        )
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("summary"), final_name=True
-            )
-        )
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))

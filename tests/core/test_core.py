@@ -6,20 +6,13 @@ import numpy as np
 import pytest
 
 from rail.core.common_params import copy_param, set_param_default
-from rail.core.data import (
-    DataHandle,
-    DataStore,
-    FitsHandle,
-    Hdf5Handle,
-    ModelHandle,
-    PqHandle,
-    QPHandle,
-    QPOrTableHandle,
-)
+from rail.core.data import (DataHandle, DataStore, FitsHandle, Hdf5Handle,
+                            ModelHandle, PqHandle, QPHandle, QPOrTableHandle)
 from rail.core.model import Model
 from rail.core.stage import RailStage
+from rail.utils.catalog_utils import (CatalogConfigBase,
+                                      RomanPlusRubinCatalogConfig)
 from rail.utils.path_utils import RAILDIR
-from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
 
 # def test_data_file():
 #    with pytest.raises(ValueError) as errinfo:
@@ -171,9 +164,7 @@ def test_hdf5_handle():
     )
     handle_chunked = Hdf5Handle("chunked", handle.data, path=datapath_chunked)
     from tables_io.arrayUtils import (  # pylint: disable=import-outside-toplevel
-        getInitializationForODict,
-        sliceDict,
-    )
+        getInitializationForODict, sliceDict)
 
     num_rows = len(handle.data["photometry"]["id"])
     check_num_rows = len(handle()["photometry"]["id"])
@@ -243,17 +234,17 @@ def test_model_handle():
         "CWW_HDFN_prior_wrap.pkl",
     )
     mh = ModelHandle("model", path=model_path)
-    mh2 = ModelHandle("model2", path=model_path)    
+    mh2 = ModelHandle("model2", path=model_path)
     Model.wrap(model_path, model_path_wrap)
-    mh4 = ModelHandle("modelWrap", path=model_path_wrap)    
-    
+    mh4 = ModelHandle("modelWrap", path=model_path_wrap)
+
     model1 = mh.read()
     model2 = mh2.read()
 
     model3 = mh.open()
-    
+
     model4 = mh4.read()
-    
+
     assert model1 is model2
     assert model2 is model3
 
@@ -262,7 +253,7 @@ def test_model_handle():
         pickle.dump(obj=mh3.data, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
     os.remove(model_path_copy)
     os.remove(model_path_wrap)
-    
+
 
 def test_data_store():
     DS = RailStage.data_store
@@ -344,18 +335,15 @@ def test_common_params():
 
 
 def test_catalog_utils():
-    CatalogConfigBase.apply('rubin')
-    CatalogConfigBase.band_name_dict()['u'] = 'LSST_obs_u'
-    assert CatalogConfigBase.active_tag() == 'rubin'
-    assert CatalogConfigBase.active_class().tag == 'rubin'
-    
-    CatalogConfigBase.apply('roman_plus_rubin')
-    RomanPlusRubinCatalogConfig.band_name_dict()['u'] = 'LSST_obs_u'
-    assert CatalogConfigBase.active_tag() == 'roman_plus_rubin'
-    assert CatalogConfigBase.active_class().tag == 'roman_plus_rubin'    
-   
-    CatalogConfigBase.apply('dc2')
-    set_param_default('redshift_col', 'redshift')
+    CatalogConfigBase.apply("rubin")
+    CatalogConfigBase.band_name_dict()["u"] = "LSST_obs_u"
+    assert CatalogConfigBase.active_tag() == "rubin"
+    assert CatalogConfigBase.active_class().tag == "rubin"
 
-    
-    
+    CatalogConfigBase.apply("roman_plus_rubin")
+    RomanPlusRubinCatalogConfig.band_name_dict()["u"] = "LSST_obs_u"
+    assert CatalogConfigBase.active_tag() == "roman_plus_rubin"
+    assert CatalogConfigBase.active_class().tag == "roman_plus_rubin"
+
+    CatalogConfigBase.apply("dc2")
+    set_param_default("redshift_col", "redshift")

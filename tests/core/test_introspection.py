@@ -1,9 +1,9 @@
 import tempfile
 
 import rail
+import rail.stages
 from rail.core import RailEnv
 from rail.core.data import DataHandle, TableHandle
-import rail.stages
 
 
 def test_print_rail_packages():

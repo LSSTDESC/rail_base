@@ -5,8 +5,8 @@ import pandas as pd
 import pytest
 
 from rail.core.data import DATA_STORE, TableHandle
-from rail.creation.degraders.quantityCut import QuantityCut
 from rail.creation.degraders.addRandom import AddColumnOfRandom
+from rail.creation.degraders.quantityCut import QuantityCut
 
 
 @pytest.fixture
@@ -65,7 +65,9 @@ def test_QuantityCut_bad_params(cuts, error):
         QuantityCut.make_stage(cuts=cuts)
 
 
-def test_QuantityCut_returns_correct_shape(data):  # pylint: disable=redefined-outer-name
+def test_QuantityCut_returns_correct_shape(
+    data,
+):  # pylint: disable=redefined-outer-name
     """Make sure QuantityCut is returning the correct shape"""
 
     cuts = {
@@ -101,14 +103,11 @@ def test_QuantityCut_returns_correct_shape(data):  # pylint: disable=redefined-o
 
 
 def test_add_random(data):  # pylint: disable=redefined-outer-name
-
     add_random = AddColumnOfRandom.make_stage()
 
     test_data = add_random(data, seed=1234).data
     assert len(test_data[add_random.config.col_name]) == len(data.data)
 
     os.remove(
-        add_random.get_output(
-            add_random.get_aliased_tag("output"), final_name=True
-        )
+        add_random.get_output(add_random.get_aliased_tag("output"), final_name=True)
     )

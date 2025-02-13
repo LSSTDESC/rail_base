@@ -1,21 +1,12 @@
 import os
 from types import GeneratorType
+
 import pytest
 
+from rail.core.data import Hdf5Handle, ModelHandle, TableHandle
 from rail.core.stage import RailStage
-from rail.core.data import (
-    Hdf5Handle,
-    ModelHandle,
-    TableHandle,
-)
-
-from rail.utils.path_utils import RAILDIR
-from rail.utils.path_utils import find_rail_file
-from rail.tools.table_tools import (
-    ColumnMapper,
-    RowSelector,
-    TableConverter,
-)
+from rail.tools.table_tools import ColumnMapper, RowSelector, TableConverter
+from rail.utils.path_utils import RAILDIR, find_rail_file
 
 
 def test_find_rail_file():
@@ -57,11 +48,7 @@ def test_util_stages():
     row_sel_3.set_data("input", None, do_read=True)
 
     for stage in [table_conv, col_map, row_sel]:
-        os.remove(
-            stage.get_output(
-                stage.get_aliased_tag("output"), final_name=True
-            )
-        )
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
 
 
 def test_set_data_nonexistent_file():

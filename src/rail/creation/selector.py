@@ -6,8 +6,9 @@ or pure photometric selection.
 """
 
 from ceci.config import StageParameter as Param
-from rail.core.stage import RailStage
+
 from rail.core.data import PqHandle
+from rail.core.stage import RailStage
 
 
 class Selector(RailStage):
