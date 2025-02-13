@@ -4,8 +4,8 @@ Abstract base classes defining Summarizers of the redshift distribution of an en
 
 import numpy as np
 
-from rail.core.data import QPHandle, TableHandle, ModelHandle
 from rail.core.common_params import SHARED_PARAMS
+from rail.core.data import ModelHandle, QPHandle, TableHandle
 from rail.core.stage import RailStage
 
 # for backwards compatibility
@@ -101,7 +101,7 @@ class PZSummarizer(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def _broadcast_bootstrap_matrix(self):        
+    def _broadcast_bootstrap_matrix(self):
         rng = np.random.default_rng(seed=self.config.seed)
         # Only one of the nodes needs to produce the bootstrap indices
         ngal = self._input_length

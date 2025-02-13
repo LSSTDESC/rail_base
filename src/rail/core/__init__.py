@@ -1,7 +1,7 @@
 """Core code for RAIL"""
 
-from .stage import RailPipeline, RailStage
 from .introspection import RailEnv
+from .stage import RailPipeline, RailStage
 
 __all__ = [
     "RailPipeline",

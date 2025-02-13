@@ -1,33 +1,33 @@
-
-from qp import Ensemble
 from ceci.stage import PipelineStage
-from rail.core.stage import RailStage
+from qp import Ensemble
+
 from rail.core.data import DataHandle
+from rail.core.stage import RailStage
 from rail.estimation.estimator import CatEstimator
 
 
 class PZFactory:
-    """ Factory class to provide a unified interface to 
+    """Factory class to provide a unified interface to
     rail p(z) estimation algorithms.
     """
-    
+
     _stage_dict = {}
 
     @classmethod
     def reset(cls):
-        """ Reset the dictionary of cached stage objects """
+        """Reset the dictionary of cached stage objects"""
         cls._stage_dict = {}
 
     @classmethod
     def build_stage_instance(
         cls,
-        stage_name: str, 
+        stage_name: str,
         stage_class: type,
         model_path: str,
-        data_path: str = 'none',
+        data_path: str = "none",
         **config_params: dict,
     ) -> CatEstimator:
-        """ Build and configure an estimator that can evalute
+        """Build and configure an estimator that can evalute
         p(z) given an input catalog
 
         Parameters
@@ -42,7 +42,7 @@ class PZFactory:
             Path to the model file used by this estimator
 
         data_path: str
-            Path to the input data, defaults to 'none' 
+            Path to the input data, defaults to 'none'
 
         config_params: dict
             Configuration parameters for the stage
@@ -52,10 +52,12 @@ class PZFactory:
         stage_obj: CatEstimator
             Newly constructed and configured Estimator instance
         """
-        stage_obj = stage_class.make_stage(name=stage_name, model=model_path, input=data_path, **config_params)
+        stage_obj = stage_class.make_stage(
+            name=stage_name, model=model_path, input=data_path, **config_params
+        )
         cls._stage_dict[stage_name] = stage_obj
         return stage_obj
-        
+
     @classmethod
     def build_cat_estimator_stage(
         cls,
@@ -63,10 +65,10 @@ class PZFactory:
         class_name: str,
         module_name: str,
         model_path: str,
-        data_path: str = 'none',
+        data_path: str = "none",
         **config_params: dict,
     ) -> CatEstimator:
-        """ Build and configure an estimator that can evalute
+        """Build and configure an estimator that can evalute
         p(z) given an input catalog
 
         Parameters
@@ -84,7 +86,7 @@ class PZFactory:
             Path to the model file used by this estimator
 
         data_path: str
-            Path to the input data, defaults to 'none' 
+            Path to the input data, defaults to 'none'
 
         config_params: dict
             Configuration parameters for the stage
@@ -95,14 +97,16 @@ class PZFactory:
             Newly constructed and configured Estimator instance
         """
         stage_class = PipelineStage.get_stage(class_name, module_name)
-        return cls.build_stage_instance(stage_name, stage_class, model_path, data_path, **config_params)
+        return cls.build_stage_instance(
+            stage_name, stage_class, model_path, data_path, **config_params
+        )
 
     @classmethod
     def get_cat_estimator_stage(
         cls,
         stage_name: str,
     ) -> CatEstimator:
-        """ Return a cached p(z) estimator """
+        """Return a cached p(z) estimator"""
         try:
             return cls._stage_dict[stage_name]
         except KeyError as msg:
@@ -116,7 +120,7 @@ class PZFactory:
         stage_obj: CatEstimator,
         data_path: str,
     ) -> DataHandle:
-        """ Run a p(z) estimator on an input data file
+        """Run a p(z) estimator on an input data file
 
         Parameters
         ----------
@@ -127,18 +131,18 @@ class PZFactory:
         -------
         data_handle: DataHandle
             Object that can give access to the data
-        """        
-        RailStage.data_store.clear()        
-        handle = stage_obj.get_handle('input', path=data_path, allow_missing=True)        
+        """
+        RailStage.data_store.clear()
+        handle = stage_obj.get_handle("input", path=data_path, allow_missing=True)
         return stage_obj.estimate(handle)
 
     @staticmethod
     def estimate_single_pz(
         stage_obj: CatEstimator,
         data_table: dict,
-        input_size: int=1,
+        input_size: int = 1,
     ) -> Ensemble:
-        """ Run a p(z) estimator on some objects
+        """Run a p(z) estimator on some objects
 
         Parameters
         ----------
@@ -155,12 +159,10 @@ class PZFactory:
         -------
         pz : qp.Ensemble
             Output pz
-        """        
+        """
         RailStage.data_store.clear()
         if stage_obj.model is None:
             stage_obj.open_model(**stage_obj.config)
         stage_obj._input_length = input_size
         stage_obj._process_chunk(0, input_size, data_table, True)
         return stage_obj._output_handle.data
-        
-   

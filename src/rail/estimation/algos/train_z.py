@@ -7,9 +7,10 @@ N (z) of the training set.
 
 import numpy as np
 import qp
+
+from rail.core.common_params import SHARED_PARAMS
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
-from rail.core.common_params import SHARED_PARAMS
 
 
 class trainZmodel:

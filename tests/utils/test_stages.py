@@ -1,13 +1,11 @@
-from rail.utils.testing_utils import check_stage_params
-
-from rail.core import RailStage
 import rail.stages
+from rail.core import RailStage
+from rail.utils.testing_utils import check_stage_params
 
 rail.stages.import_and_attach_all()
 
 
 def test_all_stage_params():
-
     fail_list = []
 
     for _key, val in RailStage.pipeline_stages.items():

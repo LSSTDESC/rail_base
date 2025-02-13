@@ -2,12 +2,13 @@
 
 import os
 import sys
-import yaml
 from math import ceil
 
-from ceci.stage import PipelineStage
-from ceci.pipeline import MiniPipeline
+import yaml
 from ceci.config import StageParameter as Param
+from ceci.pipeline import MiniPipeline
+from ceci.stage import PipelineStage
+
 from rail.core.data import DATA_STORE, DataHandle
 
 
@@ -86,7 +87,8 @@ class RailPipeline(MiniPipeline):
 
     And end up with a fully specified pipeline.
     """
-    pipeline_classes = {}    
+
+    pipeline_classes = {}
 
     def __init_subclass__(cls):
         cls.pipeline_classes[cls.__name__] = cls
@@ -101,12 +103,14 @@ class RailPipeline(MiniPipeline):
         try:
             return cls.pipeline_classes[name]
         except KeyError as msg:
-            raise KeyError(f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}") from msg
+            raise KeyError(
+                f"Could not find pipeline class {name} in {list(cls.pipeline_classes.keys())}"
+            ) from msg
 
     @staticmethod
-    def load_pipeline_class(class_name):        
-        tokens = class_name.split('.')
-        module = '.'.join(tokens[:-1])
+    def load_pipeline_class(class_name):
+        tokens = class_name.split(".")
+        module = ".".join(tokens[:-1])
         class_name = tokens[-1]
         __import__(module)
         pipe_class = RailPipeline.get_pipeline_class(class_name)
@@ -118,13 +122,13 @@ class RailPipeline(MiniPipeline):
         output_yaml,
         input_dict=None,
         stages_config=None,
-        output_dir='.',
-        log_dir='.',
+        output_dir=".",
+        log_dir=".",
         **kwargs,
     ):
         pipe_class = RailPipeline.get_pipeline_class(class_name)
         pipe = pipe_class(**kwargs)
-        
+
         full_input_dict = pipe_class.default_input_dict.copy()
         if input_dict is not None:
             full_input_dict.update(**input_dict)
@@ -405,7 +409,7 @@ class RailStage(PipelineStage):
         except Exception:
             groupname = None
 
-        chunk_size = kwargs.get('chunk_size', self.config.chunk_size)
+        chunk_size = kwargs.get("chunk_size", self.config.chunk_size)
 
         if handle.path and handle.path != "None":  # pylint: disable=no-else-return
             self._input_length = handle.size(groupname=groupname)

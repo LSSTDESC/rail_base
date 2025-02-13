@@ -1,18 +1,18 @@
 """Rail-specific data management"""
 
-from typing import Any
 import pickle
+from typing import Any
 
 
 class Model:
-    """Class to act as wrapper for ML models """
+    """Class to act as wrapper for ML models"""
 
     def __init__(
         self,
         data: Any,
         creation_class_name: str,
-        version: int=0,
-        provenance: dict[str, Any] | None=None,
+        version: int = 0,
+        provenance: dict[str, Any] | None = None,
     ):
         """Constructor
 
@@ -35,11 +35,7 @@ class Model:
         else:
             self.provenance = {}
 
-    def validate(
-        self,
-        creation_class_name: str | None,
-        version: int | None
-    ) -> None:
+    def validate(self, creation_class_name: str | None, version: int | None) -> None:
         """
         Parameters
         ----------
@@ -52,17 +48,24 @@ class Model:
         ------
         TypeError : Either creation_class_name or version does not match
         """
-        if creation_class_name is not None and creation_class_name != self.creation_class_name:
-            raise TypeError(f"Model.creation_class_name does not match.  {creation_class_name} != {self.creation_class_name}")
+        if (
+            creation_class_name is not None
+            and creation_class_name != self.creation_class_name
+        ):
+            raise TypeError(
+                f"Model.creation_class_name does not match.  {creation_class_name} != {self.creation_class_name}"
+            )
         if version is not None and version != self.version:
-            raise TypeError(f"Model.version does not match.  {version} != {self.version}")
+            raise TypeError(
+                f"Model.version does not match.  {version} != {self.version}"
+            )
 
     @classmethod
     def read(
         cls,
         path: str,
-        creation_class_name: str="dummy",
-        version: int=0,
+        creation_class_name: str = "dummy",
+        version: int = 0,
         provenance: dict[str, Any] | None = None,
     ):
         """Read a model from a file.
@@ -85,7 +88,7 @@ class Model:
         model: Model
             Newly read Model
         """
-        with open(path, 'rb') as fin:
+        with open(path, "rb") as fin:
             read_data = pickle.load(fin)
 
         if isinstance(read_data, Model):
@@ -101,8 +104,8 @@ class Model:
         cls,
         inpath: str,
         outpath: str,
-        creation_class_name: str="dummy",
-        version: int=0,
+        creation_class_name: str = "dummy",
+        version: int = 0,
         provenance: dict[str, Any] | None = None,
     ):
         """Read a model from a file and write it as a `Model` if it is not already
@@ -134,8 +137,8 @@ class Model:
         cls,
         obj: Any,
         path: str,
-        creation_class_name: str="dummy",
-        version: int=0,
+        creation_class_name: str = "dummy",
+        version: int = 0,
         provenance: dict[str, Any] | None = None,
     ):
         """Write an object to a model file

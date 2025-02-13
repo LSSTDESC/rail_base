@@ -1,13 +1,14 @@
 import os
+
 import numpy as np
 import scipy.special
 import pytest
 
-from rail.utils.testing_utils import one_algo
 from rail.core.stage import RailStage
 from rail.estimation.algos import random_gauss, train_z
 from rail.utils.path_utils import RAILDIR
 from rail.core.data import PqHandle, TableHandle
+from rail.utils.testing_utils import one_algo
 
 sci_ver_str = scipy.__version__.split(".")
 
@@ -37,7 +38,7 @@ def test_random_pz():
     )
     assert np.isclose(results.ancil["zmode"], zb_expected).all()
     try:
-        os.remove('model.pkl')
+        os.remove("model.pkl")
     except FileNotFoundError:  # pragma: no cover
         pass
 
@@ -64,7 +65,7 @@ def test_train_pz():
     assert np.isclose(results.ancil["zmode"], rerun_results.ancil["zmode"]).all()
 
     try:
-        os.remove('model.pkl')
+        os.remove("model.pkl")
     except FileNotFoundError:  # pragma: no cover
         pass
 

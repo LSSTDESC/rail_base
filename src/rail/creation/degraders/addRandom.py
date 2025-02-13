@@ -1,8 +1,8 @@
 """Add a column of random numbers to a dataframe."""
 
 import numpy as np
-
 from ceci.config import StageParameter as Param
+
 from rail.creation.noisifier import Noisifier
 
 

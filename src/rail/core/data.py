@@ -1,10 +1,11 @@
 """Rail-specific data management"""
 
+import enum
 import os
 import pickle
-import enum
-import tables_io
+
 import qp
+import tables_io
 
 from .model import Model
 
@@ -583,7 +584,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 
 def default_model_read(modelfile):
     """Default function to read model files, simply used pickle.load"""
-    with open(modelfile, 'rb') as fin:
+    with open(modelfile, "rb") as fin:
         read_data = pickle.load(fin)
     if isinstance(read_data, Model):
         ret_data = read_data.data

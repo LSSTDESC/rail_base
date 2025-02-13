@@ -4,11 +4,11 @@ A summarizer-like stage that simple makes a histogram the true nz
 
 import numpy as np
 import qp
-
 from ceci.config import StageParameter as Param
+
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.stage import RailStage
 from rail.core.data import QPHandle, TableHandle
+from rail.core.stage import RailStage
 
 
 class TrueNZHistogrammer(RailStage):
@@ -34,12 +34,11 @@ class TrueNZHistogrammer(RailStage):
         self.bincents = None
 
     def _setup_iterator(self):
-
         itrs = [
-            self.input_iterator('input', groupname=self.config.hdf5_groupname),
-            self.input_iterator('tomography_bins', groupname=""),
+            self.input_iterator("input", groupname=self.config.hdf5_groupname),
+            self.input_iterator("tomography_bins", groupname=""),
         ]
-        
+
         for it in zip(*itrs):
             first = True
             mask = None
@@ -51,9 +50,9 @@ class TrueNZHistogrammer(RailStage):
                     first = False
                 else:
                     if self.config.selected_bin < 0:
-                        mask = np.ones(e-s, dtype=bool)
+                        mask = np.ones(e - s, dtype=bool)
                     else:
-                        mask = d['class_id'] == self.config.selected_bin
+                        mask = d["class_id"] == self.config.selected_bin
             yield start, end, pz_data, mask
 
     def run(self):
@@ -64,13 +63,11 @@ class TrueNZHistogrammer(RailStage):
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
-        
+
         first = True
         for s, e, data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s} - {e}")
-            self._process_chunk(
-                s, e, data, mask, first, single_hist
-            )
+            self._process_chunk(s, e, data, mask, first, single_hist)
             first = False
         if self.comm is not None:  # pragma: no cover
             single_hist = self.comm.reduce(single_hist)
@@ -85,7 +82,13 @@ class TrueNZHistogrammer(RailStage):
             self.add_data("true_NZ", qp_d)
 
     def _process_chunk(
-        self, _start, _end, data, mask, _first, single_hist,
+        self,
+        _start,
+        _end,
+        data,
+        mask,
+        _first,
+        single_hist,
     ):
         squeeze_mask = np.squeeze(mask)
         zb = data[self.config.redshift_col][squeeze_mask]

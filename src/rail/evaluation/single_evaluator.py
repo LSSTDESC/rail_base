@@ -5,7 +5,6 @@ The key feature is that the evaluate method.
 """
 
 import numpy as np
-
 from ceci.config import StageParameter as Param
 from qp.metrics import MetricInputType, MetricOutputType
 from qp.metrics.base_metric_classes import BaseMetric
@@ -157,12 +156,16 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             truth_data = truth_data[self.config.hdf5_groupname]
 
         for metric, this_metric in self._cached_metrics.items():
-            if this_metric.metric_input_type == MetricInputType.single_ensemble:  # pragma: no cover
+            if (
+                this_metric.metric_input_type == MetricInputType.single_ensemble
+            ):  # pragma: no cover
                 if not self._input_data_type.has_dist():  # pragma: no cover
                     continue
                 key_val = f"{metric}"
                 self._process_all_single_ensemble(this_metric, key_val, input_data)
-            elif this_metric.metric_input_type == MetricInputType.dist_to_dist:  # pragma: no cover
+            elif (
+                this_metric.metric_input_type == MetricInputType.dist_to_dist
+            ):  # pragma: no cover
                 if (
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()

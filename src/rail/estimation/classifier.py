@@ -3,8 +3,9 @@ Abstract base classes defining classifiers.
 """
 
 import gc
-from rail.core.data import QPHandle, TableHandle, ModelHandle, Hdf5Handle
+
 from rail.core.common_params import SHARED_PARAMS
+from rail.core.data import Hdf5Handle, ModelHandle, QPHandle, TableHandle
 from rail.core.stage import RailStage
 
 

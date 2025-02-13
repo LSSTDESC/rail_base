@@ -6,7 +6,7 @@ They are distinguished by their input data types, and the models they output can
 be used for their corresponding Estimator, Summarizer, or Classifier stages.
 """
 
-from rail.core.data import TableHandle, QPHandle, ModelHandle
+from rail.core.data import ModelHandle, QPHandle, TableHandle
 from rail.core.stage import RailStage
 
 

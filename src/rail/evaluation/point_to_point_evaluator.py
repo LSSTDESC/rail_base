@@ -2,7 +2,7 @@ import numpy as np
 from ceci.config import StageParameter as Param
 from qp.metrics.point_estimate_metric_classes import PointToPointMetric
 
-from rail.core.data import TableHandle, QPHandle
+from rail.core.data import QPHandle, TableHandle
 from rail.evaluation.evaluator import Evaluator
 
 

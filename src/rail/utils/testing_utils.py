@@ -1,12 +1,14 @@
 """Utility functions to test alogrithms"""
 
 import os
-import scipy.special
+
 import ceci
+import scipy.special
+
+from rail.cli.rail.scripts import build_pipeline
+from rail.core.data import TableHandle
 from rail.core.stage import RailStage
 from rail.utils.path_utils import RAILDIR
-from rail.core.data import TableHandle
-from rail.cli.rail.scripts import build_pipeline
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
 validdata = os.path.join(RAILDIR, "rail/examples_data/testdata/validation_10gal.hdf5")
@@ -85,7 +87,6 @@ def one_algo(
 
 
 def check_stage_params(stage_class):
-
     legal_types = (int, float, bool, list, dict, str, None)
 
     for key, val in stage_class.config_options.items():
@@ -109,11 +110,10 @@ def check_stage_params(stage_class):
 
 
 def build_and_read_pipeline(pipeline_class, **kwargs):
-    short_name = pipeline_class.split('.')[-1]
+    short_name = pipeline_class.split(".")[-1]
     yaml_file = f"{short_name}.yml"
     config_yaml_file = f"{short_name}_config.yml"
-    build_pipeline(pipeline_class, yaml_file, 'rubin', **kwargs)
-    pr = ceci.Pipeline.read(yaml_file)    
+    build_pipeline(pipeline_class, yaml_file, "rubin", **kwargs)
+    pr = ceci.Pipeline.read(yaml_file)
     os.unlink(yaml_file)
     os.unlink(config_yaml_file)
-

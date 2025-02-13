@@ -7,18 +7,17 @@ The key feature is that the evaluate method.
 import numpy as np
 from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
-from qp.metrics.pit import PIT
 from qp.metrics.base_metric_classes import MetricOutputType
-from rail.core.data import Hdf5Handle, QPHandle, QPDictHandle
-from rail.core.stage import RailStage
+from qp.metrics.pit import PIT
+
 from rail.core.common_params import SHARED_PARAMS
+from rail.core.data import Hdf5Handle, QPDictHandle, QPHandle
+from rail.core.stage import RailStage
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import (
-    PointSigmaIQR,
-    PointBias,
-    PointOutlierRate,
-    PointSigmaMAD,
-)
+from rail.evaluation.metrics.pointestimates import (PointBias,
+                                                    PointOutlierRate,
+                                                    PointSigmaIQR,
+                                                    PointSigmaMAD)
 
 
 def _all_subclasses(a_class):
@@ -36,7 +35,7 @@ def _build_metric_dict(a_class):
     return the_dict
 
 
-class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
+class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "Evaluator"
@@ -154,14 +153,13 @@ class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
 
     def finalize(self):
         if not self.config.force_exact:
-
             # Finalize all the metrics that produce a single value summary
             summary_data = {}
             single_distribution_summary_data = {}
             for metric, cached_metric in self._cached_metrics.items():
                 if cached_metric.metric_output_type not in [
                     MetricOutputType.single_value,
-                    MetricOutputType.single_distribution
+                    MetricOutputType.single_distribution,
                 ]:
                     continue
                 matching_keys = []
@@ -207,7 +205,9 @@ class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
         """Setup the iterator that runs in parallel over the handles"""
 
         if itrs is None:
-            handle_list = [input_[0] for input_ in self.inputs]  # pylint: disable=no-member
+            handle_list = [
+                input_[0] for input_ in self.inputs
+            ]  # pylint: disable=no-member
             itrs = [self.input_iterator(tag) for tag in handle_list]
 
         for it in zip(*itrs):
@@ -273,7 +273,6 @@ class Evaluator(RailStage):  #pylint: disable=too-many-instance-attributes
                 MetricOutputType.single_value,
                 MetricOutputType.single_distribution,
             ]:
-
                 if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                     print(
                         f"The metric `{metric}` does not support parallel processing yet"
@@ -485,14 +484,16 @@ class OldEvaluator(RailStage):
             # Here we do our best to store the relevant fields in `out_table`.
             if isinstance(value, list):  # pragma: no cover
                 out_table[f"PIT_{pit_metric}"] = value
-            elif pit_metric== 'OutRate':
+            elif pit_metric == "OutRate":
                 out_table[f"PIT_{pit_metric}_stat"] = [value]
             else:
                 out_table[f"PIT_{pit_metric}_stat"] = [
                     getattr(value, "statistic", None)
                 ]
                 if getattr(value, "pvalue", None) is not None:
-                    out_table[f"PIT_{pit_metric}_pval"] = [getattr(value, "p_value", None)]
+                    out_table[f"PIT_{pit_metric}_pval"] = [
+                        getattr(value, "p_value", None)
+                    ]
                 if getattr(value, "significance_level", None) is not None:
                     out_table[f"PIT_{pit_metric}_significance_level"] = [
                         getattr(value, "significance_level", None)

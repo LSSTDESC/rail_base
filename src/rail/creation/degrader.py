@@ -5,8 +5,9 @@ and returns a pandas DataFrame, and wraps the run method.
 """
 
 from ceci.config import StageParameter as Param
-from rail.core.stage import RailStage
+
 from rail.core.data import PqHandle
+from rail.core.stage import RailStage
 
 
 class Degrader(RailStage):  # pragma: no cover

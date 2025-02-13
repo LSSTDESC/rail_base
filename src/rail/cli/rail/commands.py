@@ -1,14 +1,15 @@
 import os
-import click
 import pprint
+
+import ceci
+import click
 import yaml
 
-from rail.core import __version__
 from rail.cli.rail import options, scripts
+from rail.core import __version__
 from rail.interfaces.pz_factory import PZFactory
 from rail.interfaces.tool_factory import ToolFactory
 from rail.utils import catalog_utils
-import ceci
 
 
 @click.group()
@@ -93,12 +94,22 @@ def get_data(verbose, **kwargs):
 @options.dry_run()
 @options.input_file()
 @options.params()
-def estimate(stage_name, stage_class, stage_module, stages_config, model_file, catalog_tag, dry_run, input_file, params):
+def estimate(
+    stage_name,
+    stage_class,
+    stage_module,
+    stages_config,
+    model_file,
+    catalog_tag,
+    dry_run,
+    input_file,
+    params,
+):
     """Run a pz estimation stage"""
     if catalog_tag:
         catalog_utils.apply_defaults(catalog_tag)
 
-    if stages_config not in [None, 'none', 'None']:
+    if stages_config not in [None, "none", "None"]:
         with open(stages_config) as fin:
             config_data = yaml.safe_load(fin)
             if stage_name in config_data:
@@ -106,18 +117,20 @@ def estimate(stage_name, stage_class, stage_module, stages_config, model_file, c
             elif isinstance(config_data, dict):
                 kwargs = config_data
             else:
-                raise ValueError(f"Config file {stages_config} is not properly constructed")                
+                raise ValueError(
+                    f"Config file {stages_config} is not properly constructed"
+                )
     else:
         kwargs = {}
-        
+
     kwargs.update(**options.args_to_dict(params))
-    
+
     stage = PZFactory.build_cat_estimator_stage(
         stage_name=stage_name,
         class_name=stage_class,
         module_name=stage_module,
         model_path=model_file,
-        data_path='dummy.in',
+        data_path="dummy.in",
         **kwargs,
     )
 
@@ -127,7 +140,7 @@ def estimate(stage_name, stage_class, stage_module, stages_config, model_file, c
         print_dict = stage.config.to_dict().copy()
         pprint.pprint(print_dict)
         return 0
-        
+
     output = PZFactory.run_cat_estimator_stage(
         stage,
         data_path=input_file,
@@ -145,10 +158,12 @@ def build_pipe(pipeline_class, output_yaml, catalog_tag, stages_config, outdir, 
     """Build a pipeline yaml file"""
     input_dict = {}
     for input_ in inputs:
-        tokens = input_.split('=')
+        tokens = input_.split("=")
         assert len(tokens) == 2
         input_dict[tokens[0]] = tokens[1]
-    scripts.build_pipeline(pipeline_class, output_yaml, catalog_tag, input_dict, stages_config, outdir)
+    scripts.build_pipeline(
+        pipeline_class, output_yaml, catalog_tag, input_dict, stages_config, outdir
+    )
     return 0
 
 
@@ -162,7 +177,7 @@ def run_stage(pipeline_yaml, stage_name, dry_run, inputs):
     pipe = ceci.Pipeline.read(pipeline_yaml)
     input_dict = {}
     for input_ in inputs:
-        tokens = input_.split('=')
+        tokens = input_.split("=")
         assert len(tokens) == 2
         input_dict[tokens[0]] = tokens[1]
     com = pipe.generate_stage_command(stage_name, **input_dict)
@@ -185,7 +200,7 @@ def run_tool(stage_name, stage_class, stage_module, dry_run, input_file):
         stage_name=stage_name,
         class_name=stage_class,
         module_name=stage_module,
-        data_path='dummy.in',
+        data_path="dummy.in",
     )
 
     output = ToolFactory.run_tool_stage(

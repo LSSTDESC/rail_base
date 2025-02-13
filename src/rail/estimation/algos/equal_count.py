@@ -5,8 +5,9 @@ tomographic bins with uniform binning.
 
 import numpy as np
 from ceci.config import StageParameter as Param
-from rail.estimation.classifier import PZClassifier
+
 from rail.core.data import Hdf5Handle
+from rail.estimation.classifier import PZClassifier
 
 
 class EqualCountClassifier(PZClassifier):
