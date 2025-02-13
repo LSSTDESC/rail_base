@@ -106,3 +106,9 @@ def test_add_random(data):  # pylint: disable=redefined-outer-name
 
     test_data = add_random(data, seed=1234).data
     assert len(test_data[add_random.config.col_name]) == len(data.data)
+
+    os.remove(
+        add_random.get_output(
+            add_random.get_aliased_tag("output"), final_name=True
+        )
+    )

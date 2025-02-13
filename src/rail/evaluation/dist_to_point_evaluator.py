@@ -66,6 +66,6 @@ class DistToPointEvaluator(Evaluator):
             reference_data = data_tuple[1][self.config.hdf5_groupname][
                 self.config.reference_dictionary_key
             ]
-        else:
+        else:  # pragma: no cover
             reference_data = data_tuple[1][self.config.reference_dictionary_key]
         self._process_all_metrics(estimate_data, reference_data)

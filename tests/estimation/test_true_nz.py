@@ -50,4 +50,9 @@ def test_true_nz():
         check_ens = qp.read(out_hist.path)
         assert check_ens.ancil['n_total'][0] == check_vals[i]
 
-        
+        os.remove(
+            nz_hist.get_output(
+                nz_hist.get_aliased_tag("true_NZ"), final_name=True
+            )
+        )
+

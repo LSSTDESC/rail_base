@@ -36,6 +36,10 @@ def test_random_pz():
         "RandomPZ", train_algo, pz_algo, train_config_dict, estim_config_dict
     )
     assert np.isclose(results.ancil["zmode"], zb_expected).all()
+    try:
+        os.remove('model.pkl')
+    except FileNotFoundError:  # pragma: no cover
+        pass
 
 
 def test_train_pz():
@@ -58,9 +62,13 @@ def test_train_pz():
     )
     assert np.isclose(results.ancil["zmode"], zb_expected).all()
     assert np.isclose(results.ancil["zmode"], rerun_results.ancil["zmode"]).all()
-    
-    
-    
+
+    try:
+        os.remove('model.pkl')
+    except FileNotFoundError:  # pragma: no cover
+        pass
+
+
 def test_train_pz_with_wrong_columns_path():
     
     DS = RailStage.data_store

@@ -105,7 +105,7 @@ class PointEstimationMixin:
         """
         if grid is None:
             for key in ["zmin", "zmax", "nzbins"]:
-                if key not in self.config:
+                if key not in self.config:  # pragma: no cover
                     raise KeyError(
                         f"Expected `{key}` to be defined in stage "
                         "configuration dictionary in order to caluclate mode."

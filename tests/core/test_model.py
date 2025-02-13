@@ -1,4 +1,5 @@
 import pickle
+import os
 import numpy as np
 
 import pytest
@@ -42,7 +43,13 @@ def test_model():
   
     with pytest.raises(TypeError):
         Model.validate(check_array_data, 'dummy', 1)
-  
+
+    os.remove('array_data.pickle')
+    os.remove('array_raw.pickle')
+    os.remove('array_wrap.pickle')
+    os.remove('dict_data.pickle')
+    os.remove('model_data.pickle')
+    os.remove('train_z_data.pickle')
 
     
 

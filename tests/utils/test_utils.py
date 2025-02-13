@@ -56,6 +56,13 @@ def test_util_stages():
     )
     row_sel_3.set_data("input", None, do_read=True)
 
+    for stage in [table_conv, col_map, row_sel]:
+        os.remove(
+            stage.get_output(
+                stage.get_aliased_tag("output"), final_name=True
+            )
+        )
+
 
 def test_set_data_nonexistent_file():
     """Create an instance of a child class of RailStage. Exercise the `set_data`
