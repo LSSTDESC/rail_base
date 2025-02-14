@@ -217,7 +217,7 @@ Submodules
 
         api_pkg_toc += """
 
-.. py:module:: rail.estimation
+.. py:module:: rail.{key}
 
 Subpackages
 -----------
@@ -246,7 +246,7 @@ Submodules
             else:
                 sub_modules += f"    {vv.name}\n"
         api_pkg_toc = api_pkg_toc.format(
-            sub_packages=sub_packages, sub_modules=sub_modules
+            key=key, sub_packages=sub_packages, sub_modules=sub_modules
         )
 
         with open(
@@ -264,7 +264,31 @@ Submodules
 
 Information on specific functions, classes, and methods.
 
+Base Packages
+-------------
+
 .. toctree::
+    :maxdepth: 4
+
+{base_packages}
+
+
+Namespaces
+----------
+
+.. toctree::
+    :maxdepth: 4
+
+{namespaces}
+
+
+Algorithm Packages
+------------------
+
+.. toctree::
+    :maxdepth: 4
+
+{algorithm_packages}
 
 """
         try:
@@ -277,16 +301,30 @@ Information on specific functions, classes, and methods.
         except Exception:  # pragma: no cover
             pass
 
+        base_packages = ""
+        namespaces = ""
+        algorithm_packages = ""
+
         for key, val in cls.TREE.items():
             nsname = f"rail.{key}"
             nsfile = os.path.join("api", f"{nsname}.rst")
-            apitoc += f"    {nsfile}\n"
 
             if nsname in cls.PACKAGES:
                 cls.do_pkg_api_rst(basedir, key, val)
+                if nsname in ["rail.core", "rail.interfaces", "rail.stages"]:
+                    base_packages += f"    {nsfile}\n"
+                else:
+                    algorithm_packages += f"    {nsfile}\n"
+
             else:
                 cls.do_namespace_api_rst(basedir, key, val)
+                namespaces += f"    {nsfile}\n"
 
+        apitoc = apitoc.format(
+            base_packages=base_packages,
+            namespaces=namespaces,
+            algorithm_packages=algorithm_packages,
+        )
         with open(
             os.path.join(basedir, "api.rst"), "w", encoding="utf-8"
         ) as apitocfile:
