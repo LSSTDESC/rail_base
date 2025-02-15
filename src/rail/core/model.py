@@ -1,11 +1,15 @@
-"""Rail-specific data management"""
+"""Wrapper class for ML Models"""
 
 import pickle
 from typing import Any
 
 
 class Model:
-    """Class to act as wrapper for ML models"""
+    """Class to act as wrapper for ML models
+
+    This will attach metadata to the ML model, and provide tools
+    for validation, versioning and tracking provenance.
+    """
 
     def __init__(
         self,
@@ -18,12 +22,15 @@ class Model:
 
         Parameters
         ----------
-        data : Any
+        data: 
             Model data
-        creation_class_name : str
+
+        creation_class_name: 
             Name of the creation class
-        version : int
+
+        version: 
             Version of the model
+
         provenance: dict[str, Any] | None
             Provenance infomration
         """
@@ -39,9 +46,10 @@ class Model:
         """
         Parameters
         ----------
-        creation_class_name : str | None
+        creation_class_name:
             Name of the creation class
-        version : int | None
+
+        version:
             Version of the model
 
         Raises
@@ -75,18 +83,21 @@ class Model:
 
         Parameters
         ----------
-        path: str,
+        path:
             File to read
-        creation_class_name : str
+
+        creation_class_name:
             Name of the creation class
-        version : int
+
+        version:
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance infomration
 
         Returns
         -------
-        model: Model
+        Model：
             Newly read Model
         """
         with open(path, "rb") as fin:
@@ -113,15 +124,19 @@ class Model:
 
         Parameters
         ----------
-        inpath: str,
+        inpath:
             File to read
-        outpath: str,
+
+        outpath:
             File to write
-        creation_class_name : str
+
+        creation_class_name:
             Name of the creation class
-        version : int
+
+        version: 
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance information
 
         Returns
@@ -148,15 +163,19 @@ class Model:
 
         Parameters
         ----------
-        obj: Any
+        obj:
             Object to dump
-        path: str,
+
+        path:
             File to write
-        creation_class_name : str
+
+        creation_class_name: 
             Name of the creation class
-        version : int
+
+        version: 
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance information
 
         Returns
@@ -183,7 +202,7 @@ class Model:
 
         Parameters
         ----------
-        path: str,
+        path:
             File to write
         """
         with open(path, "wb") as fout:

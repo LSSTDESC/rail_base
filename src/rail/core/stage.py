@@ -26,7 +26,7 @@ class StageIO:
     This allows users to be more concise when writing pipelines.
     """
 
-    def __init__(self, parent: PipelineStage):
+    def __init__(self, parent: RailStage):
         self._parent = parent
 
     def __getattr__(self, item: str) -> DataHandle:
@@ -49,10 +49,10 @@ class RailStageBuild:
     a_pipe.add_stage(a_stage)
     """
 
-    def __init__(self, stage_class: type[PipelineStage], **kwargs: dict[str, Any]):
+    def __init__(self, stage_class: typeRailStage, **kwargs: Any):
         self.stage_class: type[PipelineStage] = stage_class
         self._kwargs: dict[str, Any] = kwargs
-        self._stage: PipelineStage|None = None
+        self._stage: RailStage|None = None
 
     @property
     def io(self) -> StageIO | None:  # pragma: no cover
@@ -60,13 +60,13 @@ class RailStageBuild:
             return self._stage.io
         return None
 
-    def build(self, name: str) -> PipelineStage:
+    def build(self, name: str) -> RailStage:
         """Actually build the stage, this is called by the pipeline the stage
         belongs to
 
         Parameters
         ----------
-        name:
+        name: 
             The name for this stage we are building
 
         Returns
@@ -110,6 +110,18 @@ class RailPipeline(MiniPipeline):
 
     @staticmethod
     def load_pipeline_class(class_name: str) -> type[RailPipeline]:
+        """Import a particular RailPipeline subclass by name
+        
+        Parameters
+        ----------
+        class_name:
+            Full name of the class, e.g., rail.core.stage.RailPipeline
+        
+        Returns
+        -------
+        type
+            Requested Pipeline sub-class
+        """
         tokens = class_name.split(".")
         module = ".".join(tokens[:-1])
         class_name = tokens[-1]
@@ -125,8 +137,33 @@ class RailPipeline(MiniPipeline):
         stages_config: dict[str, Any]|None=None,
         output_dir:str =".",
         log_dir: str=".",
-        **kwargs: dict[str, Any],
+        **kwargs: Any,
     ) -> None:
+        """Build a RailPipeline and write the config yaml for for it
+        
+        Parameters
+        ----------
+        class_name:
+            Full name of the class, e.g., rail.core.stage.RailPipeline
+        
+        output_yaml:
+            Path to the output yaml file
+
+        input_dict:
+            Dict of all the inputs needed to run the pipeline
+
+        stages_config:
+            Stage configuration overrides
+
+        output_dir:
+            Directory to write pipeline outputs to
+
+        log_dir:
+            Directory to write pipeline log files to
+
+        **kwargs:
+            Passed as arguements to the pipeline constructor
+        """
         pipe_class = RailPipeline.get_pipeline_class(class_name)
         pipe = pipe_class(**kwargs)
 
