@@ -1,5 +1,7 @@
 """Add a column of random numbers to a dataframe."""
 
+from typing import Any
+
 import numpy as np
 from ceci.config import StageParameter as Param
 
@@ -17,7 +19,7 @@ class AddColumnOfRandom(Noisifier):
         ),
     )
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """
         Constructor
 
@@ -25,10 +27,10 @@ class AddColumnOfRandom(Noisifier):
         """
         Noisifier.__init__(self, args, **kwargs)
 
-    def _initNoiseModel(self):  # pragma: no cover
+    def _initNoiseModel(self) -> None:  # pragma: no cover
         np.random.seed(self.config.seed)
 
-    def _addNoise(self):  # pragma: no cover
+    def _addNoise(self) -> None:  # pragma: no cover
         data = self.get_data("input")
         copy = data.copy()
         copy.insert(0, self.config.col_name, np.random.uniform(size=len(copy)))

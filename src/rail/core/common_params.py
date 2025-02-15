@@ -1,5 +1,7 @@
 """ Parameters that are shared between stages """
 
+from typing import Any
+
 from ceci.config import StageConfig
 from ceci.config import StageParameter as Param
 
@@ -65,20 +67,46 @@ SHARED_PARAMS = StageConfig(
 )
 
 
-def copy_param(param_name):
-    """Return a copy of one of the shared parameters"""
+def copy_param(param_name: str) -> Param:
+    """Return a copy of one of the shared parameters
+
+    Parameters
+    ----------
+    param_name:
+        Name of the parameter to copy
+
+    Returns
+    -------
+    Param:
+        Copied parameter
+    """
     return SHARED_PARAMS.get(param_name).copy()
 
 
-def set_param_default(param_name, default_value):
-    """Change the default value of one of the shared parameters"""
+def set_param_default(param_name: str, default_value: Any) -> None:
+    """Change the default value of one of the shared parameters
+
+    Parameters
+    ----------
+    param_name:
+        Name of the parameter to copy
+
+    default_value:
+        New default value    
+    """
     try:
         SHARED_PARAMS.get(param_name).set_default(default_value)
     except AttributeError as msg:  # pragma: no cover
         raise KeyError(f"No shared parameter {param_name} in SHARED_PARAMS") from msg
 
 
-def set_param_defaults(**kwargs):  # pragma: no cover
-    """Change the default value of several of the shared parameters"""
+def set_param_defaults(**kwargs: dict[str, Any]) -> None:  # pragma: no cover
+    """Change the default value of several of the shared parameters
+
+    Parameters
+    ----------
+    **kwargs:
+        Key, value pairs of parameter names and default values
+    """
     for key, val in kwargs.items():
         set_param_default(key, val)

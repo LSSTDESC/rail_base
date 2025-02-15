@@ -1,5 +1,6 @@
 """Utility functions to test alogrithms"""
 
+from typing import Any
 import os
 
 import ceci
@@ -7,6 +8,8 @@ import ceci
 from rail.cli.rail.scripts import build_pipeline
 from rail.core.data import TableHandle
 from rail.core.stage import RailStage
+from rail.estimation.estimator import CatEstimator
+from rail.estimation.informer import CatInformer
 from rail.utils.path_utils import RAILDIR
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
@@ -16,13 +19,13 @@ DS.__class__.allow_overwrite = True
 
 
 def one_algo(
-    key,
-    single_trainer,
-    single_estimator,
-    train_kwargs,
-    estim_kwargs,
-    is_classifier=False,
-):
+    key: str,
+    single_trainer: type[CatInformer],
+    single_estimator: type[CatEstimator],
+    train_kwargs: dict[str, Any],
+    estim_kwargs: dict[str, Any],
+    is_classifier: bool=False,
+) -> Any:
     """
     A basic test of running an estimator subclass.
     Run inform, write temporary trained model to
@@ -85,7 +88,7 @@ def one_algo(
     return estim.data, estim_2.data, estim_3.data
 
 
-def check_stage_params(stage_class):
+def check_stage_params(stage_class: type[RailStage]) -> str | None:
     legal_types = (int, float, bool, list, dict, str, None)
 
     for key, val in stage_class.config_options.items():
@@ -104,11 +107,10 @@ def check_stage_params(stage_class):
             return f"Illegal parameter type for {stage_class.name}.{key} {dtype}"
         if def_val_dtype not in legal_types:  # pragma: no cover
             return f"Illegal parameter default value type for {stage_class.name}.{key} {def_val_dtype}"
-
     return None
 
 
-def build_and_read_pipeline(pipeline_class, **kwargs):
+def build_and_read_pipeline(pipeline_class: str, **kwargs: Any) -> None:
     short_name = pipeline_class.split(".")[-1]
     yaml_file = f"{short_name}.yml"
     config_yaml_file = f"{short_name}_config.yml"

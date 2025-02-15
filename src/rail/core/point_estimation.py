@@ -1,7 +1,12 @@
+from typing import TYPE_CHECKING
+
 import numpy as np
 from numpy.typing import NDArray
 
 from rail.core.common_params import SHARED_PARAMS
+
+if TYPE_CHECKING:
+    import qp
 
 
 class PointEstimationMixin:
@@ -10,16 +15,18 @@ class PointEstimationMixin:
         recompute_point_estimates=SHARED_PARAMS,
     )
 
-    def calculate_point_estimates(self, qp_dist, grid=None):
+    
+
+    def calculate_point_estimates(self, qp_dist: qp.Ensemble, grid: NDArray|None=None) -> NDArray:
         """This function drives the calculation of point estimates for qp.Ensembles.
         It is defined here, and called from the `_process_chunk` method in the
         `CatEstimator` child classes.
 
         Parameters
         ----------
-        qp_dist : qp.Ensemble
+        qp_dist:
             The qp Ensemble instance that contains posterior estimates.
-        grid : array-like, optional
+        grid:
             The grid on which to evaluate the point estimate. Note that not all
             point estimates require a grid to be provided, by default None.
 
@@ -41,7 +48,7 @@ class PointEstimationMixin:
             - `_calculate_median_point_estimate`
         """
 
-        ancil_dict = dict()
+        ancil_dict: dict[str, NDArray] = dict()
         calculated_point_estimates = []
 
         existing_ancil = qp_dist.ancil
@@ -77,15 +84,15 @@ class PointEstimationMixin:
 
         return qp_dist
 
-    def _calculate_mode_point_estimate(self, qp_dist, grid=None) -> NDArray:
+    def _calculate_mode_point_estimate(self, qp_dist: qp.Ensemble, grid: NDArray|None=None) -> NDArray:
         """Calculates and returns the mode values for a set of posterior estimates
         in a qp.Ensemble instance.
 
         Parameters
         ----------
-        qp_dist : qp.Ensemble
+        qp_dist :
             The qp Ensemble instance that contains posterior estimates.
-        grid : array-like, optional
+        grid : 
             The grid on which to evaluate the `mode` point estimate, if a grid is
             not provided, a default will be created at run time using `zmin`, `zmax`,
             and `nzbins`, by default None
@@ -114,13 +121,13 @@ class PointEstimationMixin:
 
         return qp_dist.mode(grid=grid)
 
-    def _calculate_mean_point_estimate(self, qp_dist) -> NDArray:
+    def _calculate_mean_point_estimate(self, qp_dist: qp.Ensemble) -> NDArray:
         """Calculates and returns the mean values for a set of posterior estimates
         in a qp.Ensemble instance.
 
         Parameters
         ----------
-        qp_dist : qp.Ensemble
+        qp_dist : 
             The qp Ensemble instance that contains posterior estimates.
 
         Returns
@@ -130,13 +137,13 @@ class PointEstimationMixin:
         """
         return qp_dist.mean()
 
-    def _calculate_median_point_estimate(self, qp_dist) -> NDArray:
+    def _calculate_median_point_estimate(self, qp_dist: qp.Ensemble) -> NDArray:
         """Calculates and returns the median values for a set of posterior estimates
         in a qp.Ensemble instance.
 
         Parameters
         ----------
-        qp_dist : qp.Ensemble
+        qp_dist : 
             The qp Ensemble instance that contains posterior estimates.
 
         Returns

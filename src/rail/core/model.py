@@ -13,7 +13,7 @@ class Model:
         creation_class_name: str,
         version: int = 0,
         provenance: dict[str, Any] | None = None,
-    ):
+    ) -> None:
         """Constructor
 
         Parameters
@@ -68,7 +68,7 @@ class Model:
         creation_class_name: str = "dummy",
         version: int = 0,
         provenance: dict[str, Any] | None = None,
-    ):
+    ) -> Model:
         """Read a model from a file.
 
         Note that this will promote the data to a Model if it is not already
@@ -108,7 +108,7 @@ class Model:
         creation_class_name: str = "dummy",
         version: int = 0,
         provenance: dict[str, Any] | None = None,
-    ):
+    ) -> Model:
         """Read a model from a file and write it as a `Model` if it is not already
 
         Parameters
@@ -126,7 +126,7 @@ class Model:
 
         Returns
         -------
-        model: Model
+        Model
             Newly read & converted Model
         """
         the_model = cls.read(inpath, creation_class_name, version, provenance)
@@ -141,7 +141,7 @@ class Model:
         creation_class_name: str = "dummy",
         version: int = 0,
         provenance: dict[str, Any] | None = None,
-    ):
+    ) -> Model:
         """Write an object to a model file
 
         This will promote it to a Model if it isn't already
@@ -161,7 +161,7 @@ class Model:
 
         Returns
         -------
-        model: Model
+        Model
             Newly converted Model
         """
 

@@ -1,5 +1,7 @@
 """Degrader that applies a cut to given columns."""
 
+from typing import Any
+
 from numbers import Number
 
 import numpy as np
@@ -21,17 +23,17 @@ class QuantityCut(Selector):
         cuts=Param(dict, required=True, msg="Cuts to apply"),
     )
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Constructor.
 
         Performs standard Degrader initialization as well as defining the cuts
         to be applied.
         """
         super().__init__(args, **kwargs)
-        self.cuts = None
+        self.cuts: dict|None = None
         self.set_cuts(self.config["cuts"])
 
-    def set_cuts(self, cuts: dict):
+    def set_cuts(self, cuts: dict) -> None:
         """Defines the cuts to be applied.
 
         Parameters
@@ -86,7 +88,7 @@ class QuantityCut(Selector):
             else:
                 raise TypeError(bad_cut_msg)
 
-    def _select(self):
+    def _select(self) -> np.ndarray:
         """Applies cuts.
 
         Notes
@@ -97,6 +99,8 @@ class QuantityCut(Selector):
         """
         data = self.get_data("input")
 
+        assert self.cuts is not None
+        
         # get overlap of columns from data and columns on which to make cuts
         columns = set(self.cuts.keys()).intersection(data.columns)
 
@@ -107,13 +111,13 @@ class QuantityCut(Selector):
             f"{col} > {self.cuts[col][0]} & {col} < {self.cuts[col][1]}"
             for col in columns
         ]
-        query = " & ".join(query)
-        out_indices = data.query(query).index.values
+        query_st = " & ".join(query)
+        out_indices = data.query(query_st).index.values
         out_mask = np.zeros(len(data), dtype=int)
         out_mask[out_indices] = 1
         return out_mask
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         """Pretty print this object."""
         printMsg = "Degrader that applies the following cuts to a pandas DataFrame:\n"
         printMsg += "{column: (min, max), ...}\n"

@@ -11,10 +11,10 @@ class PZFactory:
     rail p(z) estimation algorithms.
     """
 
-    _stage_dict = {}
+    _stage_dict: dict[str, CatEstimator] = {}
 
     @classmethod
-    def reset(cls):
+    def reset(cls) -> None:
         """Reset the dictionary of cached stage objects"""
         cls._stage_dict = {}
 
@@ -22,7 +22,7 @@ class PZFactory:
     def build_stage_instance(
         cls,
         stage_name: str,
-        stage_class: type,
+        stage_class: type[CatEstimator],
         model_path: str,
         data_path: str = "none",
         **config_params: dict,

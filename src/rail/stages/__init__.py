@@ -68,7 +68,7 @@ __all__ = [
 ]
 
 
-def import_and_attach_all():
+def import_and_attach_all() -> None:
     """Import all the packages in the rail ecosystem and attach them to this module"""
     RailEnv.import_all_packages()
     RailEnv.attach_stages(rail.stages)

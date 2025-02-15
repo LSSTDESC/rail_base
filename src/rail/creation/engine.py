@@ -5,6 +5,8 @@ which can calculate posteriors for the data with respect to the distribution
 defined by the Creator.
 """
 
+from typing import Any
+
 import qp
 from ceci.config import StageParameter as Param
 
@@ -23,23 +25,21 @@ class Modeler(RailStage):  # pragma: no cover
     inputs = [("input", DataHandle)]
     outputs = [("model", ModelHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any):
         """Initialize Modeler"""
         super().__init__(args, **kwargs)
         self.model = None
 
-    def fit_model(self):
+    def fit_model(self) -> ModelHandle:
         """Produce a creation model from which photometry and redshifts can be
         generated.
 
-        Parameters
-        ----------
-        [The parameters depend entirely on the modeling approach!]
-
         Returns
         -------
-        [This will definitely be a file, but the filetype and format depend
-        entirely on the modeling approach!]
+        ModelHandle:
+            This will definitely be a wrapper around a File,
+            but the filetype and format depend entirely on the
+            modeling approach
         """
         self.run()
         self.finalize()
@@ -63,7 +63,7 @@ class Creator(RailStage):  # pragma: no cover
     inputs = [("model", ModelHandle)]
     outputs = [("output", TableHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Creator"""
         super().__init__(args, **kwargs)
         self.model = None
@@ -71,20 +71,31 @@ class Creator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> Any:
         """Load the model and/or attach it to this Creator.
 
-        Keywords
-        --------
-        model : object, str or ModelHandle
-            Either an object with a trained model, a path pointing to a file
-            that can be read to obtain the trained model, or a ``ModelHandle``
-            providing access to the trained model
+        Parameters
+        ----------
+        **kwargs:
+            Set notes for deailts
 
         Returns
         -------
-        self.model : object
+        Any:
             The object encapsulating the trained model
+
+        Notes
+        -----
+        The 'model' keyword a be one of several things:
+
+        str:  
+            It will be treated as a filename
+        ModelHandle:
+            it will be used to access the model directly
+        Any:
+            It will be treate the data for the model
+        None:
+            It well reset the model to None
         """
         model = kwargs.get("model", None)
         if model is None or model == "None":  # pragma: no cover
@@ -100,7 +111,7 @@ class Creator(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def sample(self, n_samples: int, seed: int = None, **kwargs):
+    def sample(self, n_samples: int, seed: int|None = None, **kwargs: dict[str, Any]) -> DataHandle:
         """Draw samples from the model specified in the configuration.
 
         This is a method for running a Creator in interactive mode. In pipeline
@@ -108,15 +119,19 @@ class Creator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        n_samples : int
+        n_samples: 
             The number of samples to draw
-        seed : int
+
+        seed:
             The random seed to control sampling
+
+        **kwargs:
+            Used to update the configuration
 
         Returns
         -------
-        table : table-like
-            The samples
+        DataHandle
+            DataHandle wrapping the newly created samples
 
         Notes
         -----
@@ -153,7 +168,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
     ]
     outputs = [("output", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize PosteriorCalculator"""
         super().__init__(args, **kwargs)
         self.model = None
@@ -161,7 +176,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> Any:
         """Load the model and/or attach it to this PosteriorCalculator.
 
         Keywords
@@ -190,7 +205,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def get_posterior(self, input_data, **kwargs) -> qp.Ensemble:
+    def get_posterior(self, input_data: Any, **kwargs: Any) -> qp.Ensemble:
         """Return posteriors for the given column.
 
         This is a method for running a Creator in interactive mode. In pipeline
