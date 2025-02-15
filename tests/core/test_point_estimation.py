@@ -6,7 +6,7 @@ import qp
 from rail.estimation.estimator import CatEstimator
 
 
-def test_custom_point_estimate():
+def test_custom_point_estimate() -> None:
     """This test checks to make sure that the inheritance mechanism is working
     for child classes of `CatEstimator`.
     """
@@ -16,7 +16,9 @@ def test_custom_point_estimate():
     class TestEstimator(CatEstimator):
         name = "TestEstimator"
 
-        def _calculate_mode_point_estimate(self, qp_dist=None, grid=None):
+        def _calculate_mode_point_estimate(
+            self, qp_dist: None = None, grid: None = None
+        ) -> np.ndarray:
             return np.ones(100) * MEANING_OF_LIFE
 
     config_dict = {"calculated_point_estimates": ["zmode"]}
@@ -34,7 +36,7 @@ def test_custom_point_estimate():
     assert np.all(result.ancil["zmode"] == MEANING_OF_LIFE)
 
 
-def test_basic_point_estimate():
+def test_basic_point_estimate() -> None:
     """This test checks to make sure that all the basic point estimates are
     executed when requested in the configuration dictionary.
     """
@@ -62,7 +64,7 @@ def test_basic_point_estimate():
     assert "zmean" in result.ancil
 
 
-def test_mode_no_grid():
+def test_mode_no_grid() -> None:
     """This exercises the KeyError logic in `_calculate_mode_point_estimate`."""
     config_dict = {"zmin": 0.0, "nzbins": 100, "calculated_point_estimates": ["mode"]}
 
@@ -74,7 +76,7 @@ def test_mode_no_grid():
     assert "object has no attribute" in str(excinfo.value)
 
 
-def test_mode_no_point_estimates():
+def test_mode_no_point_estimates() -> None:
     """This exercises the KeyError logic in `_calculate_mode_point_estimate`."""
     config_dict = {"zmin": 0.0, "nzbins": 100}
 
@@ -91,7 +93,7 @@ def test_mode_no_point_estimates():
     assert output_ensemble.ancil is None
 
 
-def test_keep_existing_ancil_data():
+def test_keep_existing_ancil_data() -> None:
     """Make sure that we don't overwrite the ancil data if it already exists."""
     config_dict = {
         "zmin": 0.0,
@@ -115,7 +117,7 @@ def test_keep_existing_ancil_data():
     assert len(output_ensemble.ancil["foo"]) == 100
 
 
-def test_write_new_ancil_data():
+def test_write_new_ancil_data() -> None:
     """Make sure that we don't overwrite the ancil data if it already exists."""
     config_dict = {
         "zmin": 0.0,

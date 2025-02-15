@@ -1,3 +1,5 @@
+from __future__ import annotations
+
 from typing import Any, TypeVar
 
 import numpy as np
@@ -8,14 +10,14 @@ T = TypeVar("T", bound="CatalogConfigBase")
 
 
 class CatalogConfigBase:
-    """ Class that wraps the settings of shared configuration
+    """Class that wraps the settings of shared configuration
     parameters needed work with the particular column names
-    in a given catalog type 
+    in a given catalog type
     """
-    
+
     sub_classes: dict[str, type[CatalogConfigBase]] = {}
 
-    tag: str|None = None
+    tag: str | None = None
     bandlist: str = ""
     maglims: list[float] = []
     a_env: list[float] = []
@@ -25,26 +27,26 @@ class CatalogConfigBase:
     ref_band: str = ""
     redshift_col: str = ""
 
-    _active_tag: str|None = None
-    _active_class: type|None = None
+    _active_tag: str | None = None
+    _active_class: type | None = None
 
-    def __init_subclass__(cls, **kwargs: dict[str, Any]):
+    def __init_subclass__(cls, **kwargs: Any) -> None:
         assert cls.tag is not None
         cls.sub_classes[cls.tag] = cls
 
     @classmethod
-    def active_tag(cls) -> str|None:
-        """ Return the currently active tag """
+    def active_tag(cls) -> str | None:
+        """Return the currently active tag"""
         return cls._active_tag
 
     @classmethod
-    def active_class(cls: type[T]) -> type[T]|None:
-        """ Return the currently active class """
+    def active_class(cls: type[T]) -> type[T] | None:
+        """Return the currently active class"""
         return cls._active_class
 
     @classmethod
     def apply(cls, tag: str) -> None:
-        """ Activate a particular tag """
+        """Activate a particular tag"""
         cls._active_tag = tag
         cls._active_class = cls.sub_classes[tag]
         cls._active_class._apply()
@@ -61,7 +63,7 @@ class CatalogConfigBase:
 
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
-        """Retrun the mapping from band to column names"""        
+        """Retrun the mapping from band to column names"""
         return {band: cls.band_template.format(band=band) for band in cls.bandlist}
 
     @classmethod
@@ -82,23 +84,23 @@ class CatalogConfigBase:
 
     @classmethod
     def _build_band_names(cls) -> list[str]:
-        """Construct the list of column names for the filter magnitudes """
+        """Construct the list of column names for the filter magnitudes"""
         return [cls.band_template.format(band=band) for band in cls.bandlist]
 
     @classmethod
     def _build_band_err_names(cls) -> list[str]:
-        """Construct the list of column names for uncertainties on the the filter magnitudes """
+        """Construct the list of column names for uncertainties on the the filter magnitudes"""
         return [cls.band_err_template.format(band=band) for band in cls.bandlist]
 
     @classmethod
-    def _build_ref_band(cls, ref_band: str="i") -> str:
+    def _build_ref_band(cls, ref_band: str = "i") -> str:
         """Contruct the name of the reference band"""
         return cls.band_template.format(band=ref_band)
 
     @classmethod
-    def _build_base_dict(cls) -> dict[str, Any]:
+    def _build_base_dict(cls) -> dict:
         """Construct the dict of overrides for the shared paramters"""
-        base_dict: dict[str, Any] = {}
+        base_dict: dict = {}
         base_dict.update(
             bands=cls._build_band_names(),
             err_bands=cls._build_band_err_names(),
@@ -114,6 +116,7 @@ class CatalogConfigBase:
 
 class HscCatalogConfig(CatalogConfigBase):
     """Configuration for HSC data"""
+
     tag = "hsc"
     bandlist = "grizy"
     maglims = [27.66, 27.25, 26.6, 26.24, 25.35]
@@ -127,6 +130,7 @@ class HscCatalogConfig(CatalogConfigBase):
 
 class Dc2CatalogConfig(CatalogConfigBase):
     """Configuration for DC2 data"""
+
     tag = "dc2"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
@@ -140,6 +144,7 @@ class Dc2CatalogConfig(CatalogConfigBase):
 
 class RubinCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin project data"""
+
     tag = "rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
@@ -236,7 +241,7 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
         return band_errs
 
     @classmethod
-    def _build_ref_band(cls, ref_band: str="i") -> str:
+    def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
 
 

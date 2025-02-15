@@ -2,7 +2,6 @@
 # coding: utf-8
 
 from rail.core.stage import RailPipeline, RailStage
-
 # Various rail modules
 from rail.estimation.algos.train_z import TrainZEstimator, TrainZInformer
 from rail.evaluation.single_evaluator import SingleEvaluator

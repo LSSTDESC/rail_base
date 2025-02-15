@@ -2,10 +2,13 @@
 Abstract base classes defining Summarizers of the redshift distribution of an ensemble of galaxies
 """
 
+from typing import Any
+
 import numpy as np
+import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import ModelHandle, QPHandle, TableHandle
+from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 # for backwards compatibility
@@ -27,7 +30,7 @@ class CatSummarizer(RailStage):
     inputs = [("input", TableHandle)]
     outputs = [("output", QPHandle)]
 
-    def summarize(self, input_data):
+    def summarize(self, input_data: TableLike) -> DataHandle:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 
@@ -71,7 +74,7 @@ class PZSummarizer(RailStage):
     inputs = [("model", ModelHandle), ("input", QPHandle)]
     outputs = [("output", QPHandle)]
 
-    def summarize(self, input_data):
+    def summarize(self, input_data: qp.Ensemble) -> qp.Ensemble:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 
@@ -101,7 +104,7 @@ class PZSummarizer(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def _broadcast_bootstrap_matrix(self):
+    def _broadcast_bootstrap_matrix(self) -> np.ndarray | None:
         rng = np.random.default_rng(seed=self.config.seed)
         # Only one of the nodes needs to produce the bootstrap indices
         ngal = self._input_length
@@ -116,7 +119,9 @@ class PZSummarizer(RailStage):
             bootstrap_matrix = self.comm.bcast(bootstrap_matrix, root=0)
         return bootstrap_matrix
 
-    def _join_histograms(self, bvals, yvals):  # pragma: no cover
+    def _join_histograms(
+        self, bvals: np.ndarray, yvals: np.ndarray
+    ) -> tuple[np.ndarray, np.ndarray]:  # pragma: no cover
         bvals_r = self.comm.reduce(bvals)
         yvals_r = self.comm.reduce(yvals)
         return (bvals_r, yvals_r)
@@ -138,7 +143,7 @@ class SZPZSummarizer(RailStage):
     ]
     outputs = [("output", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Estimator that can sample galaxy data."""
         super().__init__(args, **kwargs)
         self.model = None
@@ -146,7 +151,7 @@ class SZPZSummarizer(RailStage):
         # `open_model` call explicitly in the run method for
         # each summarizer.
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> Any:
         """Load the mode and/or attach it to this Summarizer
 
         Notes
@@ -176,7 +181,7 @@ class SZPZSummarizer(RailStage):
         self.model = self.set_data("model", model)
         return self.model
 
-    def summarize(self, input_data, spec_data):
+    def summarize(self, input_data: qp.Ensemble, spec_data: np.ndarray) -> qp.Ensemble:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 

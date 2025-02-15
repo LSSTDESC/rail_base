@@ -1,8 +1,7 @@
 """Degrader that applies a cut to given columns."""
 
-from typing import Any
-
 from numbers import Number
+from typing import Any
 
 import numpy as np
 from ceci.config import StageParameter as Param
@@ -30,7 +29,7 @@ class QuantityCut(Selector):
         to be applied.
         """
         super().__init__(args, **kwargs)
-        self.cuts: dict|None = None
+        self.cuts: dict | None = None
         self.set_cuts(self.config["cuts"])
 
     def set_cuts(self, cuts: dict) -> None:
@@ -100,7 +99,7 @@ class QuantityCut(Selector):
         data = self.get_data("input")
 
         assert self.cuts is not None
-        
+
         # get overlap of columns from data and columns on which to make cuts
         columns = set(self.cuts.keys()).intersection(data.columns)
 

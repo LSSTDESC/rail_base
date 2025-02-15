@@ -1,3 +1,5 @@
+from typing import Any
+
 from ceci.config import StageParameter as Param
 from qp.metrics.concrete_metric_classes import DistToDistMetric
 
@@ -34,7 +36,7 @@ class DistToDistEvaluator(Evaluator):
 
     metric_base_class = DistToDistMetric
 
-    def _process_chunk(self, data_tuple, first):
+    def _process_chunk(self, data_tuple: Any, first: bool) -> None:
         start = data_tuple[0]
         end = data_tuple[1]
         estimate_data = data_tuple[2]
@@ -44,7 +46,7 @@ class DistToDistEvaluator(Evaluator):
             estimate_data, reference_data, start, end, first
         )
 
-    def _process_all(self, data_tuple):
+    def _process_all(self, data_tuple: Any) -> None:
         estimate_data = data_tuple[0]
         reference_data = data_tuple[1]
 

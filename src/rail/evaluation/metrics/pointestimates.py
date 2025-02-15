@@ -7,7 +7,7 @@ class PointStatsEz(MetricEvaluator):
     """Copied from PZDC1paper repo. Adapted to remove the cut based on
     magnitude."""
 
-    def __init__(self, pzvec, szvec):
+    def __init__(self, pzvec: np.ndarray, szvec: np.ndarray) -> None:
         """An object that takes in the vectors of the point photo-z
         the spec-z, and the i-band magnitudes for calculating the
         point statistics
@@ -30,7 +30,7 @@ class PointStatsEz(MetricEvaluator):
         ez = (pzvec - szvec) / (1.0 + szvec)
         self.ez = ez
 
-    def evaluate(self):
+    def evaluate(self) -> float | np.ndarray:
         """Return the ez values"""
         return self.ez
 
@@ -38,7 +38,7 @@ class PointStatsEz(MetricEvaluator):
 class PointSigmaIQR(PointStatsEz):
     """Calculate sigmaIQR"""
 
-    def evaluate(self):
+    def evaluate(self) -> float:
         """Calculate the width of the e_z distribution
         using the Interquartile range
 
@@ -58,7 +58,7 @@ class PointBias(PointStatsEz):
     In keeping with the Science Book, this is just the median of the ez values
     """
 
-    def evaluate(self):
+    def evaluate(self) -> float:
         """
         Returns
         -------
@@ -74,7 +74,7 @@ class PointOutlierRate(PointStatsEz):
     sigma is very small.
     """
 
-    def evaluate(self):
+    def evaluate(self) -> float:
         """
         Returns
         -------
@@ -96,7 +96,7 @@ class PointSigmaMAD(PointStatsEz):
     magnitude trimmed samples of ez values
     """
 
-    def evaluate(self):
+    def evaluate(self) -> float:
         """
         Returns
         -------

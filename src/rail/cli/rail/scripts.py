@@ -1,4 +1,5 @@
 import os
+from typing import Any
 
 import yaml
 
@@ -10,7 +11,14 @@ from rail.utils import catalog_utils
 from rail.utils.path_utils import RAILDIR
 
 
-def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
+def render_nb(
+    outdir: str,
+    clear_output: bool,
+    dry_run: bool,
+    inputs: list[str],
+    skip: list[str],
+    **_kwargs: Any,
+) -> None:
     command = "jupyter nbconvert"
     options = "--to html"
 
@@ -52,7 +60,9 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
         raise ValueError(f"The following notebooks failed {str(failed_notebooks)}")
 
 
-def clone_source(outdir, git_mode, dry_run, package_file):  # pragma: no cover
+def clone_source(
+    outdir: str, git_mode: GitMode, dry_run: bool, package_file: str
+) -> None:  # pragma: no cover
     with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
@@ -74,7 +84,7 @@ def clone_source(outdir, git_mode, dry_run, package_file):  # pragma: no cover
             os.system(com_line)
 
 
-def update_source(outdir, dry_run, package_file):
+def update_source(outdir: str, dry_run: bool, package_file: str) -> None:
     with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
@@ -94,7 +104,7 @@ def update_source(outdir, dry_run, package_file):
             os.system(com_line)
 
 
-def install(outdir, from_source, dry_run, package_file):
+def install(outdir: str, from_source: bool, dry_run: bool, package_file: str) -> None:
     with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
 
@@ -113,7 +123,7 @@ def install(outdir, from_source, dry_run, package_file):
             os.system(com_line)
 
 
-def info(**kwargs):
+def info(**kwargs: Any) -> None:
     rail.stages.import_and_attach_all()
 
     print_all = kwargs.get("print_all", False)
@@ -139,7 +149,7 @@ def info(**kwargs):
         print("\n\n")
 
 
-def get_data(verbose, **kwargs):  # pragma: no cover
+def get_data(verbose: bool, **kwargs: Any) -> None:  # pragma: no cover
     standard_data_files = [
         {
             "local_path": "rail/examples_data/goldenspike_data/data/base_catalog.pq",
@@ -185,15 +195,15 @@ def get_data(verbose, **kwargs):  # pragma: no cover
 
 
 def build_pipeline(
-    pipeline_class,
-    output_yaml,
-    catalog_tag=None,
-    input_dict=None,
-    stages_config=None,
-    output_dir=".",
-    log_dir=None,
-    **kwargs,
-):
+    pipeline_class: str,
+    output_yaml: str,
+    catalog_tag: str | None = None,
+    input_dict: dict | None = None,
+    stages_config: dict | None = None,
+    output_dir: str = ".",
+    log_dir: str | None = None,
+    **kwargs: Any,
+) -> None:
     tokens = pipeline_class.split(".")
     module = ".".join(tokens[:-1])
     class_name = tokens[-1]

@@ -1,5 +1,6 @@
 import os
 import pprint
+from typing import Any
 
 import ceci
 import click
@@ -24,7 +25,14 @@ def cli() -> None:
 @options.dry_run()
 @options.inputs()
 @options.skip()
-def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
+def render_nb(
+    outdir: str,
+    clear_output: bool,
+    dry_run: bool,
+    inputs: list[str],
+    skip: list[str],
+    **_kwargs: Any,
+) -> int:
     """Render jupyter notebooks"""
     return scripts.render_nb(outdir, clear_output, dry_run, inputs, skip)
 
@@ -34,7 +42,13 @@ def render_nb(outdir, clear_output, dry_run, inputs, skip, **_kwargs):
 @options.git_mode()
 @options.dry_run()
 @options.package_file()
-def clone_source(outdir, git_mode, dry_run, package_file, **_kwargs):
+def clone_source(
+    outdir: str,
+    git_mode: options.GitMode,
+    dry_run: bool,
+    package_file: str,
+    **_kwargs: Any,
+) -> int:
     """Install packages from source"""
     scripts.clone_source(outdir, git_mode, dry_run, package_file)
     return 0
@@ -44,7 +58,7 @@ def clone_source(outdir, git_mode, dry_run, package_file, **_kwargs):
 @options.outdir(default="..")
 @options.dry_run()
 @options.package_file()
-def update_source(outdir, dry_run, package_file, **_kwargs):
+def update_source(outdir: str, dry_run: bool, package_file: str, **_kwargs: Any) -> int:
     """Update packages from source"""
     scripts.update_source(outdir, dry_run, package_file)
     return 0
@@ -55,7 +69,9 @@ def update_source(outdir, dry_run, package_file, **_kwargs):
 @options.dry_run()
 @options.from_source()
 @options.package_file()
-def install(outdir, dry_run, from_source, package_file, **_kwargs):
+def install(
+    outdir: str, dry_run: bool, from_source: bool, package_file: str, **_kwargs: Any
+) -> int:
     """Install rail packages one by one, to be fault tolerant"""
     scripts.install(outdir, from_source, dry_run, package_file)
     return 0
@@ -69,7 +85,7 @@ def install(outdir, dry_run, from_source, package_file, **_kwargs):
 @options.print_modules()
 @options.print_tree()
 @options.print_stages()
-def info(**kwargs):
+def info(**kwargs: Any) -> int:
     """Print information about the rail ecosystem"""
     scripts.info(**kwargs)
     return 0
@@ -78,7 +94,7 @@ def info(**kwargs):
 @cli.command()
 @options.bpz_demo_data()
 @options.verbose_download()
-def get_data(verbose, **kwargs):
+def get_data(verbose: bool, **kwargs: Any) -> int:
     """Downloads data from NERSC (if not already found)"""
     scripts.get_data(verbose, **kwargs)
     return 0
@@ -95,21 +111,22 @@ def get_data(verbose, **kwargs):
 @options.input_file()
 @options.params()
 def estimate(
-    stage_name,
-    stage_class,
-    stage_module,
-    stages_config,
-    model_file,
-    catalog_tag,
-    dry_run,
-    input_file,
-    params,
-):
+    stage_name: str,
+    stage_class: str,
+    stage_module: str,
+    stages_config: str | None,
+    model_file: str,
+    catalog_tag: str,
+    dry_run: bool,
+    input_file: str,
+    params: dict,
+) -> int:
     """Run a pz estimation stage"""
     if catalog_tag:
         catalog_utils.apply_defaults(catalog_tag)
 
     if stages_config not in [None, "none", "None"]:
+        assert stages_config is not None
         with open(stages_config, "r", encoding="utf-8") as fin:
             config_data = yaml.safe_load(fin)
             if stage_name in config_data:
@@ -155,7 +172,14 @@ def estimate(
 @options.stages_config()
 @options.outdir()
 @options.inputs()
-def build_pipe(pipeline_class, output_yaml, catalog_tag, stages_config, outdir, inputs):
+def build_pipe(
+    pipeline_class: str,
+    output_yaml: str,
+    catalog_tag: str,
+    stages_config: dict,
+    outdir: str,
+    inputs: dict[str, str],
+) -> int:
     """Build a pipeline yaml file"""
     input_dict = {}
     for input_ in inputs:
@@ -173,7 +197,9 @@ def build_pipe(pipeline_class, output_yaml, catalog_tag, stages_config, outdir, 
 @options.stage_name()
 @options.dry_run()
 @options.inputs()
-def run_stage(pipeline_yaml, stage_name, dry_run, inputs):
+def run_stage(
+    pipeline_yaml: str, stage_name: str, dry_run: bool, inputs: dict[str, str]
+) -> int:
     """Run a pipeline stage"""
     pipe = ceci.Pipeline.read(pipeline_yaml)
     input_dict = {}
@@ -195,7 +221,9 @@ def run_stage(pipeline_yaml, stage_name, dry_run, inputs):
 @options.stage_module()
 @options.dry_run()
 @options.input_file()
-def run_tool(stage_name, stage_class, stage_module, dry_run, input_file):
+def run_tool(
+    stage_name: str, stage_class: str, stage_module: str, dry_run: bool, input_file: str
+) -> int:
     """Run a pz estimation stage"""
     stage = ToolFactory.build_tool_stage(
         stage_name=stage_name,

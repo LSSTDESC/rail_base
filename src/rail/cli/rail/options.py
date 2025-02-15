@@ -55,12 +55,14 @@ class EnumChoice(click.Choice):
             list(the_enum.__members__.keys()), case_sensitive=case_sensitive
         )
 
-    def convert(self, value: Any, param, ctx) -> EnumType_co:  # pragma: no cover
+    def convert(
+        self, value: Any, param: click.Parameter | None, ctx: click.Context | None
+    ) -> enum.Enum:
         converted_str = super().convert(value, param, ctx)
         return self._enum.__members__[converted_str]
 
 
-def args_to_dict(args):
+def args_to_dict(args: list[str]) -> dict[str, str]:
     """Convert a series of command line key=value statements
     to a dict"""
     out_dict = {}
@@ -75,10 +77,8 @@ def args_to_dict(args):
 class PartialOption:
     """Wraps click.option with partial arguments for convenient reuse"""
 
-    def __init__(self, *param_decls: Any, **kwargs: Any) -> None:
-        self._partial = partial(
-            click.option, *param_decls, cls=partial(click.Option), **kwargs
-        )
+    def __init__(self, *param_decls: str, **kwargs: Any) -> None:
+        self._partial = partial(click.option, *param_decls, cls=click.Option, **kwargs)
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
         return self._partial(*args, **kwargs)
@@ -89,7 +89,7 @@ class PartialArgument:
 
     def __init__(self, *param_decls: Any, **kwargs: Any) -> None:
         self._partial = partial(
-            click.argument, *param_decls, cls=partial(click.Argument), **kwargs
+            click.argument, *param_decls, cls=click.Argument, **kwargs
         )
 
     def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover

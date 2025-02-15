@@ -9,7 +9,7 @@ from rail.tools.table_tools import ColumnMapper, RowSelector, TableConverter
 from rail.utils.path_utils import RAILDIR, find_rail_file
 
 
-def test_find_rail_file():
+def test_find_rail_file() -> None:
     afile = find_rail_file(
         os.path.join("examples_data", "testdata", "test_dc2_training_9816.pq")
     )
@@ -18,7 +18,7 @@ def test_find_rail_file():
         _not_a_file = find_rail_file("not_a_file")
 
 
-def test_util_stages():
+def test_util_stages() -> None:
     DS = RailStage.data_store
     DS.clear()
     datapath = os.path.join(
@@ -51,7 +51,7 @@ def test_util_stages():
         os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
 
 
-def test_set_data_nonexistent_file():
+def test_set_data_nonexistent_file() -> None:
     """Create an instance of a child class of RailStage. Exercise the `set_data`
     method and pass in a path to a nonexistent file. A `FileNotFound` exception
     should be raised.
@@ -63,7 +63,7 @@ def test_set_data_nonexistent_file():
         assert "Unable to find file" in err.context
 
 
-def test_set_data_real_file():
+def test_set_data_real_file() -> None:
     """Create an instance of a child class of RailStage. Exercise the `set_data`
     method and pass in a path to model. The output of set_data should be `None`.
     """
@@ -86,7 +86,7 @@ def test_set_data_real_file():
     assert ret_val is None
 
 
-def test_data_hdf5_iter():
+def test_data_hdf5_iter() -> None:
     DS = RailStage.data_store
     DS.clear()
 

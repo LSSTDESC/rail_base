@@ -2,12 +2,14 @@
 A summarizer-like stage that simple makes a histogram the true nz
 """
 
+from typing import Any, Generator
+
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import QPHandle, TableHandle
+from rail.core.data import DataHandle, QPHandle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -28,12 +30,12 @@ class TrueNZHistogrammer(RailStage):
     inputs = [("input", TableHandle), ("tomography_bins", TableHandle)]
     outputs = [("true_NZ", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
-        self.zgrid = None
-        self.bincents = None
+        self.zgrid: np.ndarray | None = None
+        self.bincents: np.ndarray | None = None
 
-    def _setup_iterator(self):
+    def _setup_iterator(self) -> Generator:
         itrs = [
             self.input_iterator("input", groupname=self.config.hdf5_groupname),
             self.input_iterator("tomography_bins", groupname=""),
@@ -55,11 +57,12 @@ class TrueNZHistogrammer(RailStage):
                         mask = d["class_id"] == self.config.selected_bin
             yield start, end, pz_data, mask
 
-    def run(self):
+    def run(self) -> None:
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
         )
+        assert self.zgrid is not None
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
@@ -83,18 +86,19 @@ class TrueNZHistogrammer(RailStage):
 
     def _process_chunk(
         self,
-        _start,
-        _end,
-        data,
-        mask,
-        _first,
-        single_hist,
-    ):
+        _start: int,
+        _end: int,
+        data: TableLike,
+        mask: np.ndarray,
+        _first: bool,
+        single_hist: np.ndarray,
+    ) -> None:
         squeeze_mask = np.squeeze(mask)
         zb = data[self.config.redshift_col][squeeze_mask]
+        assert self.zgrid is not None
         single_hist += np.histogram(zb, bins=self.zgrid)[0]
 
-    def histogram(self, catalog, tomo_bins):
+    def histogram(self, catalog: TableLike, tomo_bins: TableLike) -> DataHandle:
         """The main interface method for ``TrueNZHistogrammer``.
 
         Creates histogram of N of Z_true.

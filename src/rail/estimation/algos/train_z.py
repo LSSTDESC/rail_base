@@ -5,10 +5,13 @@ a photo-z PDF equal to the normalized redshift distribution
 N (z) of the training set.
 """
 
+from typing import Any
+
 import numpy as np
 import qp
 
 from rail.core.common_params import SHARED_PARAMS
+from rail.core.data import TableLike
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
 
@@ -19,7 +22,7 @@ class trainZmodel:
     Given how simple this is to compute, this seems like overkill.
     """
 
-    def __init__(self, zgrid, pdf, zmode):
+    def __init__(self, zgrid: np.ndarray, pdf: np.ndarray, zmode: np.ndarray) -> None:
         self.zgrid = zgrid
         self.pdf = pdf
         self.zmode = zmode
@@ -37,7 +40,7 @@ class TrainZInformer(CatInformer):
         redshift_col=SHARED_PARAMS,
     )
 
-    def run(self):
+    def run(self) -> None:
         if self.config.hdf5_groupname:
             training_data = self.get_data("input")[self.config.hdf5_groupname]
         else:  # pragma: no cover
@@ -55,7 +58,7 @@ class TrainZInformer(CatInformer):
         self.model = trainZmodel(zgrid, train_pdf, zmode)
         self.add_data("model", self.model)
 
-    def validate(self):
+    def validate(self) -> None:
         """Validation which checks if the required column names by the stage exist in the data"""
         self._get_stage_columns()
         data = self.get_handle("input", allow_missing=True)
@@ -63,7 +66,7 @@ class TrainZInformer(CatInformer):
         # as these params are not yet implemented
         self._check_column_names(data, self.stage_columns)
 
-    def _get_stage_columns(self):
+    def _get_stage_columns(self) -> None:
         self.stage_columns = [self.config.redshift_col]
 
 
@@ -74,13 +77,13 @@ class TrainZEstimator(CatEstimator):
     config_options = CatEstimator.config_options.copy()
     config_options.update(zmin=SHARED_PARAMS, zmax=SHARED_PARAMS, nzbins=SHARED_PARAMS)
 
-    def __init__(self, args, **kwargs):
-        self.zgrid = None
-        self.train_pdf = None
-        self.zmode = None
+    def __init__(self, args: Any, **kwargs: Any) -> None:
+        self.zgrid: np.ndarray | None = None
+        self.train_pdf: np.ndarray | None = None
+        self.zmode: np.ndarray | None = None
         CatEstimator.__init__(self, args, **kwargs)
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> None:
         CatEstimator.open_model(self, **kwargs)
         if self.model is None:  # pragma: no cover
             return
@@ -88,8 +91,10 @@ class TrainZEstimator(CatEstimator):
         self.train_pdf = self.model.pdf
         self.zmode = self.model.zmode
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
         test_size = end - start
+        assert self.zmode is not None
+        assert self.train_pdf is not None
         zmode = np.repeat(self.zmode, test_size)
         qp_d = qp.Ensemble(
             qp.interp,

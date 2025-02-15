@@ -1,5 +1,7 @@
 """Wrapper class for ML Models"""
 
+from __future__ import annotations
+
 import pickle
 from typing import Any
 
@@ -16,22 +18,22 @@ class Model:
         data: Any,
         creation_class_name: str,
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
+        provenance: dict | None = None,
     ) -> None:
         """Constructor
 
         Parameters
         ----------
-        data: 
+        data:
             Model data
 
-        creation_class_name: 
+        creation_class_name:
             Name of the creation class
 
-        version: 
+        version:
             Version of the model
 
-        provenance: dict[str, Any] | None
+        provenance: dict | None
             Provenance infomration
         """
         self.data = data
@@ -75,7 +77,7 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
+        provenance: dict | None = None,
     ) -> Model:
         """Read a model from a file.
 
@@ -118,7 +120,7 @@ class Model:
         outpath: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
+        provenance: dict | None = None,
     ) -> Model:
         """Read a model from a file and write it as a `Model` if it is not already
 
@@ -133,7 +135,7 @@ class Model:
         creation_class_name:
             Name of the creation class
 
-        version: 
+        version:
             Version of the model
 
         provenance:
@@ -155,7 +157,7 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
+        provenance: dict | None = None,
     ) -> Model:
         """Write an object to a model file
 
@@ -169,10 +171,10 @@ class Model:
         path:
             File to write
 
-        creation_class_name: 
+        creation_class_name:
             Name of the creation class
 
-        version: 
+        version:
             Version of the model
 
         provenance:

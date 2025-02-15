@@ -30,7 +30,7 @@ class EqualCountClassifier(PZClassifier):
     )
     outputs = [("output", Hdf5Handle)]
 
-    def run(self):
+    def run(self) -> None:
         test_data = self.get_data("input")
         npdf = test_data.npdf
 

@@ -3,9 +3,13 @@ Abstract base classes defining classifiers.
 """
 
 import gc
+from typing import Any
+
+import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import Hdf5Handle, ModelHandle, QPHandle, TableHandle
+from rail.core.data import (DataHandle, Hdf5Handle, ModelHandle, ModelLike, QPHandle,
+                            TableHandle, TableLike)
 from rail.core.stage import RailStage
 
 
@@ -28,16 +32,16 @@ class CatClassifier(RailStage):  # pragma: no cover
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", TableHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Classifier"""
         super().__init__(args, **kwargs)
-        self._output_handle = None
-        self.model = None
+        self._output_handle: TableHandle | None = None
+        self.model: ModelLike | None = None
         if not isinstance(args, dict):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and/or attach it to this Classifier
 
         Parameters
@@ -66,7 +70,7 @@ class CatClassifier(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def classify(self, input_data):
+    def classify(self, input_data: TableLike) -> DataHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -111,7 +115,7 @@ class PZClassifier(RailStage):
     inputs = [("input", QPHandle)]
     outputs = [("output", Hdf5Handle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize the PZClassifier.
 
         Parameters
@@ -122,9 +126,9 @@ class PZClassifier(RailStage):
             MPI communicator for parallel processing.
         """
         super().__init__(args, **kwargs)
-        self._output_handle = None
+        self._output_handle: DataHandle | None = None
 
-    def classify(self, input_data):
+    def classify(self, input_data: qp.Ensemble) -> DataHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -161,11 +165,14 @@ class PZClassifier(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def _finalize_run(self):
+    def _finalize_run(self) -> None:
         """Finalize the classification process after processing all chunks."""
+        assert self._output_handle is not None
         self._output_handle.finalize_write()
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(
+        self, start: int, end: int, data: qp.Ensemble, first: bool
+    ) -> None:
         """Process a chunk of data.
 
         This method should be implemented in subclasses to perform the actual
@@ -186,7 +193,9 @@ class PZClassifier(RailStage):
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
 
-    def _do_chunk_output(self, class_id, start, end, first):
+    def _do_chunk_output(
+        self, class_id: TableLike, start: int, end: int, first: bool
+    ) -> None:
         """Handle the output of a processed chunk.
 
         Parameters
@@ -202,13 +211,15 @@ class PZClassifier(RailStage):
         """
         if first:
             self._output_handle = self.add_handle("output", data=class_id)
+            assert self._output_handle is not None
             self._output_handle.initialize_write(
                 self._input_length, communicator=self.comm
             )
+        assert self._output_handle is not None
         self._output_handle.set_data(class_id, partial=True)
         self._output_handle.write_chunk(start, end)
 
-    def run(self):
+    def run(self) -> None:
         """Processes the input data in chunks and performs classification.
 
         This method iterates over chunks of the input data, calling the

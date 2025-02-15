@@ -2,11 +2,13 @@
 A summarizer that simple makes a histogram of a point estimate
 """
 
+from typing import Any, Generator
+
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
 
-from rail.core.data import QPHandle, TableHandle
+from rail.core.data import DataHandle, QPHandle, TableHandle, TableLike
 from rail.estimation.informer import PzInformer
 from rail.estimation.summarizer import PZSummarizer
 
@@ -17,7 +19,7 @@ class PointEstHistInformer(PzInformer):
     name = "PointEstHistInformer"
     config_options = PzInformer.config_options.copy()
 
-    def run(self):
+    def run(self) -> None:
         self.add_data("model", np.array([None]))
 
 
@@ -37,23 +39,24 @@ class PointEstHistSummarizer(PZSummarizer):
     inputs = [("input", QPHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
-        self.zgrid = None
-        self.bincents = None
+        self.zgrid: np.ndarray | None = None
+        self.bincents: np.ndarray | None = None
 
-    def _setup_iterator(self):
+    def _setup_iterator(self) -> Generator:
         itr = self.input_iterator("input")
         for s, e, d in itr:
             yield s, e, d, np.ones(e - s, dtype=bool)
 
-    def run(self):
+    def run(self) -> None:
         handle = self.get_handle("input", allow_missing=True)
         self._input_length = handle.size()
         iterator = self._setup_iterator()
         self.zgrid = np.linspace(
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
         )
+        assert self.zgrid is not None
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         bootstrap_matrix = self._broadcast_bootstrap_matrix()
         # Initiallizing the histograms
@@ -82,15 +85,16 @@ class PointEstHistSummarizer(PZSummarizer):
 
     def _process_chunk(
         self,
-        start,
-        end,
-        test_data,
-        mask,
-        _first,
-        bootstrap_matrix,
-        single_hist,
-        hist_vals,
-    ):
+        start: int,
+        end: int,
+        test_data: qp.Ensemble,
+        mask: np.ndarray,
+        _first: bool,
+        bootstrap_matrix: np.ndarray,
+        single_hist: np.ndarray,
+        hist_vals: np.ndarray,
+    ) -> None:
+        assert self.zgrid is not None
         zb = test_data.ancil[self.config.point_estimate]
         single_hist += np.histogram(zb[mask], bins=self.zgrid)[0]
         for i in range(self.config.nsamples):
@@ -113,7 +117,7 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
-    def _setup_iterator(self):
+    def _setup_iterator(self) -> Generator:
         selected_bin = self.config.selected_bin
         if self.config.tomography_bins in ["none", None]:
             selected_bin = -1
@@ -141,7 +145,9 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
                 mask = np.ones(pz_data.npdf, dtype=bool)
             yield start, end, pz_data, mask
 
-    def summarize(self, input_data, tomo_bins=None):
+    def summarize(
+        self, input_data: qp.Ensemble, tomo_bins: TableLike | None = None
+    ) -> DataHandle:
         """Override the Summarizer.summarize() method to take tomo bins
         as an additional input
 

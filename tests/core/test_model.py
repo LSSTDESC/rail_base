@@ -1,5 +1,6 @@
 import os
 import pickle
+from typing import Any
 
 import numpy as np
 import pytest
@@ -8,12 +9,12 @@ from rail.core.model import Model
 from rail.estimation.algos.train_z import trainZmodel
 
 
-def pickle_dump(obj, path):
+def pickle_dump(obj: Any, path: str) -> None:
     with open(path, "wb") as fout:
         pickle.dump(obj=obj, file=fout, protocol=pickle.HIGHEST_PROTOCOL)
 
 
-def test_model():
+def test_model() -> None:
     array_data = np.array([None])
     dict_data = dict(a=5, b=6)
     train_z_data = trainZmodel(np.linspace(0.0, 3.0, 301), np.ones(301), 1.5)

@@ -10,7 +10,7 @@ __all__ = [
 ]
 
 
-def find_version():
+def find_version() -> str:
     """Find the version"""
     # setuptools_scm should install a
     # file _version alongside this one.

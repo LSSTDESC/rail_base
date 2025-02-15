@@ -4,32 +4,33 @@ Abstract base class defining an Evaluator
 The key feature is that the evaluate method.
 """
 
+from typing import Any, Generator, Iterable
+
 import numpy as np
+import qp
 from ceci.config import StageParameter as Param
 from ceci.stage import PipelineStage
-from qp.metrics.base_metric_classes import MetricOutputType
+from qp.metrics.base_metric_classes import BaseMetric, MetricOutputType
 from qp.metrics.pit import PIT
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import Hdf5Handle, QPDictHandle, QPHandle
+from rail.core.data import DataHandle, Hdf5Handle, QPDictHandle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import (
-    PointBias,
-    PointOutlierRate,
-    PointSigmaIQR,
-    PointSigmaMAD,
-)
+from rail.evaluation.metrics.pointestimates import (PointBias,
+                                                    PointOutlierRate,
+                                                    PointSigmaIQR,
+                                                    PointSigmaMAD)
 
 
-def _all_subclasses(a_class):
+def _all_subclasses(a_class: type[BaseMetric]) -> set[type[BaseMetric]]:
     return set(a_class.__subclasses__()).union(
         [s for c in a_class.__subclasses__() for s in _all_subclasses(c)]
     )
 
 
-def _build_metric_dict(a_class):
-    the_dict = {}
+def _build_metric_dict(a_class: type[BaseMetric]) -> dict[str, type[BaseMetric]]:
+    the_dict: dict[str, type[BaseMetric]] = {}
     for subcls in _all_subclasses(a_class):
         if subcls.metric_name is None:
             continue
@@ -72,27 +73,28 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
         ),
     )
 
-    inputs = []
+    inputs: list[tuple[str, type[DataHandle]]] = []
     outputs = [
         ("output", Hdf5Handle),
         ("summary", Hdf5Handle),
         ("single_distribution_summary", QPDictHandle),
     ]
 
-    metric_base_class = None
+    metric_base_class: type[BaseMetric] | None = None
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
-        self._output_handle = None
-        self._summary_handle = None
-        self._single_distribution_summary_handle = None
+        self._output_handle: DataHandle | None = None
+        self._summary_handle: DataHandle | None = None
+        self._single_distribution_summary_handle: DataHandle | None = None
+        assert self.metric_base_class is not None
         self._metric_dict = _build_metric_dict(self.metric_base_class)
-        self._cached_data = {}
-        self._cached_metrics = {}
-        self._single_distribution_summary_data = {}
-        self._metric_config_dict = {}
+        self._cached_data: dict = {}
+        self._cached_metrics: dict = {}
+        self._single_distribution_summary_data: dict = {}
+        self._metric_config_dict: dict = {}
 
-    def evaluate(self, data, truth):
+    def evaluate(self, data: qp.Ensemble, truth: Any) -> dict[str, DataHandle]:
         """Evaluate the performance of an estimator
 
         This will attach the input data and truth to this `Evaluator`
@@ -129,7 +131,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
             ),
         }
 
-    def run(self):
+    def run(self) -> None:
         self._build_config_dict()
 
         print(f"Requested metrics: {list(self._metric_config_dict.keys())}")
@@ -150,11 +152,11 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
             self._process_chunk(data_tuple, first)
             first = False
 
-    def run_single_node(self):
+    def run_single_node(self) -> None:
         data_tuple = self._get_all_data()
         self._process_all(data_tuple)
 
-    def finalize(self):
+    def finalize(self) -> None:
         if not self.config.force_exact:
             # Finalize all the metrics that produce a single value summary
             summary_data = {}
@@ -204,7 +206,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         PipelineStage.finalize(self)
 
-    def _setup_iterator(self, itrs=None):
+    def _setup_iterator(self, itrs: list[Iterable] | None = None) -> Generator:
         """Setup the iterator that runs in parallel over the handles"""
 
         if itrs is None:
@@ -226,18 +228,18 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
                     data.append(d)
             yield data
 
-    def _get_all_data(self):
+    def _get_all_data(self) -> Any:
         """Stuff the data from all the handles into a tuple"""
         handles = [input_[0] for input_ in self.inputs]  # pylint: disable=no-member
         all_data = [self.get_data(handle_) for handle_ in handles]
         return all_data
 
-    def _process_chunk(self, data_tuple, first):  # pragma: no cover
+    def _process_chunk(self, data_tuple: Any, first: bool) -> None:  # pragma: no cover
         raise NotImplementedError("Evaluator._process_chunk()")
 
     def _process_all_chunk_metrics(
-        self, estimate_data, reference_data, start, end, first
-    ):
+        self, estimate_data: Any, reference_data: Any, start: int, end: int, first: bool
+    ) -> None:
         """This function takes the properly formatted data and loops over all the
         requested metrics. The metric outputs are either cached for later finalization
         or written to output files.
@@ -299,23 +301,27 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         self._output_table_chunk_data(start, end, out_table, first)
 
-    def _output_table_chunk_data(self, start, end, out_table, first):
+    def _output_table_chunk_data(
+        self, start: int, end: int, out_table: Any, first: bool
+    ) -> None:
         out_table_to_write = {
             key: np.array(val).astype(float) for key, val in out_table.items()
         }
 
         if first:
             self._output_handle = self.add_handle("output", data=out_table_to_write)
+            assert isinstance(self._output_handle, DataHandle)
             self._output_handle.initialize_write(
                 self._input_length, communicator=self.comm
             )
+        assert self._output_handle is not None
         self._output_handle.set_data(out_table_to_write, partial=True)
         self._output_handle.write_chunk(start, end)
 
-    def _process_all(self, data_tuple):  # pragma: no cover
+    def _process_all(self, data_tuple: Any) -> None:  # pragma: no cover
         raise NotImplementedError("Evaluator._process_all()")
 
-    def _process_all_metrics(self, estimate_data, reference_data):
+    def _process_all_metrics(self, estimate_data: Any, reference_data: Any) -> None:
         """This function writes out metric values when operating in non-parallel mode.
 
         Parameters
@@ -362,7 +368,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
             "single_distribution_summary", data=single_distribution_summary
         )
 
-    def _build_config_dict(self):
+    def _build_config_dict(self) -> None:
         """Build the configuration dict for each of the metrics"""
         self._metric_config_dict = {}
 
@@ -417,7 +423,7 @@ class OldEvaluator(RailStage):
     inputs = [("input", QPHandle), ("truth", Hdf5Handle)]
     outputs = [("output", Hdf5Handle)]
 
-    def evaluate(self, data, truth):
+    def evaluate(self, data: qp.Ensemble, truth: Any) -> DataHandle:
         """Evaluate the performance of an estimator
         This will attach the input data and truth to this `Evaluator`
         (for introspection and provenance tracking).
@@ -443,7 +449,7 @@ class OldEvaluator(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def run(self):
+    def run(self) -> None:
         """Run method
         Evaluate all the metrics and put them into a table
         Notes

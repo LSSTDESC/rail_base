@@ -4,6 +4,9 @@ tomographic bins with uniform binning.
 """
 
 import numpy as np
+
+import qp
+
 from ceci.config import StageParameter as Param
 
 from rail.core.data import Hdf5Handle
@@ -37,7 +40,7 @@ class UniformBinningClassifier(PZClassifier):
     )
     outputs = [("output", Hdf5Handle)]
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start: int, end: int, data: qp.Ensemble, first: bool) -> None:
         """Process a chunk of data for uniform binning classification.
 
         Parameters

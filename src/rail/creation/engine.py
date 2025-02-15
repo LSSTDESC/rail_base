@@ -10,7 +10,7 @@ from typing import Any
 import qp
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle
+from rail.core.data import DataHandle, ModelHandle, ModelLike, QPHandle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -71,7 +71,7 @@ class Creator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs: Any) -> Any:
+    def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and/or attach it to this Creator.
 
         Parameters
@@ -81,14 +81,14 @@ class Creator(RailStage):  # pragma: no cover
 
         Returns
         -------
-        Any:
+        Model:
             The object encapsulating the trained model
 
         Notes
         -----
         The 'model' keyword a be one of several things:
 
-        str:  
+        str:
             It will be treated as a filename
         ModelHandle:
             it will be used to access the model directly
@@ -111,7 +111,9 @@ class Creator(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def sample(self, n_samples: int, seed: int|None = None, **kwargs: dict[str, Any]) -> DataHandle:
+    def sample(
+        self, n_samples: int, seed: int | None = None, **kwargs: Any
+    ) -> DataHandle:
         """Draw samples from the model specified in the configuration.
 
         This is a method for running a Creator in interactive mode. In pipeline
@@ -119,7 +121,7 @@ class Creator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        n_samples: 
+        n_samples:
             The number of samples to draw
 
         seed:
@@ -176,7 +178,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs: Any) -> Any:
+    def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and/or attach it to this PosteriorCalculator.
 
         Keywords
@@ -188,7 +190,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
 
         Returns
         -------
-        self.model : object
+        Model
             The object encapsulating the trained model
         """
         model = kwargs.get("model", None)
@@ -205,7 +207,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def get_posterior(self, input_data: Any, **kwargs: Any) -> qp.Ensemble:
+    def get_posterior(self, input_data: TableLike, **kwargs: Any) -> qp.Ensemble:
         """Return posteriors for the given column.
 
         This is a method for running a Creator in interactive mode. In pipeline

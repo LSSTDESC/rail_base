@@ -1,9 +1,7 @@
 import importlib
 import os
 import pkgutil
-
 from types import ModuleType
-from typing import Any
 
 import setuptools
 
@@ -29,7 +27,7 @@ class RailEnv:
         -------
         dict[str,str]:
             Dict mapping the package names to the path to the package
-        
+
         """
         cls._packages = {
             pkg.name: pkg
@@ -137,7 +135,7 @@ class RailEnv:
         Returns
         -------
         dict[str, list[dict]]:
-           Tree of the namespaces and packages in rail        
+           Tree of the namespaces and packages in rail
         """
         cls._tree.clear()
         if not cls._namespace_module_dict:  # pragma: no cover
@@ -171,7 +169,7 @@ class RailEnv:
         return cls._tree
 
     @classmethod
-    def pretty_print_tree(cls, the_dict: dict|None=None, indent: str="") -> None:
+    def pretty_print_tree(cls, the_dict: dict | None = None, indent: str = "") -> None:
         """Utility function to help print the namespace tree
 
         This can be called recurisvely to walk the tree structure, which has nested dicts
@@ -216,9 +214,9 @@ class RailEnv:
         basedir:
             Directory to write file to
 
-        key: 
-            Name of the rail package 
-            
+        key:
+            Name of the rail package
+
         val:
             Namespace tree for the package
         """
@@ -262,9 +260,9 @@ Submodules
         basedir:
             Directory to write file to
 
-        key: 
-            Name of the rail namespace 
-            
+        key:
+            Name of the rail namespace
+
         val:
             Namespace tree for the namespace
         """
@@ -312,7 +310,7 @@ Submodules
             apitocfile.write(api_pkg_toc)
 
     @classmethod
-    def do_api_rst(cls, basedir: str=".") -> None:
+    def do_api_rst(cls, basedir: str = ".") -> None:
         """Build the top-level API documentation
 
         Parameters
@@ -376,7 +374,7 @@ Algorithm Packages
 
             if nsname in cls._packages:
                 # Skip rail_projects
-                if nsname in ['rail.projects', 'rail.plotting']:
+                if nsname in ["rail.projects", "rail.plotting"]:
                     continue
                 cls.do_pkg_api_rst(basedir, key, val)
                 if nsname in ["rail.core", "rail.interfaces", "rail.stages"]:
@@ -422,7 +420,8 @@ Algorithm Packages
         -----
         This allow you to do 'from rail.stages import *'
         """
-        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import \
+            RailStage  # pylint: disable=import-outside-toplevel
 
         cls._stage_dict.clear()
         cls._stage_dict["none"] = []

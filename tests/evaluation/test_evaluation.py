@@ -25,7 +25,7 @@ OUTRATE = 0.0
 SIGMAD = 0.0046489
 
 
-def construct_test_ensemble():
+def construct_test_ensemble() -> tuple:
     np.random.seed(87)
     nmax = 2.5
     NPDF = 399
@@ -41,7 +41,7 @@ def construct_test_ensemble():
     return zgrid, true_zs, grid_ens, true_ez
 
 
-def test_point_metrics():
+def test_point_metrics() -> None:
     zgrid, zspec, pdf_ens, true_ez = construct_test_ensemble()
     zb = pdf_ens.mode(grid=zgrid).flatten()
 
@@ -62,7 +62,7 @@ def test_point_metrics():
     assert np.isclose(sig_mad, SIGMAD)
 
 
-def test_evaluation_stage():
+def test_evaluation_stage() -> None:
     DS = RailStage.data_store
     _zgrid, zspec, pdf_ens, _true_ez = construct_test_ensemble()
     pdf = DS.add_data("pdf", pdf_ens, QPHandle)
@@ -76,7 +76,7 @@ def test_evaluation_stage():
     )
 
 
-def test_dist_to_dist_evaluator(get_evaluation_files: tuple[str, str]):
+def test_dist_to_dist_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, _ztrue_file = get_evaluation_files
     assert pdfs_file
 
@@ -103,7 +103,7 @@ def test_dist_to_dist_evaluator(get_evaluation_files: tuple[str, str]):
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 
-def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
+def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
 
@@ -152,7 +152,7 @@ def test_dist_to_point_evaluator(get_evaluation_files: tuple[str, str]):
         )
 
 
-def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]):
+def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
 
@@ -188,7 +188,7 @@ def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]):
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 
-def test_single_evaluator(get_evaluation_files: tuple[str, str]):
+def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
     DS = RailStage.data_store

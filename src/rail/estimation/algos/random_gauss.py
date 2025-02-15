@@ -4,12 +4,14 @@ for z_mode, and Gaussian centered at z_mode with width
 random_width*(1+zmode).
 """
 
+from typing import Any
+
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
 from scipy.stats import norm
 
-from rail.core.data import TableHandle
+from rail.core.data import TableHandle, TableLike
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
 
@@ -20,7 +22,7 @@ class RandomGaussInformer(CatInformer):
     name = "RandomGaussInformer"
     config_options = CatInformer.config_options.copy()
 
-    def run(self):
+    def run(self) -> None:
         self.add_data("model", np.array([None]))
 
 
@@ -44,13 +46,13 @@ class RandomGaussEstimator(CatEstimator):
         ),
     )
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Constructor:
         Do CatEstimator specific initialization"""
         super().__init__(args, **kwargs)
         self.zgrid = None
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
         pdf = []
         # allow for either format for now
         numzs = len(data[self.config.column_name])
@@ -72,7 +74,7 @@ class RandomGaussEstimator(CatEstimator):
         qp_d.set_ancil(dict(zmode=zmode))
         self._do_chunk_output(qp_d, start, end, first)
 
-    def validate(self):
+    def validate(self) -> None:
         """Validation which checks if the required column names by the stage exist in the data"""
         self._get_stage_columns()
         data = self.get_handle("input", allow_missing=True)
@@ -80,5 +82,5 @@ class RandomGaussEstimator(CatEstimator):
         # as these params are not yet implemented
         self._check_column_names(data, self.stage_columns)
 
-    def _get_stage_columns(self):
+    def _get_stage_columns(self) -> None:
         self.stage_columns = [self.config.column_name]

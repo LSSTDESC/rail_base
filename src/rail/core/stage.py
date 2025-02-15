@@ -1,13 +1,15 @@
 """ Base class for PipelineStages in Rail """
 
-from typing import Any, TypeVar, Iterable
+from __future__ import annotations
+
 import os
+from typing import Any, Iterable, TypeVar
 
 from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
 from ceci.stage import PipelineStage
 
-from .data import DATA_STORE, DataHandle
+from .data import DATA_STORE, DataHandle, DataLike
 
 T = TypeVar("T", bound="RailPipeline")
 S = TypeVar("S", bound="RailStage")
@@ -49,10 +51,10 @@ class RailStageBuild:
     a_pipe.add_stage(a_stage)
     """
 
-    def __init__(self, stage_class: typeRailStage, **kwargs: Any):
+    def __init__(self, stage_class: type[RailStage], **kwargs: Any):
         self.stage_class: type[PipelineStage] = stage_class
-        self._kwargs: dict[str, Any] = kwargs
-        self._stage: RailStage|None = None
+        self._kwargs: dict = kwargs
+        self._stage: RailStage | None = None
 
     @property
     def io(self) -> StageIO | None:  # pragma: no cover
@@ -66,7 +68,7 @@ class RailStageBuild:
 
         Parameters
         ----------
-        name: 
+        name:
             The name for this stage we are building
 
         Returns
@@ -75,6 +77,7 @@ class RailStageBuild:
             The newly built stage
         """
         self._stage = self.stage_class.make_and_connect(name=name, **self._kwargs)
+        assert self._stage is not None
         return self._stage
 
 
@@ -89,7 +92,7 @@ class RailPipeline(MiniPipeline):
     And end up with a fully specified pipeline.
     """
 
-    pipeline_classes: dict[str, type[RailPipeline]]  = {}
+    pipeline_classes: dict[str, type[RailPipeline]] = {}
 
     def __init_subclass__(cls) -> None:
         cls.pipeline_classes[cls.__name__] = cls
@@ -111,12 +114,12 @@ class RailPipeline(MiniPipeline):
     @staticmethod
     def load_pipeline_class(class_name: str) -> type[RailPipeline]:
         """Import a particular RailPipeline subclass by name
-        
+
         Parameters
         ----------
         class_name:
             Full name of the class, e.g., rail.core.stage.RailPipeline
-        
+
         Returns
         -------
         type
@@ -133,19 +136,19 @@ class RailPipeline(MiniPipeline):
     def build_and_write(
         class_name: str,
         output_yaml: str,
-        input_dict: dict[str, Any]|None=None,
-        stages_config: dict[str, Any]|None=None,
-        output_dir:str =".",
-        log_dir: str=".",
+        input_dict: dict | None = None,
+        stages_config: dict | None = None,
+        output_dir: str = ".",
+        log_dir: str = ".",
         **kwargs: Any,
     ) -> None:
         """Build a RailPipeline and write the config yaml for for it
-        
+
         Parameters
         ----------
         class_name:
             Full name of the class, e.g., rail.core.stage.RailPipeline
-        
+
         output_yaml:
             Path to the output yaml file
 
@@ -184,7 +187,9 @@ class RailPipeline(MiniPipeline):
     def __init__(self) -> None:
         MiniPipeline.__init__(self, [], dict(name="mini"))
 
-    def __setattr__(self, name: str, value: RailStageBuild | Any) -> PipelineStage | Any:
+    def __setattr__(
+        self, name: str, value: RailStageBuild | Any
+    ) -> PipelineStage | Any:
         if isinstance(value, RailStageBuild):
             stage = value.build(name)
             self.add_stage(stage)
@@ -239,16 +244,16 @@ class RailStage(PipelineStage):
 
     data_store = DATA_STORE()
 
-    def __init__(self, args: Any, **kwargs: dict[str, Any]) -> None:
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Constructor:
         Do RailStage specific initialization"""
         super().__init__(args, **kwargs)
-        self._input_length: int|None = None
+        self._input_length: int | None = None
         self.io = StageIO(self)
-        self.stage_columns: list[str]|None = None
+        self.stage_columns: list[str] | None = None
 
     @classmethod
-    def make_and_connect(cls: type[S], **kwargs: dict[str, Any]) -> S:
+    def make_and_connect(cls: type[S], **kwargs: Any) -> S:
         """Make a stage and connects it to other stages
 
         Notes
@@ -271,22 +276,24 @@ class RailStage(PipelineStage):
         return stage
 
     @classmethod
-    def build(cls, **kwargs: dict[str, Any]) -> RailStageBuild:
+    def build(cls, **kwargs: Any) -> RailStageBuild:
         """Return an object that can be used to build a stage"""
         return RailStageBuild(cls, **kwargs)
 
-    def get_handle(self, tag: str, path: str|None=None, allow_missing: bool=False) -> DataHandle:
+    def get_handle(
+        self, tag: str, path: str | None = None, allow_missing: bool = False
+    ) -> DataHandle:
         """Gets a DataHandle associated to a particular tag
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
 
-        path : 
+        path :
             The path to the data, only needed if we might need to read the data
 
-        allow_missing : 
+        allow_missing :
             If False this will raise a key error if the tag is not in the DataStore
 
         Returns
@@ -304,18 +311,20 @@ class RailStage(PipelineStage):
             handle = self.add_handle(tag, path=path)
         return handle
 
-    def add_handle(self, tag: str, data:Any=None, path:str|None=None) -> DataHandle:
+    def add_handle(
+        self, tag: str, data: DataLike = None, path: str | None = None
+    ) -> DataHandle:
         """Adds a DataHandle associated to a particular tag
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data : 
+        data :
             If not None these data will be associated to the handle
 
-        path : 
+        path :
             If not None, this will be the path used to read the data
 
         Returns
@@ -341,7 +350,7 @@ class RailStage(PipelineStage):
         self.data_store[aliased_tag] = handle
         return handle
 
-    def get_data(self, tag: str, allow_missing: bool=True) -> Any:
+    def get_data(self, tag: str, allow_missing: bool = True) -> DataLike:
         """Gets the data associated to a particular tag
 
         Notes
@@ -351,14 +360,14 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
-        allow_missing : 
+        allow_missing :
             If False this will raise a key error if the tag is not in the DataStore
 
         Returns
         -------
-        Any
+        DataLike
             The data accesed by the handle assocated to the tag
         """
         handle = self.get_handle(tag, allow_missing=allow_missing)
@@ -366,7 +375,9 @@ class RailStage(PipelineStage):
             handle.read()
         return handle()
 
-    def set_data(self, tag: str, data: Any, path: str|None=None, do_read: bool=True) -> Any:
+    def set_data(
+        self, tag: str, data: DataLike, path: str | None = None, do_read: bool = True
+    ) -> DataLike:
         """Sets the data associated to a particular tag
 
         Notes
@@ -379,21 +390,21 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data : 
+        data :
             The data being set,
 
-        path : 
+        path :
             Can be used to set the path for the data
 
-        do_read : 
+        do_read :
             If True, will read the data if it is not set
 
         Returns
         -------
-        Any
+        DataLike
             The data accesed by the handle assocated to the tag
         """
         if isinstance(data, DataHandle):
@@ -419,35 +430,35 @@ class RailStage(PipelineStage):
                 handle.data = arg_data
         return handle.data
 
-    def add_data(self, tag: str, data: Any=None) -> Any:
+    def add_data(self, tag: str, data: DataLike = None) -> DataLike:
         """Adds a handle to the DataStore associated to a particular tag and
         attaches data to it.
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data : 
+        data :
             Data being added
 
         Returns
         -------
-        Any
+        DataLike
             The data accesed by the handle assocated to the tag
         """
         handle = self.add_handle(tag, data=data)
         return handle.data
 
-    def input_iterator(self, tag: str, **kwargs: dict[str, Any]) -> Iterable:
+    def input_iterator(self, tag: str, **kwargs: Any) -> Iterable:
         """Iterate the input assocated to a particular tag
 
         Parameters
         ----------
-        tag : 
+        tag :
             The tag (from cls.inputs or cls.outputs) for this data
 
-        **kwargs : 
+        **kwargs :
             These will be passed to the Handle's iterator method
 
         Returns
@@ -491,7 +502,12 @@ class RailStage(PipelineStage):
             iterator = [[s, self._input_length, test_data]]
             return iterator
 
-    def connect_input(self, other: PipelineStage, inputTag: str|None=None, outputTag: str|None=None) -> DataHandle:
+    def connect_input(
+        self,
+        other: PipelineStage,
+        inputTag: str | None = None,
+        outputTag: str | None = None,
+    ) -> DataHandle:
         """Connect another stage to this stage as an input
 
         Parameters
@@ -529,7 +545,9 @@ class RailStage(PipelineStage):
         handle.path = final_name
         return final_name
 
-    def _check_column_names(self, data: Any, columns_to_check: list[str], **kwargs: dict[str, Any]) -> None:
+    def _check_column_names(
+        self, data: Any, columns_to_check: list[str], **kwargs: Any
+    ) -> None:
         try:
             groupname = kwargs.get("groupname", self.config.hdf5_groupname)
         except Exception:  # pragma: no cover

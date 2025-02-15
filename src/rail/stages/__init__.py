@@ -8,19 +8,21 @@ from rail.creation.engine import Creator, Modeler, PosteriorCalculator
 from rail.creation.noisifier import Noisifier
 from rail.creation.selector import Selector
 from rail.estimation.algos.equal_count import EqualCountClassifier
-from rail.estimation.algos.naive_stack import NaiveStackInformer, NaiveStackSummarizer
-from rail.estimation.algos.point_est_hist import (
-    PointEstHistInformer,
-    PointEstHistSummarizer,
-)
-from rail.estimation.algos.random_gauss import RandomGaussEstimator, RandomGaussInformer
+from rail.estimation.algos.naive_stack import (NaiveStackInformer,
+                                               NaiveStackSummarizer)
+from rail.estimation.algos.point_est_hist import (PointEstHistInformer,
+                                                  PointEstHistSummarizer)
+from rail.estimation.algos.random_gauss import (RandomGaussEstimator,
+                                                RandomGaussInformer)
 from rail.estimation.algos.train_z import TrainZEstimator, TrainZInformer
 from rail.estimation.algos.true_nz import TrueNZHistogrammer
 from rail.estimation.algos.uniform_binning import UniformBinningClassifier
-from rail.estimation.algos.var_inf import VarInfStackInformer, VarInfStackSummarizer
+from rail.estimation.algos.var_inf import (VarInfStackInformer,
+                                           VarInfStackSummarizer)
 from rail.estimation.classifier import CatClassifier, PZClassifier
 from rail.estimation.estimator import CatEstimator
-from rail.estimation.summarizer import CatSummarizer, PZSummarizer, SZPZSummarizer
+from rail.estimation.summarizer import (CatSummarizer, PZSummarizer,
+                                        SZPZSummarizer)
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.evaluator import Evaluator, OldEvaluator

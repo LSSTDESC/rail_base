@@ -3,14 +3,15 @@ Abstract base classes defining Estimators of individual galaxy redshift uncertai
 """
 
 import gc
+from typing import Any
+
+import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import ModelHandle, QPHandle, TableHandle
+from rail.core.data import DataHandle, ModelHandle, ModelLike, QPHandle, TableHandle, TableLike
 from rail.core.point_estimation import PointEstimationMixin
 from rail.core.stage import RailStage
-
 # for backwards compatibility, to avoid break stuff that imports it from here
-from rail.estimation.informer import CatInformer  # pylint: disable=unused-import
 
 
 class CatEstimator(RailStage, PointEstimationMixin):
@@ -39,13 +40,13 @@ class CatEstimator(RailStage, PointEstimationMixin):
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Estimator"""
         super().__init__(args, **kwargs)
-        self._output_handle = None
+        self._output_handle: QPHandle | None = None
         self.model = None
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and attach it to this Estimator
 
         Parameters
@@ -57,7 +58,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
         Returns
         -------
-        self.model : ``object``
+        ModelLike:
             The object encapsulating the trained model.
         """
         model = kwargs.get("model", None)
@@ -74,7 +75,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self.model = self.set_data("model", model)
         return self.model
 
-    def estimate(self, input_data):
+    def estimate(self, input_data: TableLike) -> DataHandle:
         """The main interface method for the photo-z estimation
 
         This will attach the input data (defined in ``inputs`` as "input") to this
@@ -106,7 +107,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
         results.read(force=True)
         return results
 
-    def run(self):
+    def run(self) -> None:
         self.open_model(**self.config)
 
         iterator = self.input_iterator("input")
@@ -122,25 +123,31 @@ class CatEstimator(RailStage, PointEstimationMixin):
             gc.collect()
         self._finalize_run()
 
-    def _initialize_run(self):
+    def _initialize_run(self) -> None:
         self._output_handle = None
 
-    def _finalize_run(self):
+    def _finalize_run(self) -> None:
+        assert self._output_handle is not None
         self._output_handle.finalize_write()
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
         raise NotImplementedError(
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
 
-    def _do_chunk_output(self, qp_dstn, start, end, first):
+    def _do_chunk_output(
+        self, qp_dstn: qp.Ensemble, start: int, end: int, first: bool
+    ) -> None:
         qp_dstn = self.calculate_point_estimates(qp_dstn)
         if first:
-            self._output_handle = self.add_handle("output", data=qp_dstn)
+            the_handle = self.add_handle("output", data=qp_dstn)
+            assert isinstance(the_handle, QPHandle)
+            self._output_handle = the_handle
             if self.config.output_mode != "return":
                 self._output_handle.initialize_write(
                     self._input_length, communicator=self.comm
                 )
+        assert self._output_handle is not None
         self._output_handle.set_data(qp_dstn, partial=True)
         if self.config.output_mode != "return":
             self._output_handle.write_chunk(start, end)

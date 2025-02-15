@@ -1,12 +1,8 @@
-from typing import TYPE_CHECKING
-
 import numpy as np
+import qp
 from numpy.typing import NDArray
 
 from rail.core.common_params import SHARED_PARAMS
-
-if TYPE_CHECKING:
-    import qp
 
 
 class PointEstimationMixin:
@@ -15,7 +11,9 @@ class PointEstimationMixin:
         recompute_point_estimates=SHARED_PARAMS,
     )
 
-    def calculate_point_estimates(self, qp_dist: qp.Ensemble, grid=NDArray|list|None=None) -> qp.Ensemble:
+    def calculate_point_estimates(
+        self, qp_dist: qp.Ensemble, grid: NDArray | list | None = None
+    ) -> qp.Ensemble:
         """This function drives the calculation of point estimates for qp.Ensembles.
         It is defined here, and called from the `_process_chunk` method in the
         `CatEstimator` child classes.
@@ -82,7 +80,9 @@ class PointEstimationMixin:
 
         return qp_dist
 
-    def _calculate_mode_point_estimate(self, qp_dist: qp.Ensemble, grid=NDArray|list|None=None) -> NDArray:
+    def _calculate_mode_point_estimate(
+        self, qp_dist: qp.Ensemble, grid: NDArray | list | None = None
+    ) -> NDArray:
         """Calculates and returns the mode values for a set of posterior estimates
         in a qp.Ensemble instance.
 

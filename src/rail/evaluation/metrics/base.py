@@ -1,7 +1,12 @@
+from typing import Any
+
+import qp
+
+
 class MetricEvaluator:
     """A superclass for metrics evaluations"""
 
-    def __init__(self, qp_ens):
+    def __init__(self, qp_ens: qp.Ensemble) -> None:
         """Class constructor.
         Parameters
         ----------
@@ -10,7 +15,7 @@ class MetricEvaluator:
         """
         self._qp_ens = qp_ens
 
-    def evaluate(self):  # pragma: no cover
+    def evaluate(self) -> Any:  # pragma: no cover
         """
         Evaluates the metric a function of the truth and prediction
 

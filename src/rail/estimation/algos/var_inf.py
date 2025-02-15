@@ -2,6 +2,8 @@
 A summarizer that simple makes a histogram of a point estimate
 """
 
+from typing import Any, Iterable
+
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
@@ -21,7 +23,7 @@ class VarInfStackInformer(PzInformer):
     name = "VarInfStackInformer"
     config_options = PzInformer.config_options.copy()
 
-    def run(self):
+    def run(self) -> None:
         self.add_data("model", np.array([None]))
 
 
@@ -61,11 +63,11 @@ class VarInfStackSummarizer(PZSummarizer):
     inputs = [("input", QPHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
-        self.zgrid = None
+        self.zgrid: np.ndarray | None = None
 
-    def _setup_iterator(self):
+    def _setup_iterator(self) -> Iterable:
         input_handle = self.get_handle("input", allow_missing=True)
         try:
             self.config.hdf5_groupname
@@ -77,7 +79,7 @@ class VarInfStackSummarizer(PZSummarizer):
         iterator = self.input_iterator("input", chunk_size=chunk_size)
         return iterator
 
-    def run(self):
+    def run(self) -> None:
         # Redefining the chunk size so that all of the data is distributed at once in the
         # nodes. This would fill all the memory if not enough nodes are allocated
 
@@ -107,13 +109,16 @@ class VarInfStackSummarizer(PZSummarizer):
             self.add_data("output", sample_ens)
             self.add_data("single_NZ", qp_d)
 
-    def _process_chunk(self, _start, _end, test_data, first):
+    def _process_chunk(
+        self, _start: int, _end: int, test_data: qp.Ensemble, first: bool
+    ) -> np.ndarray:
         if not first:  # pragma: no cover
             raise ValueError(
                 "This algorithm needs all data in memory at once, increase nprocess or chunk size."
             )
 
         # Initiallizing arrays
+        assert self.zgrid is not None
         alpha_trace = np.ones(len(self.zgrid))
         init_trace = np.ones(len(self.zgrid))
         pdf_vals = test_data.pdf(self.zgrid)

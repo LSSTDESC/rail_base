@@ -1,10 +1,10 @@
 """ Stages that implement utility functions """
-from typing import Any
+
 
 import tables_io
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, Hdf5Handle, PqHandle
+from rail.core.data import DataHandle, Hdf5Handle, PqHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -41,7 +41,7 @@ class ColumnMapper(RailStage):
         printMsg += "f{str(self.config.columns)}"
         return printMsg
 
-    def __call__(self, data: Any) -> DataHandle:
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a table with the columns names changed
 
         Parameters
@@ -91,7 +91,7 @@ class RowSelector(RailStage):
         printMsg += "f{str(self.config.columns)}"
         return printMsg
 
-    def __call__(self, data: Any) -> DataHandle:
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a table with the columns names changed
 
         Parameters
@@ -131,7 +131,7 @@ class TableConverter(RailStage):
         out_data = tables_io.convert(data, out_fmt)
         self.add_data("output", out_data)
 
-    def __call__(self, data: Any) -> DataHandle:
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a converted table
 
         Parameters

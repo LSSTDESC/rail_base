@@ -4,11 +4,11 @@ The key feature here is make selection to either the photometric or spectroscopi
 Intended subclasses spectroscopic selection, probability selection on a grid for the photometry, 
 or pure photometric selection. 
 """
-from typing import Any
+
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, PqHandle
+from rail.core.data import DataHandle, PqHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -33,7 +33,7 @@ class Selector(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
-    def __call__(self, sample: Any) -> DataHandle:
+    def __call__(self, sample: TableLike) -> DataHandle:
         """The main interface method for ``Selector``.
 
         Adds noise to the input catalog
@@ -51,7 +51,7 @@ class Selector(RailStage):
 
         Parameters
         ----------
-        sample: 
+        sample:
             The sample to be selected
 
         Returns
@@ -74,5 +74,5 @@ class Selector(RailStage):
             out_data.insert(0, "flag", selection_mask)
         self.add_data("output", out_data)
 
-    def _select(self) -> Any:  # pragma: no cover
+    def _select(self) -> TableLike:  # pragma: no cover
         raise NotImplementedError("Selector._select()")

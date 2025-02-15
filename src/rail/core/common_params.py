@@ -92,7 +92,7 @@ def set_param_default(param_name: str, default_value: Any) -> None:
         Name of the parameter to copy
 
     default_value:
-        New default value    
+        New default value
     """
     try:
         SHARED_PARAMS.get(param_name).set_default(default_value)
@@ -100,7 +100,7 @@ def set_param_default(param_name: str, default_value: Any) -> None:
         raise KeyError(f"No shared parameter {param_name} in SHARED_PARAMS") from msg
 
 
-def set_param_defaults(**kwargs: dict[str, Any]) -> None:  # pragma: no cover
+def set_param_defaults(**kwargs: Any) -> None:  # pragma: no cover
     """Change the default value of several of the shared parameters
 
     Parameters

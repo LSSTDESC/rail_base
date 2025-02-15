@@ -1,7 +1,7 @@
 """Utility functions to test alogrithms"""
 
-from typing import Any
 import os
+from typing import Any
 
 import ceci
 
@@ -22,9 +22,9 @@ def one_algo(
     key: str,
     single_trainer: type[CatInformer],
     single_estimator: type[CatEstimator],
-    train_kwargs: dict[str, Any],
-    estim_kwargs: dict[str, Any],
-    is_classifier: bool=False,
+    train_kwargs: dict,
+    estim_kwargs: dict,
+    is_classifier: bool = False,
 ) -> Any:
     """
     A basic test of running an estimator subclass.
