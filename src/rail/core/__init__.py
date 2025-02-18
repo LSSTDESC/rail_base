@@ -4,6 +4,7 @@ from .common_params import (
     copy_param,
     set_param_default,
     set_param_defaults,
+    SharedParams,
     SHARED_PARAMS,
 )
 
@@ -27,6 +28,7 @@ from .point_estimation import PointEstimationMixin
 from .stage import StageIO, RailPipeline, RailStage
 
 __all__ = [
+    "SharedParams",
     "copy_param",
     "set_param_default",
     "set_param_defaults",

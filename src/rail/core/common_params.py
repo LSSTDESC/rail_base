@@ -67,46 +67,62 @@ SHARED_PARAMS = StageConfig(
 )
 
 
-def copy_param(param_name: str) -> Param:
-    """Return a copy of one of the shared parameters
+class SharedParams:
+    """Class to store parameters shared between many stages"""
 
-    Parameters
-    ----------
-    param_name
-        Name of the parameter to copy
+    _config_text = SHARED_PARAMS.numpy_style_help_text()
+    __doc__: str | None = f"\n\nParameters\n----------\n{_config_text}"
 
-    Returns
-    -------
-    Param
-        Copied parameter
-    """
-    return SHARED_PARAMS.get(param_name).copy()
+    @staticmethod
+    def copy_param(param_name: str) -> Param:
+        """Return a copy of one of the shared parameters
+
+        Parameters
+        ----------
+        param_name
+            Name of the parameter to copy
+
+        Returns
+        -------
+        Param
+            Copied parameter
+        """
+        return SHARED_PARAMS.get(param_name).copy()
+
+    @staticmethod
+    def set_param_default(param_name: str, default_value: Any) -> None:
+        """Change the default value of one of the shared parameters
+
+        Parameters
+        ----------
+        param_name
+            Name of the parameter to copy
+
+        default_value
+            New default value
+        """
+        try:
+            SHARED_PARAMS.get(param_name).set_default(default_value)
+        except AttributeError as msg:  # pragma: no cover
+            raise KeyError(
+                f"No shared parameter {param_name} in SHARED_PARAMS"
+            ) from msg
+
+    @staticmethod
+    def set_param_defaults(**kwargs: Any) -> None:  # pragma: no cover
+        """Change the default value of several of the shared parameters
+
+        Parameters
+        ----------
+        **kwargs
+            Key, value pairs of parameter names and default values
+        """
+        for key, val in kwargs.items():
+            set_param_default(key, val)
 
 
-def set_param_default(param_name: str, default_value: Any) -> None:
-    """Change the default value of one of the shared parameters
+copy_param = SharedParams.copy_param
 
-    Parameters
-    ----------
-    param_name
-        Name of the parameter to copy
+set_param_default = SharedParams.set_param_default
 
-    default_value
-        New default value
-    """
-    try:
-        SHARED_PARAMS.get(param_name).set_default(default_value)
-    except AttributeError as msg:  # pragma: no cover
-        raise KeyError(f"No shared parameter {param_name} in SHARED_PARAMS") from msg
-
-
-def set_param_defaults(**kwargs: Any) -> None:  # pragma: no cover
-    """Change the default value of several of the shared parameters
-
-    Parameters
-    ----------
-    **kwargs
-        Key, value pairs of parameter names and default values
-    """
-    for key, val in kwargs.items():
-        set_param_default(key, val)
+set_param_defaults = SharedParams.set_param_defaults
