@@ -61,19 +61,19 @@ class UniformBinningClassifier(PZClassifier):
         """
         try:
             zb = data.ancil[self.config.point_estimate]
-        except KeyError as msg:  # pragma: no cover
+        except KeyError as missing_key:
             raise KeyError(
                 f"{self.config.point_estimate} is not contained "
                 "in the data ancil, you will need to compute it explicitly."
-            ) from msg
+            ) from missing_key
 
         try:
             _npdf = data.npdf
-        except KeyError as msg:
+        except KeyError as missing_key:
             raise KeyError(
                 f"npdf is not a supported attribute of {type(data)}. "
                 "Are you sure you don't mean to be using a qp ensemble?"
-            ) from msg
+            ) from missing_key
 
         # binning options
         if len(self.config.zbin_edges) >= 2:
