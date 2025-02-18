@@ -7,8 +7,6 @@ from typing import Any
 
 import qp
 
-from ceci.config import StageConfig
-
 from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import (
     DataHandle,
@@ -56,10 +54,6 @@ class CatEstimator(RailStage, PointEstimationMixin):
         super().__init__(args, **kwargs)
         self._output_handle: QPHandle | None = None
         self.model = None
-
-#    @property
-#    def config(self) -> StageConfig:
-#        return RailStage.config(self)
 
     def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and attach it to this Estimator
