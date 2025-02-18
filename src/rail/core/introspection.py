@@ -231,7 +231,6 @@ class RailEnv:
         depth = max(level_dict.keys())
 
         for current_depth in range(depth + 1):
-
             for key in level_dict[current_depth]:
                 subs = set()
 
@@ -653,8 +652,9 @@ Algorithm Packages
         """Genarate the rst files for the stage tpye documentation"""
         from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
 
-        for key, val in cls._stage_dict.items():
+        os.makedirs(os.path.join(basedir, "api"), exist_ok=True)
 
+        for key, val in cls._stage_dict.items():
             if key in RailStage.incomplete_pipeline_stages:
                 base_class = RailStage.incomplete_pipeline_stages[key][0]
             else:
