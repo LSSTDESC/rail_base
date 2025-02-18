@@ -70,8 +70,11 @@ SHARED_PARAMS = StageConfig(
 class SharedParams:
     """Class to store parameters shared between many stages"""
 
-    _config_text = SHARED_PARAMS.numpy_style_help_text()
-    __doc__: str | None = f"\n\nParameters\n----------\n{_config_text}"
+    try:
+        _config_text = SHARED_PARAMS.numpy_style_help_text()
+        __doc__: str | None = f"\n\nParameters\n----------\n{_config_text}"
+    except Exception:
+        pass
 
     @staticmethod
     def copy_param(param_name: str) -> Param:
