@@ -57,9 +57,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self._output_handle: QPHandle | None = None
         self.model = None
 
-    @property
-    def config(self) -> StageConfig:
-        return RailStage.config(self)
+#    @property
+#    def config(self) -> StageConfig:
+#        return RailStage.config(self)
 
     def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and attach it to this Estimator
