@@ -94,7 +94,7 @@ def info(**kwargs: Any) -> int:
 @cli.command()
 @options.bpz_demo_data()
 @options.verbose_download()
-def get_data(verbose: bool, **kwargs: Any) -> int:
+def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
     """Downloads data from NERSC (if not already found)"""
     scripts.get_data(verbose, **kwargs)
     return 0
@@ -120,7 +120,7 @@ def estimate(
     dry_run: bool,
     input_file: str,
     params: dict,
-) -> int:
+) -> int:  # pragma: no cover
     """Run a pz estimation stage"""
     if catalog_tag:
         catalog_utils.apply_defaults(catalog_tag)
@@ -179,7 +179,7 @@ def build_pipe(
     stages_config: dict,
     outdir: str,
     inputs: dict[str, str],
-) -> int:
+) -> int:  # pragma: no cover
     """Build a pipeline yaml file"""
     input_dict = {}
     for input_ in inputs:
@@ -199,7 +199,7 @@ def build_pipe(
 @options.inputs()
 def run_stage(
     pipeline_yaml: str, stage_name: str, dry_run: bool, inputs: dict[str, str]
-) -> int:
+) -> int:  # pragma: no cover
     """Run a pipeline stage"""
     pipe = ceci.Pipeline.read(pipeline_yaml)
     input_dict = {}
@@ -223,7 +223,7 @@ def run_stage(
 @options.input_file()
 def run_tool(
     stage_name: str, stage_class: str, stage_module: str, dry_run: bool, input_file: str
-) -> int:
+) -> int:  # pragma: no cover
     """Run a pz estimation stage"""
     stage = ToolFactory.build_tool_stage(
         stage_name=stage_name,

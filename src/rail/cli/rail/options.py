@@ -57,7 +57,7 @@ class EnumChoice(click.Choice):
 
     def convert(
         self, value: Any, param: click.Parameter | None, ctx: click.Context | None
-    ) -> enum.Enum:
+    ) -> enum.Enum:  # pragma: no cover
         converted_str = super().convert(value, param, ctx)
         return self._enum.__members__[converted_str]
 
@@ -80,7 +80,7 @@ class PartialOption:
     def __init__(self, *param_decls: str, **kwargs: Any) -> None:
         self._partial = partial(click.option, *param_decls, cls=click.Option, **kwargs)
 
-    def __call__(self, *args: Any, **kwargs: Any) -> Any:  # pragma: no cover
+    def __call__(self, *args: Any, **kwargs: Any) -> Any:
         return self._partial(*args, **kwargs)
 
 

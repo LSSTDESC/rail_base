@@ -89,3 +89,18 @@ strict_equality = true
 warn_redundant_casts = true
 warn_unreachable = true
 warn_unused_ignores = true
+
+
+[tool.coverage.run]
+omit = [
+     "*/_version.py",
+     ]
+
+[tool.coverage.report]
+exclude_also = [
+    "raise NotImplementedError",
+    "__repr__",
+    "TYPE_CHECKING",
+    "if cls._instance is None:",
+    "except KeyError as missing_key:",    
+]

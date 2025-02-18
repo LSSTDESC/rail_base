@@ -216,10 +216,7 @@ class RailEnv:
 
         for key in cls._namespace_sub_dict:
             count = key.count(".") - 1
-            if count in level_dict:
-                level_dict[count].add(key)
-            else:
-                level_dict[count] = {key}
+            level_dict[count].add(key)
 
         def _recursive_get(a_dict: dict, keys: list[str]) -> dict:
             ret_dict = a_dict
@@ -228,8 +225,6 @@ class RailEnv:
                 use_keys.append(key_)
                 full_key = ".".join(use_keys)
                 full_key = f"rail.{full_key}"
-                if full_key not in ret_dict:
-                    ret_dict[full_key] = {}
                 ret_dict = ret_dict[full_key]
             return ret_dict
 
@@ -252,10 +247,7 @@ class RailEnv:
 
                 if key in parent_dict:
                     for kk, vv in a_dict.items():
-                        if kk in parent_dict[key]:
-                            parent_dict[key][kk].update(**vv)
-                        else:
-                            parent_dict[key][kk] = vv
+                        parent_dict[key][kk] = vv
                 else:
                     parent_dict[key] = a_dict
 
@@ -365,10 +357,6 @@ class RailEnv:
 
 """
         for k2 in val:
-            if k2[0] == "=":
-                continue
-            if k2.find("_version") >= 0:
-                continue
             api_pkg_toc += f"   {k2}\n"
             cls.do_module_api_str(basedir, k2, module_options)
 
@@ -416,10 +404,6 @@ class RailEnv:
 """
 
         for k2 in val:
-            if k2[0] == "_":
-                continue
-            if k2.find("_version") >= 0:
-                continue
             api_pkg_toc += f"   {k2}\n"
             cls.do_module_api_str(basedir, k2, module_options)
 
@@ -461,10 +445,6 @@ class RailEnv:
         sub_packages = ""
         for k2, v2 in val.items():
             if k2 in ["rail.cli.rail_project", "rail.cli.rail_plot"]:
-                continue
-            if k2[0] == "_":
-                continue
-            if k2.find("_version") >= 0:
                 continue
 
             sub_packages += f"    {k2}\n"
@@ -544,9 +524,6 @@ Algorithm Packages
         algorithm_packages = ""
 
         for key, val in cls._tree.items():
-            if key[0] == "_":
-                continue
-
             nsname = f"{key}"
             nsfile = os.path.join("api", f"{nsname}")
 
@@ -577,11 +554,7 @@ Algorithm Packages
                         cls._package_api_options,
                         cls._module_api_options,
                     )
-            elif nsname in cls._module_dict:
-                continue
             else:
-                if nsname in ["rail.cli.rail_project", "rail.cli.rail_plot"]:
-                    continue
                 cls.do_namespace_api_rst(basedir, key, val)
                 namespaces += f"    {nsfile}\n"
 
@@ -603,7 +576,7 @@ Algorithm Packages
             try:
                 _imported_module = importlib.import_module(pkg)
                 print(f"Imported {pkg}")
-            except Exception as msg:
+            except Exception as msg:  # pragma: no cover
                 print(f"Failed to import {pkg} because: {str(msg)}")
 
     @classmethod

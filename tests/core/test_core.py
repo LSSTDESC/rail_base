@@ -26,6 +26,7 @@ from rail.utils.path_utils import RAILDIR
 #        df = DataFile('dummy', 'x')
 
 
+
 def do_data_handle(datapath: str, handle_class: type[DataHandle]) -> DataHandle:
     _DS = RailStage.data_store
 
@@ -34,6 +35,9 @@ def do_data_handle(datapath: str, handle_class: type[DataHandle]) -> DataHandle:
     with pytest.raises(ValueError) as _errinfo:
         th.write()
 
+
+    assert handle_class.__name__ in DataHandle.get_sub_classes()
+        
     assert not th.has_data
     try:
         _check_size = th.size()
@@ -356,3 +360,6 @@ def test_catalog_utils() -> None:
 
     CatalogConfigBase.apply("dc2")
     set_param_default("redshift_col", "redshift")
+
+    
+    assert 'rubin' in CatalogConfigBase.subclasses()
