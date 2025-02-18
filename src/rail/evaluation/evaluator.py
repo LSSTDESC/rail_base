@@ -17,10 +17,12 @@ from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import DataHandle, Hdf5Handle, QPDictHandle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import (PointBias,
-                                                    PointOutlierRate,
-                                                    PointSigmaIQR,
-                                                    PointSigmaMAD)
+from rail.evaluation.metrics.pointestimates import (
+    PointBias,
+    PointOutlierRate,
+    PointSigmaIQR,
+    PointSigmaMAD,
+)
 
 
 def _all_subclasses(a_class: type[BaseMetric]) -> set[type[BaseMetric]]:
@@ -108,14 +110,15 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        data : qp.Ensemble
+        data
             The sample to evaluate
-        truth : Table-like
+
+        truth
             Table with the truth information
 
         Returns
         -------
-        output : Table-like
+        dict[str, DataHandle]
             The evaluation metrics
         """
 
@@ -246,19 +249,23 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        estimate_data : Ensemble or array
+        estimate_data
             The estimated values (of the appropriate type, float or pdf) to be used
             by the requested metrics.
-        reference_data : Ensemble or array
+
+        reference_data
             The reference or known values (of the appropriate type, float or pdf)
             to be used by the requested metrics.
-        start : int
+
+        start
             The start index of the data chunk, used to write metric results to
             the correct location of the output file.
-        end : int
+
+        end
             The end index of the data chunk, used to write metric results to the
             correct location of the output file.
-        first : bool
+
+        first
             Used internally to determine if the output file should be initialized.
 
         Raises
@@ -326,10 +333,11 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        estimate_data : Ensemble or array
+        estimate_data
             The estimated values (of the appropriate type, float or pdf) to be used
             by the requested metrics.
-        reference_data : Ensemble or array
+
+        reference_data
             The reference or known values (of the appropriate type, float or pdf)
             to be used by the requested metrics.
 
@@ -425,21 +433,25 @@ class OldEvaluator(RailStage):
 
     def evaluate(self, data: qp.Ensemble, truth: Any) -> DataHandle:
         """Evaluate the performance of an estimator
+
         This will attach the input data and truth to this `Evaluator`
         (for introspection and provenance tracking).
         Then it will call the run() and finalize() methods, which need to
         be implemented by the sub-classes.
         The run() method will need to register the data that it creates to this Estimator
         by using `self.add_data('output', output_data)`.
+
         Parameters
         ----------
-        data : qp.Ensemble
+        data
             The sample to evaluate
-        truth : Table-like
+
+        truth
             Table with the truth information
+
         Returns
         -------
-        output : Table-like
+        DataHandle
             The evaluation metrics
         """
 

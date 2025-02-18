@@ -4,7 +4,6 @@ The key feature here is the run adds noise to the catalog.
 Intended subclasses are noisifier that adds LSST noise / other telescope noise
 """
 
-
 from ceci.config import StageParameter as Param
 
 from rail.core.data import DataHandle, PqHandle, TableLike

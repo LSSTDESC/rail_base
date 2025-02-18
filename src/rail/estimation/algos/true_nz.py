@@ -117,12 +117,15 @@ class TrueNZHistogrammer(RailStage):
 
         Parameters
         ----------
-        catalog : table-like
+        catalog
             The sample with the true NZ column
+
+        tomo_bins
+            Tomographic bin assignemnets
 
         Returns
         -------
-        output_data : QPHandle
+        DataHandle
             A handle giving access to a the histogram in QP format
         """
         self.set_data("input", catalog)

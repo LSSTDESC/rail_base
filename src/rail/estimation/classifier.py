@@ -8,8 +8,15 @@ from typing import Any
 import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import (DataHandle, Hdf5Handle, ModelHandle, ModelLike, QPHandle,
-                            TableHandle, TableLike)
+from rail.core.data import (
+    DataHandle,
+    Hdf5Handle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.stage import RailStage
 
 
@@ -46,14 +53,20 @@ class CatClassifier(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        model : `object`, `str` or `ModelHandle`
-            Either an object with a trained model,
-            a path pointing to a file that can be read to obtain the trained model,
-            or a `ModelHandle` providing access to the trained model.
+        **kwargs
+            Should include 'model', see notes
+
+        Notes
+        -----
+        The keyword arguement 'model' should be either
+
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
 
         Returns
         -------
-        self.model : `object`
+        ModelLike
             The object encapsulating the trained model.
         """
         model = kwargs.get("model", None)
@@ -87,12 +100,12 @@ class CatClassifier(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        input_data : `dict`
+        input_data
             A dictionary of all input data
 
         Returns
         -------
-        output: `dict`
+        DataHandle
             Class assignment for each galaxy.
         """
         self.set_data("input", input_data)
@@ -116,15 +129,7 @@ class PZClassifier(RailStage):
     outputs = [("output", Hdf5Handle)]
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
-        """Initialize the PZClassifier.
-
-        Parameters
-        ----------
-        args : dict
-            Configuration arguments for the classifier.
-        comm : MPI.Comm, optional
-            MPI communicator for parallel processing.
-        """
+        """Initialize the PZClassifier."""
         super().__init__(args, **kwargs)
         self._output_handle: DataHandle | None = None
 
@@ -151,12 +156,12 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        input_data : `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        output: `dict`
+        DataHandle
             Class assignment for each galaxy, typically in the form of a
             dictionary with IDs and class labels.
         """
@@ -180,13 +185,16 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        start : int
+        start
             The starting index of the chunk.
-        end : int
+
+        end
             The ending index of the chunk.
-        data : qp.Ensemble
+
+        data
             The data chunk to be processed.
-        first : bool
+
+        first
             True if this is the first chunk, False otherwise.
         """
         raise NotImplementedError(
@@ -200,13 +208,16 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        class_id : dict
+        class_id
             The classification results for the chunk.
-        start : int
+
+        start
             The starting index of the chunk.
-        end : int
+
+        end
             The ending index of the chunk.
-        first : bool
+
+        first
             True if this is the first chunk, False otherwise.
         """
         if first:

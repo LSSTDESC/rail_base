@@ -72,12 +72,12 @@ def copy_param(param_name: str) -> Param:
 
     Parameters
     ----------
-    param_name:
+    param_name
         Name of the parameter to copy
 
     Returns
     -------
-    Param:
+    Param
         Copied parameter
     """
     return SHARED_PARAMS.get(param_name).copy()
@@ -88,10 +88,10 @@ def set_param_default(param_name: str, default_value: Any) -> None:
 
     Parameters
     ----------
-    param_name:
+    param_name
         Name of the parameter to copy
 
-    default_value:
+    default_value
         New default value
     """
     try:
@@ -105,7 +105,7 @@ def set_param_defaults(**kwargs: Any) -> None:  # pragma: no cover
 
     Parameters
     ----------
-    **kwargs:
+    **kwargs
         Key, value pairs of parameter names and default values
     """
     for key, val in kwargs.items():

@@ -7,10 +7,16 @@ defined by the Creator.
 
 from typing import Any
 
-import qp
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, ModelHandle, ModelLike, QPHandle, TableHandle, TableLike
+from rail.core.data import (
+    DataHandle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.stage import RailStage
 
 
@@ -121,10 +127,10 @@ class Creator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        n_samples:
+        n_samples
             The number of samples to draw
 
-        seed:
+        seed
             The random seed to control sampling
 
         **kwargs:
@@ -181,17 +187,23 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
     def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and/or attach it to this PosteriorCalculator.
 
-        Keywords
-        --------
-        model : object, str or ModelHandle
-            Either an object with a trained model, a path pointing to a file
-            that can be read to obtain the trained model, or a ``ModelHandle``
-            providing access to the trained model
+        Parameters
+        ----------
+        **kwargs
+            Should include 'model', see notes
+
+        Notes
+        -----
+        The keyword arguement 'model' should be either
+
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
 
         Returns
         -------
-        Model
-            The object encapsulating the trained model
+        ModelLike:
+            The object encapsulating the trained model.
         """
         model = kwargs.get("model", None)
         if model is None or model == "None":  # pragma: no cover
@@ -207,7 +219,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def get_posterior(self, input_data: TableLike, **kwargs: Any) -> qp.Ensemble:
+    def get_posterior(self, input_data: TableLike, **kwargs: Any) -> DataHandle:
         """Return posteriors for the given column.
 
         This is a method for running a Creator in interactive mode. In pipeline
@@ -215,8 +227,16 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        data : table-like
+        data
             A table of the galaxies for which posteriors are calculated
+
+        **kwargs
+            Used to update configuration
+
+        Returns
+        -------
+        DataHandle
+            Posterior Estimate
 
         Notes
         -----

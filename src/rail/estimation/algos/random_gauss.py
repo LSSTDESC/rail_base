@@ -52,7 +52,9 @@ class RandomGaussEstimator(CatEstimator):
         super().__init__(args, **kwargs)
         self.zgrid = None
 
-    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
+    def _process_chunk(
+        self, start: int, end: int, data: TableLike, first: bool
+    ) -> None:
         pdf = []
         # allow for either format for now
         numzs = len(data[self.config.column_name])

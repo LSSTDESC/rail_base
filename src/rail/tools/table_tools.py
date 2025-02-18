@@ -1,6 +1,5 @@
 """ Stages that implement utility functions """
 
-
 import tables_io
 from ceci.config import StageParameter as Param
 
@@ -11,8 +10,6 @@ from rail.core.stage import RailStage
 class ColumnMapper(RailStage):
     """Utility stage that remaps the names of columns.
 
-    Notes
-    -----
     1. This operates on pandas dataframs in parquet files.
 
     2. In short, this does:
@@ -63,8 +60,6 @@ class ColumnMapper(RailStage):
 class RowSelector(RailStage):
     """Utility Stage that sub-selects rows from a table by index
 
-    Notes
-    -----
     1. This operates on pandas dataframs in parquet files.
 
     2. In short, this does:

@@ -11,6 +11,7 @@ class Model:
 
     This will attach metadata to the ML model, and provide tools
     for validation, versioning and tracking provenance.
+
     """
 
     def __init__(
@@ -24,16 +25,16 @@ class Model:
 
         Parameters
         ----------
-        data:
+        data
             Model data
 
-        creation_class_name:
-            Name of the creation class
+        creation_class_name
+            Name of class that created this model
 
-        version:
+        version
             Version of the model
 
-        provenance: dict | None
+        provenance
             Provenance infomration
         """
         self.data = data
@@ -48,10 +49,10 @@ class Model:
         """
         Parameters
         ----------
-        creation_class_name:
-            Name of the creation class
+        creation_class_name
+            Name of class that created this model
 
-        version:
+        version
             Version of the model
 
         Raises
@@ -85,11 +86,11 @@ class Model:
 
         Parameters
         ----------
-        path:
+        path
             File to read
 
         creation_class_name:
-            Name of the creation class
+            Name of class that created this model
 
         version:
             Version of the model
@@ -99,7 +100,7 @@ class Model:
 
         Returns
         -------
-        Model：
+        Model
             Newly read Model
         """
         with open(path, "rb") as fin:
@@ -126,14 +127,14 @@ class Model:
 
         Parameters
         ----------
-        inpath:
+        inpath
             File to read
 
         outpath:
             File to write
 
         creation_class_name:
-            Name of the creation class
+            Name of class that created this model
 
         version:
             Version of the model
@@ -165,14 +166,14 @@ class Model:
 
         Parameters
         ----------
-        obj:
+        obj
             Object to dump
 
         path:
             File to write
 
         creation_class_name:
-            Name of the creation class
+            Name of class that created this model
 
         version:
             Version of the model
@@ -204,7 +205,7 @@ class Model:
 
         Parameters
         ----------
-        path:
+        path
             File to write
         """
         with open(path, "wb") as fout:

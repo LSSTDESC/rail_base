@@ -47,12 +47,12 @@ class CatSummarizer(RailStage):
 
         Parameters
         ----------
-        input_data : `dict` or `ModelHandle`
-            Either a dictionary of all input data or a `ModelHandle` providing access to the same
+        input_data
+            Either a dictionary of all input data or a `TableHandle` providing access to the same
 
         Returns
         -------
-        output: `qp.Ensemble`
+        DataHandle
             Ensemble with n(z), and any ancilary data
         """
         self.set_data("input", input_data)
@@ -91,12 +91,12 @@ class PZSummarizer(RailStage):
 
         Parameters
         ----------
-        input_data : `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        output: `qp.Ensemble`
+        qp.Ensemble
             Ensemble with n(z), and any ancilary data
         """
         self.set_data("input", input_data)
@@ -154,17 +154,22 @@ class SZPZSummarizer(RailStage):
     def open_model(self, **kwargs: Any) -> Any:
         """Load the mode and/or attach it to this Summarizer
 
+        Parameters
+        ----------
+        **kwargs
+            Should include 'model', see notes
+
         Notes
         -----
-        Keywords are potentially used to build the model.
-        By default we just use 'model'  which can be an `object`, `str` or `ModelHandle`
+        The keyword arguement 'model' should be either
 
-        I.e., either an object with a trained model, a path pointing to a file that
-        can be read to obtain the trained model, or a `ModelHandle` providing access to the trained model.
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
 
         Returns
         -------
-        self.model : `object`
+        Any
             The object encapsulating the trained model.
         """
         model = kwargs.get("model", None)
@@ -198,12 +203,15 @@ class SZPZSummarizer(RailStage):
 
         Parameters
         ----------
-        input_data : `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
+
+        spec_data
+            Spectroscopic data
 
         Returns
         -------
-        output: `qp.Ensemble`
+        qp.Ensemble
             Ensemble with n(z), and any ancilary data
         """
         self.set_data("input", input_data)

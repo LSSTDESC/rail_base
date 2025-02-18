@@ -68,7 +68,7 @@ class RailStageBuild:
 
         Parameters
         ----------
-        name:
+        name
             The name for this stage we are building
 
         Returns
@@ -117,12 +117,12 @@ class RailPipeline(MiniPipeline):
 
         Parameters
         ----------
-        class_name:
+        class_name
             Full name of the class, e.g., rail.core.stage.RailPipeline
 
         Returns
         -------
-        type
+        type[RailPipeline]
             Requested Pipeline sub-class
         """
         tokens = class_name.split(".")
@@ -146,25 +146,25 @@ class RailPipeline(MiniPipeline):
 
         Parameters
         ----------
-        class_name:
+        class_name
             Full name of the class, e.g., rail.core.stage.RailPipeline
 
-        output_yaml:
+        output_yaml
             Path to the output yaml file
 
-        input_dict:
+        input_dict
             Dict of all the inputs needed to run the pipeline
 
-        stages_config:
+        stages_config
             Stage configuration overrides
 
-        output_dir:
+        output_dir
             Directory to write pipeline outputs to
 
-        log_dir:
+        log_dir
             Directory to write pipeline log files to
 
-        **kwargs:
+        **kwargs
             Passed as arguements to the pipeline constructor
         """
         pipe_class = RailPipeline.get_pipeline_class(class_name)
@@ -287,13 +287,13 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
 
-        path :
+        path
             The path to the data, only needed if we might need to read the data
 
-        allow_missing :
+        allow_missing
             If False this will raise a key error if the tag is not in the DataStore
 
         Returns
@@ -318,13 +318,13 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data :
+        data
             If not None these data will be associated to the handle
 
-        path :
+        path
             If not None, this will be the path used to read the data
 
         Returns
@@ -360,9 +360,10 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
-        allow_missing :
+
+        allow_missing
             If False this will raise a key error if the tag is not in the DataStore
 
         Returns
@@ -390,16 +391,16 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data :
+        data
             The data being set,
 
-        path :
+        path
             Can be used to set the path for the data
 
-        do_read :
+        do_read
             If True, will read the data if it is not set
 
         Returns
@@ -436,10 +437,10 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
 
-        data :
+        data
             Data being added
 
         Returns
@@ -455,10 +456,10 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        tag :
+        tag
             The tag (from cls.inputs or cls.outputs) for this data
 
-        **kwargs :
+        **kwargs
             These will be passed to the Handle's iterator method
 
         Returns
@@ -512,11 +513,13 @@ class RailStage(PipelineStage):
 
         Parameters
         ----------
-        other : RailStage
+        other
              The stage whose output is being connected
-        inputTag : str
+
+        inputTag
              Which input tag of this stage to connect to.  None -> self.inputs[0]
-        outputTag : str
+
+        outputTag
              Which output tag of the other stage to connect to.  None -> other.outputs[0]
 
         Returns

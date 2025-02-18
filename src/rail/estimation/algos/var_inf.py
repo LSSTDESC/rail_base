@@ -32,18 +32,6 @@ class VarInfStackSummarizer(PZSummarizer):
     The summzarizer is appropriate for the likelihoods returned by
     template-based codes, for which the NaiveSummarizer are not appropriate.
 
-    Parameters
-    ----------
-    zmin: float
-      minimum z for redshift grid
-    zmax: float
-      maximum z for redshift grid
-    nzbins: int
-      number of bins for redshift grid
-    niter: int
-      number of iterations to perform in the variational inference
-    nsamples: int
-      number of samples used in dirichlet to determind error bar
     """
 
     name = "VarInfStackSummarizer"

@@ -15,7 +15,7 @@ class CatalogConfigBase:
     in a given catalog type
     """
 
-    sub_classes: dict[str, type[CatalogConfigBase]] = {}
+    _sub_classes: dict[str, type[CatalogConfigBase]] = {}
 
     tag: str | None = None
     bandlist: str = ""
@@ -32,7 +32,7 @@ class CatalogConfigBase:
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         assert cls.tag is not None
-        cls.sub_classes[cls.tag] = cls
+        cls._sub_classes[cls.tag] = cls
 
     @classmethod
     def active_tag(cls) -> str | None:
@@ -45,10 +45,15 @@ class CatalogConfigBase:
         return cls._active_class
 
     @classmethod
+    def subclasses(cls) -> dict[str, type[CatalogConfigBase]]:
+        """Return the dict of all the sub-classes"""
+        return cls._sub_classes
+
+    @classmethod
     def apply(cls, tag: str) -> None:
         """Activate a particular tag"""
         cls._active_tag = tag
-        cls._active_class = cls.sub_classes[tag]
+        cls._active_class = cls._sub_classes[tag]
         cls._active_class._apply()
 
     @classmethod
@@ -157,6 +162,8 @@ class RubinCatalogConfig(CatalogConfigBase):
 
 
 class RomanRubinCatalogConfig(CatalogConfigBase):
+    """Configuration for Rubin data from Roman / Rubin simulations"""
+
     tag = "roman_rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
@@ -169,6 +176,8 @@ class RomanRubinCatalogConfig(CatalogConfigBase):
 
 
 class ComCamCatalogConfig(CatalogConfigBase):
+    """Configuration for ComCam data"""
+
     tag = "com_cam"
     bandlist = "ugrizy"
     maglims = [26.4, 27.8, 27.1, 26.7, 25.8, 24.6]
@@ -181,6 +190,8 @@ class ComCamCatalogConfig(CatalogConfigBase):
 
 
 class RomanPlusRubinCatalogConfig(CatalogConfigBase):
+    """Configuration for Roman + Rubin bands in Roman / Rubin simulations"""
+
     tag = "roman_plus_rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]

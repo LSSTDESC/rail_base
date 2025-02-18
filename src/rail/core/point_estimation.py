@@ -2,6 +2,8 @@ import numpy as np
 import qp
 from numpy.typing import NDArray
 
+from ceci.config import StageConfig
+
 from rail.core.common_params import SHARED_PARAMS
 
 
@@ -10,6 +12,10 @@ class PointEstimationMixin:
         calculated_point_estimates=SHARED_PARAMS,
         recompute_point_estimates=SHARED_PARAMS,
     )
+
+    @property
+    def config(self) -> StageConfig:
+        raise NotImplementedError()
 
     def calculate_point_estimates(
         self, qp_dist: qp.Ensemble, grid: NDArray | list | None = None
@@ -20,9 +26,9 @@ class PointEstimationMixin:
 
         Parameters
         ----------
-        qp_dist:
+        qp_dist
             The qp Ensemble instance that contains posterior estimates.
-        grid:
+        grid
             The grid on which to evaluate the point estimate. Note that not all
             point estimates require a grid to be provided, by default None.
 
@@ -88,7 +94,7 @@ class PointEstimationMixin:
 
         Parameters
         ----------
-        qp_dist :
+        qp_dist
             The qp Ensemble instance that contains posterior estimates.
         grid :
             The grid on which to evaluate the `mode` point estimate, if a grid is
@@ -125,7 +131,7 @@ class PointEstimationMixin:
 
         Parameters
         ----------
-        qp_dist:
+        qp_dist
             The qp Ensemble instance that contains posterior estimates.
 
         Returns
@@ -141,7 +147,7 @@ class PointEstimationMixin:
 
         Parameters
         ----------
-        qp_dist:
+        qp_dist
             The qp Ensemble instance that contains posterior estimates.
 
         Returns

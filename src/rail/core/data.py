@@ -13,6 +13,8 @@ import tables_io
 from .model import Model
 
 T = TypeVar("T", bound="DataHandle")
+
+# These are place-holders for if and when we enforce typing
 DataLike: TypeAlias = Any
 GroupLike: TypeAlias = Any
 ModelLike: TypeAlias = Any
@@ -24,22 +26,12 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
     """Class to act as a handle for a bit of data.  Associating it with a file and
     providing tools to read & write it to that file
 
-    Parameters
-    ----------
-    tag : str
-        The tag under which this data handle can be found in the store
-    data : any or None
-        The associated data
-    path : str or None
-        The path to the associated file
-    creator : str or None
-        The name of the stage that created this data handle
     """
 
     suffix: str | None = ""
 
     # This is to keep track of all the sub-types
-    data_handle_type_dict: dict[str, type[DataHandle]] = {}
+    _data_handle_type_dict: dict[str, type[DataHandle]] = {}
 
     def __init__(
         self,
@@ -48,7 +40,22 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         path: str | None = None,
         creator: str | None = None,
     ) -> None:
-        """Constructor"""
+        """Constructor
+
+        Parameters
+        ----------
+        tag
+            The tag under which this data handle can be found in the store
+
+        data
+            The associated data
+
+        path
+            The path to the associated file
+
+        creator
+            The name of the stage that created this data handle
+        """
         self.tag = tag
         if data is not None:
             self._validate_data(data)
@@ -62,17 +69,22 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         """Register the subclass with the dict"""
-        cls.data_handle_type_dict[cls.__name__] = cls
+        cls._data_handle_type_dict[cls.__name__] = cls
+
+    @classmethod
+    def get_sub_classes(cls) -> dict[str, type[DataHandle]]:
+        """Get all the subclasses"""
+        return cls._data_handle_type_dict
 
     @classmethod
     def get_sub_class(cls, class_name: str) -> type[DataHandle]:
         """Get a particular subclass by name"""
-        return cls.data_handle_type_dict[class_name]
+        return cls._data_handle_type_dict[class_name]
 
     @classmethod
     def print_sub_classes(cls) -> None:
         """Print the list of all the subclasses"""
-        for key, val in cls.data_handle_type_dict.items():
+        for key, val in cls._data_handle_type_dict.items():
             print(f"{key}: {val}")
 
     def open(self, **kwargs: Any) -> FileLike:
@@ -80,17 +92,17 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        **kwargs:
+        **kwargs
             Passed to the call to open the file in question
 
         Returns
         -------
-        FileLike:
+        FileLike
             Newly opened file
 
         Notes
         -----
-        This will simply open the file and return a file-like object to the caller.
+        This will simply open the file and return a FileLike object to the caller.
         It will not read or cache the data
         """
         if self.path is None:
@@ -111,15 +123,15 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        force:
+        force
             If true, force re-reading the data
 
-        **kwargs:
+        **kwargs
             Passed to the call to read the data
 
         Returns
         -------
-        DataLike:
+        DataLike
             Data that were read
 
         Notes
@@ -167,10 +179,10 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        data_length:
+        data_length
             Number of rows of data that we will write, used to reserve space
 
-        **kwargs:
+        **kwargs
             Information about the columns we will write
         """
         if self.path is None:  # pragma: no cover
@@ -196,13 +208,13 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        start:
+        start
             Index of starting row for this chunk of data
 
-        end:
+        end
             Index of ending row for this chunk of data
 
-        **kwargs:
+        **kwargs
             Passed to call to write this chunk of data
         """
         if self.data is None:
@@ -234,7 +246,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        **kwargs:
+        **kwargs
             Passed to call to write this chunk of data
         """
         if self.fileObj is None:  # pragma: no cover
@@ -354,7 +366,7 @@ class TableHandle(DataHandle):
     suffix: str | None = None
 
     def set_data(self, data: TableLike, partial: bool = False) -> None:
-        """Set the data for a chunk, and set the partial flag to true"""
+        """Set the data for a chunk, and set the partial flag if this is not all the data"""
         self._validate_data(data)
         self.data = data
         self.partial = partial
@@ -469,7 +481,13 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
 
     @classmethod
     def _write_chunk(
-        cls, data: TableLike, fileObj: FileLike, groups: GroupLike, start: int, end: int, **kwargs: Any
+        cls,
+        data: TableLike,
+        fileObj: FileLike,
+        groups: GroupLike,
+        start: int,
+        end: int,
+        **kwargs: Any,
     ) -> None:
         tables_io.io.writeDictToHdf5ChunkSingle(fileObj, data, start, end, **kwargs)
 
@@ -504,7 +522,7 @@ class QPHandle(DataHandle):
 
         Notes
         -----
-        This will simply open the file and return a file-like object to the caller.
+        This will simply open the file and return a FileLike object to the caller.
         It will not read or cache the data
         """
         return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
@@ -539,7 +557,9 @@ class QPHandle(DataHandle):
         return data.writeHdf5Chunk(fileObj, start, end)
 
     @classmethod
-    def _finalize_write(cls, data: qp.Ensemble, fileObj: FileLike, **kwargs: Any) -> None:
+    def _finalize_write(
+        cls, data: qp.Ensemble, fileObj: FileLike, **kwargs: Any
+    ) -> None:
         return data.finalizeHdf5Write(fileObj)
 
     @classmethod
@@ -585,7 +605,7 @@ class QPDictHandle(DataHandle):
 
         Notes
         -----
-        This will simply open the file and return a file-like object to the caller.
+        This will simply open the file and return a FileLike object to the caller.
         It will not read or cache the data
         """
         return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
@@ -602,7 +622,7 @@ class QPDictHandle(DataHandle):
 
 
 class QPOrTableHandle(QPHandle, Hdf5Handle):
-    """DataHandle that should work with either qp.ensembles or tables"""
+    """DataHandle that will work with either qp.Ensembles or TableLike data"""
 
     suffix = "hdf5"
 
@@ -642,14 +662,14 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
         return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
-    def _read(cls, path: str, **kwargs: Any) -> qp.Ensemble|TableLike:
+    def _read(cls, path: str, **kwargs: Any) -> qp.Ensemble | TableLike:
         """Read and return the data from the associated file"""
         if qp.is_qp_file(path):
             return qp.read(path, **kwargs)
         return tables_io.read(path, **kwargs)
 
     @classmethod
-    def _write(cls, data: qp.Ensemble|TableLike, path: str, **kwargs: Any) -> None:
+    def _write(cls, data: qp.Ensemble | TableLike, path: str, **kwargs: Any) -> None:
         """Write the data to the associated file"""
         raise RuntimeError(
             "QPOrTableHandle should be used for input, not output"
@@ -657,7 +677,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 
     @classmethod
     def _initialize_write(
-        cls, data: qp.Ensemble|TableLike, path: str, data_length: int, **kwargs: Any
+        cls, data: qp.Ensemble | TableLike, path: str, data_length: int, **kwargs: Any
     ) -> tuple[GroupLike, FileLike]:
         raise RuntimeError(
             "QPOrTableHandle should be used for input, not output"
@@ -665,20 +685,28 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
 
     @classmethod
     def _write_chunk(
-        cls, data: qp.Ensemble|TableLike, fileObj: FileLike, groups: GroupLike, start: int, end: int, **kwargs: Any
+        cls,
+        data: qp.Ensemble | TableLike,
+        fileObj: FileLike,
+        groups: GroupLike,
+        start: int,
+        end: int,
+        **kwargs: Any,
     ) -> None:
         raise RuntimeError(
             "QPOrTableHandle should be used for input, not output"
         )  # pragma: no cover
 
     @classmethod
-    def _finalize_write(cls, data: qp.Ensemble|TableLike, fileObj: FileLike, **kwargs: Any) -> None:
+    def _finalize_write(
+        cls, data: qp.Ensemble | TableLike, fileObj: FileLike, **kwargs: Any
+    ) -> None:
         raise RuntimeError(
             "QPOrTableHandle should be used for input, not output"
         )  # pragma: no cover
 
     @classmethod
-    def _validate_data(cls, data: qp.Ensemble|TableLike) -> None:
+    def _validate_data(cls, data: qp.Ensemble | TableLike) -> None:
         pass
 
     def _size(self, path: str, **kwargs: Any) -> int:
@@ -686,7 +714,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
             return QPHandle._size(self, path, **kwargs)
         return Hdf5Handle._size(self, path, **kwargs)
 
-    def _data_size(self, data: qp.Ensemble|TableLike, **kwargs: Any) -> int:
+    def _data_size(self, data: qp.Ensemble | TableLike, **kwargs: Any) -> int:
         if self.is_qp():
             return self.data.npdf
         return Hdf5Handle._data_size(self, data, **kwargs)
@@ -728,8 +756,9 @@ class ModelDict(dict):
 
     1. Keys are paths
     2. There is a read(path, force=False) method that reads a model object and
-    inserts it into the dictionary
+        inserts it into the dictionary
     3. There is a single static instance of this class
+
     """
 
     def open(self, path: str, mode: str, **kwargs: Any) -> FileLike:
@@ -741,7 +770,7 @@ class ModelDict(dict):
         path: str,
         force: bool = False,
         reader: Callable | None = None,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> ModelLike:  # pylint: disable=unused-argument
         """Read a model into this dict"""
         if reader is None:
@@ -758,7 +787,7 @@ class ModelDict(dict):
         path: str,
         force: bool = False,
         writer: Callable | None = None,
-        **kwargs: Any,
+        **_kwargs: Any,
     ) -> None:  # pylint: disable=unused-argument
         """Write the model, this default implementation uses pickle"""
         if writer is None:
@@ -807,8 +836,10 @@ class DataStore(dict):
     """Class to provide a transient data store
 
     This class:
-    1) associates data products with keys
-    2) provides functions to read and write the various data produces to associated files
+
+    1. associates data products with keys
+    2. provides functions to read and write the various data produces to associated files
+
     """
 
     allow_overwrite = False
@@ -820,7 +851,7 @@ class DataStore(dict):
         ----
         All of the values must be data handles of this will raise a TypeError
         """
-        dict.__init__(self)
+        super(dict, self).__init__()
         for key, val in kwargs.items():
             self[key] = val
 

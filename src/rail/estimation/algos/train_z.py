@@ -91,7 +91,9 @@ class TrainZEstimator(CatEstimator):
         self.train_pdf = self.model.pdf
         self.zmode = self.model.zmode
 
-    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
+    def _process_chunk(
+        self, start: int, end: int, data: TableLike, first: bool
+    ) -> None:
         test_size = end - start
         assert self.zmode is not None
         assert self.train_pdf is not None

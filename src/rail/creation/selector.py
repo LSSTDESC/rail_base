@@ -5,7 +5,6 @@ Intended subclasses spectroscopic selection, probability selection on a grid for
 or pure photometric selection. 
 """
 
-
 from ceci.config import StageParameter as Param
 
 from rail.core.data import DataHandle, PqHandle, TableLike

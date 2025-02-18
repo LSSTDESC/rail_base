@@ -40,18 +40,23 @@ class UniformBinningClassifier(PZClassifier):
     )
     outputs = [("output", Hdf5Handle)]
 
-    def _process_chunk(self, start: int, end: int, data: qp.Ensemble, first: bool) -> None:
+    def _process_chunk(
+        self, start: int, end: int, data: qp.Ensemble, first: bool
+    ) -> None:
         """Process a chunk of data for uniform binning classification.
 
         Parameters
         ----------
-        start : int
-            The starting index of the chunk.
-        end : int
-            The ending index of the chunk.
-        data : qp.Ensemble
-            The data chunk to be processed.
-        first : bool
+        start
+            The starting index of the chunk
+
+        end
+            The ending index of the chunk
+
+        data
+            The data chunk to be processed
+
+        first
             True if this is the first chunk, False otherwise.
         """
         try:

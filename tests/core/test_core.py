@@ -6,12 +6,19 @@ import numpy as np
 import pytest
 
 from rail.core.common_params import copy_param, set_param_default
-from rail.core.data import (DataHandle, DataStore, FitsHandle, Hdf5Handle,
-                            ModelHandle, PqHandle, QPHandle, QPOrTableHandle)
+from rail.core.data import (
+    DataHandle,
+    DataStore,
+    FitsHandle,
+    Hdf5Handle,
+    ModelHandle,
+    PqHandle,
+    QPHandle,
+    QPOrTableHandle,
+)
 from rail.core.model import Model
 from rail.core.stage import RailStage
-from rail.utils.catalog_utils import (CatalogConfigBase,
-                                      RomanPlusRubinCatalogConfig)
+from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
 from rail.utils.path_utils import RAILDIR
 
 # def test_data_file():
@@ -164,7 +171,9 @@ def test_hdf5_handle() -> None:
     )
     handle_chunked = Hdf5Handle("chunked", handle.data, path=datapath_chunked)
     from tables_io.arrayUtils import (  # pylint: disable=import-outside-toplevel
-        getInitializationForODict, sliceDict)
+        getInitializationForODict,
+        sliceDict,
+    )
 
     num_rows = len(handle.data["photometry"]["id"])
     check_num_rows = len(handle()["photometry"]["id"])

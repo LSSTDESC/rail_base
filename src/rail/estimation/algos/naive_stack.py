@@ -156,15 +156,15 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
 
         Parameters
         ----------
-        input_data : `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
-        tomo_bins : `table-like`
+        tomo_bins
             Tomographic bins file
 
         Returns
         -------
-        output: `qp.Ensemble`
+        DataHandle
             Ensemble with n(z), and any ancilary data
         """
         self.set_data("input", input_data)

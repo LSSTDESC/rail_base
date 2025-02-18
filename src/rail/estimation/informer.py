@@ -57,7 +57,7 @@ class CatInformer(RailStage):
 
         Parameters
         ----------
-        input_data : `dict` or `TableHandle`
+        input_data
             dictionary of all input data, or a `TableHandle` providing access to it
 
         Returns
@@ -99,7 +99,7 @@ class PzInformer(RailStage):
         super().__init__(args, **kwargs)
         self.model = None
 
-    def inform(self, training_data: qp.Ensemble) -> None:
+    def inform(self, training_data: qp.Ensemble) -> DataHandle:
         """The main interface method for Informers
 
         This will attach the input_data to this `Informer`
@@ -115,12 +115,12 @@ class PzInformer(RailStage):
 
         Parameters
         ----------
-        input_data :  `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        ModelHandle
+        DataHandle
             Handle providing access to trained model
         """
 

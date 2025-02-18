@@ -7,11 +7,22 @@ from typing import Any
 
 import qp
 
+from ceci.config import StageConfig
+
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import DataHandle, ModelHandle, ModelLike, QPHandle, TableHandle, TableLike
+from rail.core.data import (
+    DataHandle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.point_estimation import PointEstimationMixin
 from rail.core.stage import RailStage
+
 # for backwards compatibility, to avoid break stuff that imports it from here
+from .informer import CatInformer
 
 
 class CatEstimator(RailStage, PointEstimationMixin):
@@ -46,15 +57,25 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self._output_handle: QPHandle | None = None
         self.model = None
 
+    @property
+    def config(self) -> StageConfig:
+        return RailStage.config(self)
+
     def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and attach it to this Estimator
 
         Parameters
         ----------
-        model : ``object``, ``str`` or ``ModelHandle``
-            Either an object with a trained model, a path pointing to a file
-            that can be read to obtain the trained model, or a `ModelHandle`
-            providing access to the trained model.
+        **kwargs
+            Should include 'model', see notes
+
+        Notes
+        -----
+        The keyword arguement 'model' should be either
+
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
 
         Returns
         -------
@@ -90,13 +111,12 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
         Parameters
         ----------
-        input_data : ``dict`` or ``ModelHandle``
-            Either a dictionary of all input data or a ``ModelHandle`` providing
-            access to the same
+        input_data
+            A dictionary of all input data
 
         Returns
         -------
-        output: ``QPHandle``
+        DataHandle
             Handle providing access to QP ensemble with output data
         """
         self.set_data("input", input_data)
@@ -130,7 +150,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
         assert self._output_handle is not None
         self._output_handle.finalize_write()
 
-    def _process_chunk(self, start: int, end: int, data: TableLike, first: bool) -> None:
+    def _process_chunk(
+        self, start: int, end: int, data: TableLike, first: bool
+    ) -> None:
         raise NotImplementedError(
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
