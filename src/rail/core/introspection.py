@@ -320,52 +320,6 @@ class RailEnv:
             apitocfile.write(api_pkg_toc)
 
     @classmethod
-    def do_core_pkg_api_rst(
-        cls, basedir: str, key: str, val: dict, options: str, module_options: str
-    ) -> None:
-        """Build the api rst file for a rail package
-
-        Parameters
-        ----------
-        basedir
-            Directory to write file to
-
-        key
-            Name of the rail package
-
-        val
-            Namespace tree for the package
-
-        options
-            Pre-formatted autodoc options for the package
-
-        module_options
-            Pre-formatted autodoc options for modules
-        """
-
-        api_pkg_toc = f"{key} package\n"
-        api_pkg_toc += "=" * len(api_pkg_toc)
-
-        api_pkg_toc += f"""
-
-.. automodule:: {key}
-{options}
-
-.. toctree::
-   :maxdepth: 4
-
-"""
-        for k2 in val:
-            api_pkg_toc += f"   {k2}\n"
-            cls.do_module_api_str(basedir, k2, module_options)
-
-        print(f"Writing {key}.rst")
-        with open(
-            os.path.join(basedir, "api", f"{key}.rst"), "w", encoding="utf-8"
-        ) as apitocfile:
-            apitocfile.write(api_pkg_toc)
-
-    @classmethod
     def do_pkg_api_rst(
         cls, basedir: str, key: str, val: dict, options: str, module_options: str
     ) -> None:
@@ -537,7 +491,7 @@ Algorithm Packages
                     continue
                 if nsname in ["rail.core", "rail.interfaces", "rail.stages"]:
                     base_packages += f"    {nsfile}\n"
-                    cls.do_core_pkg_api_rst(
+                    cls.do_pkg_api_rst(
                         basedir,
                         key,
                         val,
