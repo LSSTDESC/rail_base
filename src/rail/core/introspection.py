@@ -495,7 +495,7 @@ Algorithm Packages
 
             if nsname in cls._packages:
                 # Skip rail_projects
-                if nsname in cls:_skip_packages:  # pragma: no cover
+                if nsname in cls._skip_packages:  # pragma: no cover
                     continue
                 if nsname in cls._base_packages:
                     base_packages += f"    {nsfile}\n"
