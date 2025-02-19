@@ -28,6 +28,19 @@ class RailEnv:
     _stage_dict: dict[str, list[str]] = {}
     _base_stages: list[type] = []
 
+    _skip_packages: list[str] = [
+        "rail.projects",
+        "rail.plotting",
+        "rail.cli.rail_plot",
+        "rail.cli.rail_project",
+    ]
+
+    _base_packcages: list[str] = [
+        "rail.core",
+        "rail.stages",
+        "rail.interfaces",
+    ]
+    
     _base_stages_names = [
         "CatClassifier",
         "PZClassifier",
@@ -397,7 +410,7 @@ class RailEnv:
 
         sub_packages = ""
         for k2, v2 in val.items():
-            if k2 in ["rail.cli.rail_project", "rail.cli.rail_plot"]:
+            if k2 in cls._skip_packages:  # pragma: no cover
                 continue
 
             sub_packages += f"    {k2}\n"
@@ -482,14 +495,9 @@ Algorithm Packages
 
             if nsname in cls._packages:
                 # Skip rail_projects
-                if nsname in [
-                    "rail.projects",
-                    "rail.plotting",
-                    "rail.cli.rail_project",
-                    "rail.cli.rail_plot",
-                ]:
+                if nsname in cls:_skip_packages:  # pragma: no cover
                     continue
-                if nsname in ["rail.core", "rail.interfaces", "rail.stages"]:
+                if nsname in cls._base_packages:
                     base_packages += f"    {nsfile}\n"
                     cls.do_pkg_api_rst(
                         basedir,
