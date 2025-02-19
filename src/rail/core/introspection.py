@@ -35,7 +35,7 @@ class RailEnv:
         "rail.cli.rail_project",
     ]
 
-    _base_packcages: list[str] = [
+    _base_packages: list[str] = [
         "rail.core",
         "rail.stages",
         "rail.interfaces",
