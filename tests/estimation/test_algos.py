@@ -1,13 +1,13 @@
 import os
 
 import numpy as np
-import scipy.special
 import pytest
+import scipy.special
 
+from rail.core.data import PqHandle, TableHandle
 from rail.core.stage import RailStage
 from rail.estimation.algos import random_gauss, train_z
 from rail.utils.path_utils import RAILDIR
-from rail.core.data import PqHandle, TableHandle
 from rail.utils.testing_utils import one_algo
 
 sci_ver_str = scipy.__version__.split(".")
@@ -17,8 +17,8 @@ DS = RailStage.data_store
 DS.__class__.allow_overwrite = True
 
 
-def test_random_pz():
-    train_config_dict = {}
+def test_random_pz() -> None:
+    train_config_dict: dict = {}
     estim_config_dict = {
         "rand_width": 0.025,
         "rand_zmin": 0.0,
@@ -43,7 +43,7 @@ def test_random_pz():
         pass
 
 
-def test_train_pz():
+def test_train_pz() -> None:
     train_config_dict = dict(
         zmin=0.0,
         zmax=3.0,
@@ -70,7 +70,7 @@ def test_train_pz():
         pass
 
 
-def test_train_pz_with_wrong_columns_path():
+def test_train_pz_with_wrong_columns_path() -> None:
     DS.clear()
     DS.__class__.allow_overwrite = False
 
@@ -100,7 +100,7 @@ def test_train_pz_with_wrong_columns_path():
         train_pz._check_column_names(training_data1, train_pz.stage_columns)
 
 
-def test_train_pz_with_wrong_columns_nogroupname():
+def test_train_pz_with_wrong_columns_nogroupname() -> None:
     DS.clear()
     DS.__class__.allow_overwrite = False
 
@@ -127,7 +127,7 @@ def test_train_pz_with_wrong_columns_nogroupname():
         train_pz._check_column_names(training_data2, train_pz.stage_columns)
 
 
-def test_train_pz_with_wrong_columns_table():
+def test_train_pz_with_wrong_columns_table() -> None:
     DS.clear()
     DS.__class__.allow_overwrite = False
 
@@ -158,7 +158,7 @@ def test_train_pz_with_wrong_columns_table():
         train_pz._check_column_names(training_data3, train_pz.stage_columns)
 
 
-def test_train_pz_with_wrong_columns_table_wgroupname():
+def test_train_pz_with_wrong_columns_table_wgroupname() -> None:
     DS.clear()
     DS.__class__.allow_overwrite = False
 

@@ -9,10 +9,10 @@ class ToolFactory:
     rail tool stages
     """
 
-    _stage_dict = {}
+    _stage_dict: dict[str, RailStage] = {}
 
     @classmethod
-    def reset(cls):
+    def reset(cls) -> None:
         """Reset the dictionary of cached stage objects"""
         cls._stage_dict = {}
 
@@ -20,7 +20,7 @@ class ToolFactory:
     def build_stage_instance(
         cls,
         stage_name: str,
-        stage_class: type,
+        stage_class: type[RailStage],
         data_path: str = "none",
         **config_params: dict,
     ) -> RailStage:

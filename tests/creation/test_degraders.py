@@ -1,16 +1,17 @@
 import os
+from typing import Any
 
 import numpy as np
 import pandas as pd
 import pytest
 
-from rail.core.data import DATA_STORE, TableHandle
+from rail.core.data import DATA_STORE, DataHandle, TableHandle
 from rail.creation.degraders.addRandom import AddColumnOfRandom
 from rail.creation.degraders.quantityCut import QuantityCut
 
 
 @pytest.fixture
-def data():
+def data() -> DataHandle:
     """Some dummy data to use below."""
 
     DS = DATA_STORE()
@@ -29,7 +30,7 @@ def data():
 
 
 @pytest.fixture
-def data_forspec():
+def data_forspec() -> DataHandle:
     """Some dummy data to use below."""
 
     DS = DATA_STORE()
@@ -59,15 +60,15 @@ def data_forspec():
         ({"u": TypeError}, TypeError),
     ],
 )
-def test_QuantityCut_bad_params(cuts, error):
+def test_QuantityCut_bad_params(cuts: Any, error: type[Exception]) -> None:
     """Test bad parameters that should return Type and Value errors"""
     with pytest.raises(error):
         QuantityCut.make_stage(cuts=cuts)
 
 
 def test_QuantityCut_returns_correct_shape(
-    data,
-):  # pylint: disable=redefined-outer-name
+    data: Any,
+) -> None:  # pylint: disable=redefined-outer-name
     """Make sure QuantityCut is returning the correct shape"""
 
     cuts = {
@@ -102,7 +103,7 @@ def test_QuantityCut_returns_correct_shape(
     )
 
 
-def test_add_random(data):  # pylint: disable=redefined-outer-name
+def test_add_random(data: Any) -> None:  # pylint: disable=redefined-outer-name
     add_random = AddColumnOfRandom.make_stage()
 
     test_data = add_random(data, seed=1234).data

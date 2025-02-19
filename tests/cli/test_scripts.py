@@ -7,7 +7,7 @@ from rail.cli.rail import scripts
 from rail.cli.rail.options import GitMode, args_to_dict
 
 
-def test_args_to_dict():
+def test_args_to_dict() -> None:
     args = ["x=3", "y=2"]
     as_dict = args_to_dict(args)
     assert as_dict["x"] == "3"
@@ -19,7 +19,7 @@ def test_args_to_dict():
         args_to_dict(["x=3=3"])
 
 
-def test_render_nb():
+def test_render_nb() -> None:
     nb_dir = "./tests/cli/"
     nb_files = glob.glob(os.path.join(nb_dir, "*.ipynb"))
     scripts.render_nb("docs", False, True, nb_files, skip=[])
@@ -31,26 +31,26 @@ def test_render_nb():
     )
 
 
-def test_clone_source():
+def test_clone_source() -> None:
     scripts.clone_source("..", GitMode.ssh, True, "rail_packages.yml")
     scripts.clone_source("..", GitMode.https, True, "rail_packages.yml")
     scripts.clone_source("..", GitMode.cli, True, "rail_packages.yml")
 
 
-def test_update_source():
+def test_update_source() -> None:
     scripts.update_source("..", True, "rail_packages.yml")
 
 
-def test_install():
+def test_install() -> None:
     scripts.install("..", False, True, "rail_packages.yml")
     scripts.install("..", True, True, "rail_packages.yml")
 
 
-def test_info():
+def test_info() -> None:
     scripts.info(print_all=True)
 
 
-def test_build_pipeline():
+def test_build_pipeline() -> None:
     scripts.build_pipeline(
         "rail.pipelines.estimation.train_z_pipeline.TrainZPipeline",
         "trainz_pipe.yaml",

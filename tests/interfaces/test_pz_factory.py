@@ -7,7 +7,7 @@ from rail.interfaces import PZFactory
 from rail.utils.path_utils import find_rail_file
 
 
-def test_pz_factory():
+def test_pz_factory() -> None:
     stage = PZFactory.build_cat_estimator_stage(
         "train_z",
         "TrainZEstimator",

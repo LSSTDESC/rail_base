@@ -6,7 +6,11 @@ They are distinguished by their input data types, and the models they output can
 be used for their corresponding Estimator, Summarizer, or Classifier stages.
 """
 
-from rail.core.data import ModelHandle, QPHandle, TableHandle
+from typing import Any
+
+import qp
+
+from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -32,12 +36,12 @@ class CatInformer(RailStage):
     inputs = [("input", TableHandle)]
     outputs = [("model", ModelHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Informer that can inform models for redshift estimation"""
         super().__init__(args, **kwargs)
         self.model = None
 
-    def inform(self, training_data):
+    def inform(self, training_data: TableLike) -> DataHandle:
         """The main interface method for Informers
 
         This will attach the input_data to this `Informer`
@@ -53,12 +57,12 @@ class CatInformer(RailStage):
 
         Parameters
         ----------
-        input_data : `dict` or `TableHandle`
+        input_data
             dictionary of all input data, or a `TableHandle` providing access to it
 
         Returns
         -------
-        model : ModelHandle
+        ModelHandle
             Handle providing access to trained model
         """
 
@@ -90,12 +94,12 @@ class PzInformer(RailStage):
     inputs = [("input", QPHandle)]
     outputs = [("model", ModelHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Informer that can inform models for redshift estimation"""
         super().__init__(args, **kwargs)
         self.model = None
 
-    def inform(self, training_data):
+    def inform(self, training_data: qp.Ensemble) -> DataHandle:
         """The main interface method for Informers
 
         This will attach the input_data to this `Informer`
@@ -111,12 +115,12 @@ class PzInformer(RailStage):
 
         Parameters
         ----------
-        input_data :  `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        model : ModelHandle
+        DataHandle
             Handle providing access to trained model
         """
 

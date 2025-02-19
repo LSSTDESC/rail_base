@@ -9,12 +9,12 @@ from rail.evaluation.single_evaluator import SingleEvaluator
 
 
 class TrainZPipeline(RailPipeline):
-    default_input_dict = dict(
+    default_input_dict: dict[str, str] = dict(
         input_train="dummy.in",
         input_test="dummy.in",
     )
 
-    def __init__(self):
+    def __init__(self) -> None:
         RailPipeline.__init__(self)
 
         DS = RailStage.data_store

@@ -1,30 +1,40 @@
-"""Rail-specific data management"""
+"""Wrapper class for ML Models"""
+
+from __future__ import annotations
 
 import pickle
 from typing import Any
 
 
 class Model:
-    """Class to act as wrapper for ML models"""
+    """Class to act as wrapper for ML models
+
+    This will attach metadata to the ML model, and provide tools
+    for validation, versioning and tracking provenance.
+
+    """
 
     def __init__(
         self,
         data: Any,
         creation_class_name: str,
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
-    ):
+        provenance: dict | None = None,
+    ) -> None:
         """Constructor
 
         Parameters
         ----------
-        data : Any
+        data
             Model data
-        creation_class_name : str
-            Name of the creation class
-        version : int
+
+        creation_class_name
+            Name of class that created this model
+
+        version
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance
             Provenance infomration
         """
         self.data = data
@@ -39,9 +49,10 @@ class Model:
         """
         Parameters
         ----------
-        creation_class_name : str | None
-            Name of the creation class
-        version : int | None
+        creation_class_name
+            Name of class that created this model
+
+        version
             Version of the model
 
         Raises
@@ -67,26 +78,29 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
-    ):
+        provenance: dict | None = None,
+    ) -> Model:
         """Read a model from a file.
 
         Note that this will promote the data to a Model if it is not already
 
         Parameters
         ----------
-        path: str,
+        path
             File to read
-        creation_class_name : str
-            Name of the creation class
-        version : int
+
+        creation_class_name:
+            Name of class that created this model
+
+        version:
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance infomration
 
         Returns
         -------
-        model: Model
+        Model
             Newly read Model
         """
         with open(path, "rb") as fin:
@@ -107,26 +121,30 @@ class Model:
         outpath: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
-    ):
+        provenance: dict | None = None,
+    ) -> Model:
         """Read a model from a file and write it as a `Model` if it is not already
 
         Parameters
         ----------
-        inpath: str,
+        inpath
             File to read
-        outpath: str,
+
+        outpath:
             File to write
-        creation_class_name : str
-            Name of the creation class
-        version : int
+
+        creation_class_name:
+            Name of class that created this model
+
+        version:
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance information
 
         Returns
         -------
-        model: Model
+        Model
             Newly read & converted Model
         """
         the_model = cls.read(inpath, creation_class_name, version, provenance)
@@ -140,28 +158,32 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
-        provenance: dict[str, Any] | None = None,
-    ):
+        provenance: dict | None = None,
+    ) -> Model:
         """Write an object to a model file
 
         This will promote it to a Model if it isn't already
 
         Parameters
         ----------
-        obj: Any
+        obj
             Object to dump
-        path: str,
+
+        path:
             File to write
-        creation_class_name : str
-            Name of the creation class
-        version : int
+
+        creation_class_name:
+            Name of class that created this model
+
+        version:
             Version of the model
-        provenance: dict[str, Any] | None
+
+        provenance:
             Provenance information
 
         Returns
         -------
-        model: Model
+        Model
             Newly converted Model
         """
 
@@ -183,7 +205,7 @@ class Model:
 
         Parameters
         ----------
-        path: str,
+        path
             File to write
         """
         with open(path, "wb") as fout:

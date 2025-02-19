@@ -1,3 +1,5 @@
+from typing import Any
+
 import numpy as np
 from ceci.config import StageParameter as Param
 from qp.metrics.concrete_metric_classes import DistToPointMetric
@@ -50,7 +52,7 @@ class DistToPointEvaluator(Evaluator):
 
     metric_base_class = DistToPointMetric
 
-    def _process_chunk(self, data_tuple, first):
+    def _process_chunk(self, data_tuple: Any, first: bool) -> None:
         start = data_tuple[0]
         end = data_tuple[1]
         estimate_data = data_tuple[2]
@@ -60,7 +62,7 @@ class DistToPointEvaluator(Evaluator):
             estimate_data, reference_data, start, end, first
         )
 
-    def _process_all(self, data_tuple):
+    def _process_all(self, data_tuple: Any) -> None:
         estimate_data = data_tuple[0]
         if self.config.hdf5_groupname:
             reference_data = data_tuple[1][self.config.hdf5_groupname][

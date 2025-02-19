@@ -1,6 +1,7 @@
 import importlib
 import os
 import pkgutil
+from types import ModuleType
 
 import setuptools
 
@@ -8,263 +9,470 @@ import rail
 
 
 class RailEnv:
-    PACKAGES = {}
-    NAMESPACE_PATH_DICT = {}
-    NAMESPACE_MODULE_DICT = {}
-    MODULE_DICT = {}
-    MODULE_PATH_DICT = {}
-    TREE = {}
-    STAGE_DICT = {}
-    BASE_STAGES = []
+    """Singleton class that manages introspection into the RAIL installation
+
+    This will idenfity all of the installed RAIL packages, namespaces and
+    files, and navigate the connections between them.
+
+    This will also generate restructed text (`.rst`) files for the Sphinx
+    autodoc documentation
+    """
+
+    _packages: dict[str, pkgutil.ModuleInfo] = {}
+    _namespace_path_dict: dict[str, list[str]] = {}
+    _namespace_module_dict: dict[str, list[pkgutil.ModuleInfo]] = {}
+    _namespace_sub_dict: dict[str, list[str]] = {}
+    _module_dict: dict[str, list[str]] = {}
+    _module_path_dict: dict[str, str] = {}
+    _tree: dict[str, dict] = {}
+    _stage_dict: dict[str, list[str]] = {}
+    _base_stages: list[type] = []
+
+    _skip_packages: list[str] = [
+        "rail.projects",
+        "rail.plotting",
+        "rail.cli.rail_plot",
+        "rail.cli.rail_project",
+    ]
+
+    _base_packages: list[str] = [
+        "rail.core",
+        "rail.stages",
+        "rail.interfaces",
+    ]
+    
+    _base_stages_names = [
+        "CatClassifier",
+        "PZClassifier",
+        "CatEstimator",
+        "CatInformer",
+        "PzInformer",
+        "CatSummarizer",
+        "PZSummarizer",
+        "SZPZSummarizer",
+        "Degrader",
+        "Noisifier",
+        "Selector",
+        "Modeler",
+        "Creator",
+        "PosteriorCalculator",
+        "Evaluator",
+    ]
+
+    _module_api_options: str = """   :members:
+   :undoc-members:
+   :show-inheritance:
+"""
+
+    _module_no_index_api_options: str = """   :members:
+   :undoc-members:
+   :show-inheritance:
+   :noindex:
+"""
+
+    _rail_core_api_options: str = """   :members:
+   :undoc-members:
+   :show-inheritance:
+"""
+
+    _package_api_options: str = """   :members:
+   :undoc-members:
+   :show-inheritance:
+   :noindex:
+"""
 
     @classmethod
-    def list_rail_packages(cls):
-        """List all the packages that are available in the RAIL ecosystem"""
-        cls.PACKAGES = {
+    def list_rail_packages(cls) -> dict[str, pkgutil.ModuleInfo]:
+        """List all the packages that are available in the RAIL ecosystem
+
+        Returns
+        -------
+        dict[str,str]:
+            Dict mapping the package names to the path to the package
+
+        """
+        cls._packages = {
             pkg.name: pkg
             for pkg in pkgutil.iter_modules(rail.__path__, rail.__name__ + ".")
         }
-        return cls.PACKAGES
+        return cls._packages
 
     @classmethod
-    def print_rail_packages(cls):
+    def print_rail_packages(cls) -> None:
         """Print all the packages that are available in the RAIL ecosystem"""
-        if not cls.PACKAGES:  # pragma: no cover
+        if not cls._packages:  # pragma: no cover
             cls.list_rail_packages()
-        for pkg_name, pkg in cls.PACKAGES.items():
-            print(f"{pkg_name} @ {pkg[0].path}")
+        for pkg_name, pkg in cls._packages.items():
+            assert isinstance(pkg[0], importlib.machinery.FileFinder)
+            path = pkg[0].path
+            print(f"{pkg_name} @ {path}")
 
     @classmethod
-    def list_rail_namespaces(cls):
-        """List all the namespaces within rail"""
-        cls.NAMESPACE_PATH_DICT.clear()
+    def list_rail_namespaces(cls) -> dict[str, list[str]]:
+        """List all the namespaces within rail
+
+        Returns
+        -------
+        dict[str, list[str]]:
+            Dict mapping the namespaces to the paths contributing to
+            each namespace
+        """
+        cls._namespace_path_dict.clear()
 
         for path_ in rail.__path__:
-            namespaces = setuptools.find_namespace_packages(path_)
+            namespaces = setuptools.find_namespace_packages(path_, exclude=["_*"])
             for namespace_ in namespaces:
-                # exclude stuff that starts with 'example'
-                if namespace_.find("example") == 0:
+                # exclude stuff that starts with 'examples_data'
+                if namespace_.find("examples_data") == 0:
                     continue
-                if namespace_ in cls.NAMESPACE_PATH_DICT:  # pragma: no cover
-                    cls.NAMESPACE_PATH_DICT[namespace_].append(path_)
+                full_ns = f"rail.{namespace_}"
+                if full_ns in cls._namespace_path_dict:  # pragma: no cover
+                    cls._namespace_path_dict[full_ns].append(path_)
                 else:
-                    cls.NAMESPACE_PATH_DICT[namespace_] = [path_]
+                    cls._namespace_path_dict[full_ns] = [path_]
 
-        return cls.NAMESPACE_PATH_DICT
+                full_path = os.path.join(path_, namespace_.replace(".", "/"))
+                cls._namespace_sub_dict[full_ns] = [
+                    f"{full_ns}.{ns_}"
+                    for ns_ in setuptools.find_namespace_packages(
+                        full_path, exclude=["_*"]
+                    )
+                ]
+
+        return cls._namespace_path_dict
 
     @classmethod
-    def print_rail_namespaces(cls):
+    def print_rail_namespaces(cls) -> None:
         """Print all the namespaces that are available in the RAIL ecosystem"""
-        if not cls.NAMESPACE_PATH_DICT:
+        if not cls._namespace_path_dict:
             cls.list_rail_namespaces()
-        for key, val in cls.NAMESPACE_PATH_DICT.items():
+        for key, val in cls._namespace_path_dict.items():
             print(f"Namespace {key}")
+            for vv in val:
+                print(f"     {vv}")
+        for key, val in cls._namespace_sub_dict.items():
+            print(f"Namespace members {key}")
             for vv in val:
                 print(f"     {vv}")
 
     @classmethod
-    def list_rail_modules(cls):
-        """List all modules within rail"""
-        cls.MODULE_DICT.clear()
-        cls.MODULE_PATH_DICT.clear()
-        cls.NAMESPACE_MODULE_DICT.clear()
-        if not cls.NAMESPACE_PATH_DICT:  # pragma: no cover
-            cls.list_rail_namespaces()
-        for key, val in cls.NAMESPACE_PATH_DICT.items():
-            cls.NAMESPACE_MODULE_DICT[key] = []
-            for vv in val:
-                fullpath = os.path.join(vv, key.replace(".", "/"))
-                modules = list(
-                    pkgutil.iter_modules([fullpath], rail.__name__ + "." + key + ".")
-                )
-                for module_ in modules:
-                    if module_ in cls.MODULE_DICT:  # pragma: no cover
-                        cls.MODULE_DICT[module_.name].append(key)
-                    else:
-                        cls.MODULE_DICT[module_.name] = [key]
-                    cls.NAMESPACE_MODULE_DICT[key].append(module_)
-                    cls.MODULE_PATH_DICT[module_.name] = module_[0].path
+    def list_rail_modules(cls) -> dict[str, str]:
+        """List all modules within rail
 
-        return cls.MODULE_PATH_DICT
+        Returns
+        -------
+        dict[str, str]
+            Dict mapping module names to their import paths
+        """
+        cls._module_dict.clear()
+        cls._module_path_dict.clear()
+        cls._namespace_module_dict.clear()
+        if not cls._namespace_path_dict:  # pragma: no cover
+            cls.list_rail_namespaces()
+        for key, val in cls._namespace_path_dict.items():
+            cls._namespace_module_dict[key] = []
+            for vv in val:
+                fullpath = os.path.join(vv, key.replace(".", "/")[5:])
+                modules = list(pkgutil.iter_modules([fullpath], key + "."))
+
+                for module_ in modules:
+                    # Skip hidden files
+                    if module_.name.find("._") >= 0:
+                        continue
+                    if module_.name in cls._module_dict:  # pragma: no cover
+                        cls._module_dict[module_.name].append(key)
+                    else:
+                        cls._module_dict[module_.name] = [key]
+                    cls._namespace_module_dict[key].append(module_)
+                    assert isinstance(module_[0], importlib.machinery.FileFinder)
+                    cls._module_path_dict[module_.name] = module_[0].path
+
+        return cls._module_path_dict
 
     @classmethod
-    def print_rail_modules(cls):
+    def print_rail_modules(cls) -> None:
         """Print all the moduels that are available in the RAIL ecosystem"""
-        if not cls.MODULE_DICT:
+        if not cls._module_dict:
             cls.list_rail_modules()
 
-        for key, val in cls.MODULE_DICT.items():
+        for key, val in cls._module_dict.items():
             print(f"Module {key}")
             for vv in val:
                 print(f"     {vv}")
 
-        for key, val in cls.NAMESPACE_MODULE_DICT.items():
-            print(f"Namespace {key}")
-            for vv in val:
-                print(f"     {vv}")
-
     @classmethod
-    def build_rail_namespace_tree(cls):
-        """Build a tree of the namespaces and packages in rail"""
-        cls.TREE.clear()
-        if not cls.NAMESPACE_MODULE_DICT:  # pragma: no cover
+    def build_rail_namespace_tree(cls) -> dict[str, dict]:
+        """Build a tree of the namespaces and packages in rail
+
+        Returns
+        -------
+        dict[str, list[dict]]:
+           Tree of the namespaces and packages in rail
+        """
+        cls._tree.clear()
+        if not cls._namespace_module_dict:  # pragma: no cover
             cls.list_rail_modules()
 
-        if not cls.PACKAGES:  # pragma: no cover
+        if not cls._packages:  # pragma: no cover
             cls.list_rail_packages()
 
-        level_dict = {}
-        for key in cls.NAMESPACE_MODULE_DICT:
-            count = key.count(".")
+        # This is tricky, we are reconstrucing the source code tree
+        # from the various import names by parsing the names and
+        # identifying parents
+        level_dict: dict[int, set[str]] = {}
+        for key in cls._namespace_module_dict:
+            count = key.count(".") - 1
             if count in level_dict:
-                level_dict[count].append(key)
+                level_dict[count].add(key)
             else:
-                level_dict[count] = [key]
+                level_dict[count] = {key}
+
+        for key in cls._namespace_sub_dict:
+            count = key.count(".") - 1
+            level_dict[count].add(key)
+
+        def _recursive_get(a_dict: dict, keys: list[str]) -> dict:
+            ret_dict = a_dict
+            use_keys = []
+            for key_ in keys:
+                use_keys.append(key_)
+                full_key = ".".join(use_keys)
+                full_key = f"rail.{full_key}"
+                ret_dict = ret_dict[full_key]
+            return ret_dict
 
         depth = max(level_dict.keys())
+
         for current_depth in range(depth + 1):
             for key in level_dict[current_depth]:
-                _nsname = f"rail.{key}"
-                if current_depth == 0:
-                    _nsname = f"rail.{key}"
-                    cls.TREE[key] = cls.NAMESPACE_MODULE_DICT[key]
-                else:
-                    parent_key = ".".join(key.split(".")[0:current_depth])
-                    if parent_key in cls.TREE:
-                        cls.TREE[parent_key].append(
-                            {key: cls.NAMESPACE_MODULE_DICT[key]}
-                        )
+                subs = set()
 
-        return cls.TREE
+                for module_ in cls._namespace_module_dict.get(key, []):
+                    subs.add(module_.name)
+                for ns_ in cls._namespace_sub_dict.get(key, []):
+                    subs.add(ns_)
+
+                a_dict: dict[str, dict] = {sub_: {} for sub_ in subs}
+
+                parent_keys = key.split(".")[1 : current_depth + 1]
+                parent_dict = _recursive_get(cls._tree, parent_keys)
+
+                if key in parent_dict:
+                    for kk, vv in a_dict.items():
+                        parent_dict[key][kk] = vv
+                else:
+                    parent_dict[key] = a_dict
+
+        return cls._tree
 
     @classmethod
-    def pretty_print_tree(cls, the_dict=None, indent=""):
+    def pretty_print_tree(cls, the_dict: dict | None = None, indent: str = "") -> None:
         """Utility function to help print the namespace tree
 
         This can be called recurisvely to walk the tree structure, which has nested dicts
 
         Parameters
         ----------
-        the_dict:  dict | None
-            Current dictionary to print, if None it will print cls.TREE
+        the_dict:
+            Current dictionary to print, if None it will print cls._tree
 
-        indent:  str
+        indent:
             Indentation string prepended to each line
         """
         if the_dict is None:  # pragma: no cover
-            the_dict = cls.TREE
+            the_dict = cls._tree
         for key, val in the_dict.items():
-            nsname = f"rail.{key}"
-            if nsname in cls.PACKAGES:
+            nsname = f"{key}"
+            if nsname in cls._packages:
                 pkg_type = "Package"
+            elif nsname in cls._module_dict:
+                pkg_type = "Module"
             else:
                 pkg_type = "Namespace"
 
             print(f"{indent}{pkg_type} {nsname}")
-            for vv in val:
-                if isinstance(vv, dict):
-                    cls.pretty_print_tree(vv, indent=indent + "    ")
-                else:
-                    print(f"    {indent}{vv.name}")
+
+            cls.pretty_print_tree(val, indent=indent + "    ")
 
     @classmethod
-    def print_rail_namespace_tree(cls):
+    def print_rail_namespace_tree(cls) -> None:
         """Print the namespace tree in a nice way"""
-        if not cls.TREE:
+        if not cls._tree:
             cls.build_rail_namespace_tree()
-        cls.pretty_print_tree(cls.TREE)
+        cls.pretty_print_tree(cls._tree)
 
     @classmethod
-    def do_pkg_api_rst(cls, basedir, key, val):
-        """Build the api rst file for a rail package"""
+    def do_module_api_str(cls, basedir: str, key: str, options: str) -> None:
+        """Build the api rst file for a rail module
 
-        api_pkg_toc = f"rail.{key} package\n"
-        api_pkg_toc += "=" * len(api_pkg_toc)
+        Parameters
+        ----------
+        basedir
+            Directory to write file to
+
+        key
+            Name of the rail module
+
+        options
+            Pre-formatted autodoc options
+        """
+
+        api_pkg_toc = f"{key} module\n"
+        api_pkg_toc += "-" * len(api_pkg_toc)
 
         api_pkg_toc += f"""
-.. automodule:: rail.{key}
-    :members:
-    :undoc-members:
-    :show-inheritance:
 
-Submodules
-----------
-
-.. toctree::
-    :maxdepth: 4
+.. automodule:: {key}
+{options}
 
 """
-
-        for vv in val:
-            if isinstance(vv, dict):  # pragma: no cover
-                for _k3, v3 in vv.items():
-                    for v4 in v3:
-                        api_pkg_toc += f"    {v4.name}.rst\n"
-            else:
-                api_pkg_toc += f"    {vv.name}.rst\n"
-
+        print(f"Writing {key}.rst")
         with open(
-            os.path.join(basedir, "api", f"rail.{key}.rst"), "w", encoding="utf-8"
+            os.path.join(basedir, "api", f"{key}.rst"), "w", encoding="utf-8"
         ) as apitocfile:
             apitocfile.write(api_pkg_toc)
 
     @classmethod
-    def do_namespace_api_rst(cls, basedir, key, val):
-        """Build the api rst file for a rail namespace"""
+    def do_pkg_api_rst(
+        cls, basedir: str, key: str, val: dict, options: str, module_options: str
+    ) -> None:
+        """Build the api rst file for a rail package
+
+        Parameters
+        ----------
+        basedir
+            Directory to write file to
+
+        key
+            Name of the rail package
+
+        val
+            Namespace tree for the package
+
+        options
+            Pre-formatted autodoc options for the package
+
+        module_options
+            Pre-formatted autodoc options for modules
+        """
+
+        api_pkg_toc = f"{key} package\n"
+        api_pkg_toc += "=" * len(api_pkg_toc)
+
+        api_pkg_toc += f"""
+
+.. automodule:: {key}
+{options}
+
+.. toctree::
+   :maxdepth: 4
+
+"""
+
+        for k2 in val:
+            api_pkg_toc += f"   {k2}\n"
+            cls.do_module_api_str(basedir, k2, module_options)
+
+        print(f"Writing {key}.rst")
+        with open(
+            os.path.join(basedir, "api", f"{key}.rst"), "w", encoding="utf-8"
+        ) as apitocfile:
+            apitocfile.write(api_pkg_toc)
+
+    @classmethod
+    def do_namespace_api_rst(cls, basedir: str, key: str, val: dict) -> None:
+        """Build the api rst file for a rail namespace
+
+        Parameters
+        ----------
+        basedir
+            Directory to write file to
+
+        key
+            Name of the rail namespace
+
+        val:
+            Namespace tree for the namespace
+        """
 
         api_pkg_toc = f"{key} namespace\n"
         api_pkg_toc += "=" * len(api_pkg_toc)
 
         api_pkg_toc += """
 
-.. py:module:: rail.estimation
-
-Subpackages
------------
+.. py:module:: {key}
 
 .. toctree::
     :maxdepth: 4
 
 {sub_packages}
-
-Submodules
-----------
-
-.. toctree::
-    :maxdepth: 4
-
-{sub_modules}
 """
 
         sub_packages = ""
-        sub_modules = ""
-        for vv in val:
-            if isinstance(vv, dict):
-                for k3, v3 in vv.items():
-                    cls.do_namespace_api_rst(basedir, k3, v3)
-                    sub_packages += f"    rail.{k3}\n"
-            else:
-                sub_modules += f"    {vv.name}\n"
+        for k2, v2 in val.items():
+            if k2 in cls._skip_packages:  # pragma: no cover
+                continue
+
+            sub_packages += f"    {k2}\n"
+            if k2 in cls._module_dict:
+                cls.do_module_api_str(basedir, k2, cls._module_api_options)
+                continue
+            cls.do_namespace_api_rst(basedir, k2, v2)
+
         api_pkg_toc = api_pkg_toc.format(
-            sub_packages=sub_packages, sub_modules=sub_modules
+            key=key,
+            sub_packages=sub_packages,
         )
 
+        print(f"Writing {key}.rst")
         with open(
-            os.path.join(basedir, "api", f"rail.{key}.rst"), "w", encoding="utf-8"
+            os.path.join(basedir, "api", f"{key}.rst"), "w", encoding="utf-8"
         ) as apitocfile:
             apitocfile.write(api_pkg_toc)
 
     @classmethod
-    def do_api_rst(cls, basedir="."):
-        if not cls.TREE:  # pragma: no cover
+    def do_api_rst(cls, basedir: str = ".") -> None:
+        """Build the top-level API documentation
+
+        Parameters
+        ----------
+        basedir
+            Directory to write file to
+        """
+
+        if not cls._tree:  # pragma: no cover
             cls.build_rail_namespace_tree()
 
-        apitoc = """API Documentation
-=================
+        apitoc = """
 
-Information on specific functions, classes, and methods.
+*************
+Base Packages
+*************
 
 .. toctree::
+    :maxdepth: 4
+
+{base_packages}
+
+
+**********
+Namespaces
+**********
+
+.. toctree::
+    :maxdepth: 4
+
+{namespaces}
+
+
+******************
+Algorithm Packages
+******************
+
+.. toctree::
+    :maxdepth: 4
+
+{algorithm_packages}
 
 """
         try:
@@ -277,74 +485,189 @@ Information on specific functions, classes, and methods.
         except Exception:  # pragma: no cover
             pass
 
-        for key, val in cls.TREE.items():
-            nsname = f"rail.{key}"
-            nsfile = os.path.join("api", f"{nsname}.rst")
-            apitoc += f"    {nsfile}\n"
+        base_packages = ""
+        namespaces = ""
+        algorithm_packages = ""
 
-            if nsname in cls.PACKAGES:
-                cls.do_pkg_api_rst(basedir, key, val)
+        for key, val in cls._tree.items():
+            nsname = f"{key}"
+            nsfile = os.path.join("api", f"{nsname}")
+
+            if nsname in cls._packages:
+                # Skip rail_projects
+                if nsname in cls._skip_packages:  # pragma: no cover
+                    continue
+                if nsname in cls._base_packages:
+                    base_packages += f"    {nsfile}\n"
+                    cls.do_pkg_api_rst(
+                        basedir,
+                        key,
+                        val,
+                        cls._rail_core_api_options,
+                        cls._module_no_index_api_options,
+                    )
+                else:
+                    algorithm_packages += f"    {nsfile}\n"
+                    cls.do_pkg_api_rst(
+                        basedir,
+                        key,
+                        val,
+                        cls._package_api_options,
+                        cls._module_api_options,
+                    )
             else:
                 cls.do_namespace_api_rst(basedir, key, val)
+                namespaces += f"    {nsfile}\n"
 
+        apitoc = apitoc.format(
+            base_packages=base_packages,
+            namespaces=namespaces,
+            algorithm_packages=algorithm_packages,
+        )
         with open(
             os.path.join(basedir, "api.rst"), "w", encoding="utf-8"
         ) as apitocfile:
             apitocfile.write(apitoc)
 
     @classmethod
-    def import_all_packages(cls):
+    def import_all_packages(cls) -> None:
         """Import all the packages that are available in the RAIL ecosystem"""
         pkgs = cls.list_rail_packages()
         for pkg in pkgs:
             try:
                 _imported_module = importlib.import_module(pkg)
                 print(f"Imported {pkg}")
-            except Exception as msg:
+            except Exception as msg:  # pragma: no cover
                 print(f"Failed to import {pkg} because: {str(msg)}")
 
     @classmethod
-    def attach_stages(cls, to_module):
+    def attach_stages(cls, to_module: ModuleType) -> None:
         """Attach all the available stages to this module
 
-        This allow you to do 'from rail.stages import *'
+        Parameters
+        ----------
+        to_module
+            python module we are attaching stages to
+
+        Notes
+        -----
+        This allow you to do:
+
+        .. highlight:: python
+        .. code-block:: python
+
+            from rail.stages import *
+
         """
         from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
 
-        cls.STAGE_DICT.clear()
-        cls.STAGE_DICT["none"] = []
-        cls.BASE_STAGES.clear()
+        cls._stage_dict.clear()
+        cls._stage_dict["RailStage"] = []
+        cls._base_stages.clear()
 
         n_base_classes = 0
         n_stages = 0
 
         for stage_name, stage_info in RailStage.incomplete_pipeline_stages.items():
             if stage_info[0] in [RailStage]:
-                continue
-            cls.BASE_STAGES.append(stage_info[0])
-            cls.STAGE_DICT[stage_info[0].__name__] = []
-            n_base_classes += 1
+                cls._stage_dict[stage_info[0].__name__] = []
+            if stage_info[0].__name__ in cls._base_stages_names:
+                cls._base_stages.append(stage_info[0])
+                cls._stage_dict[stage_info[0].__name__] = []
+                n_base_classes += 1
 
         for stage_name, stage_info in RailStage.pipeline_stages.items():
+            if stage_info[0].__name__ in cls._base_stages_names:
+                cls._base_stages.append(stage_info[0])
+                cls._stage_dict[stage_info[0].__name__] = []
+                n_base_classes += 1
+                continue
+
             setattr(to_module, stage_name, stage_info[0])
             n_stages += 1
 
         for stage_name, stage_info in RailStage.pipeline_stages.items():
-            baseclass = "none"
-            for possible_base in cls.BASE_STAGES:
+            baseclass = "RailStage"
+            for possible_base in cls._base_stages:
                 if issubclass(stage_info[0], possible_base):
                     baseclass = possible_base.__name__
                     break
-            cls.STAGE_DICT[baseclass].append(stage_name)
+            cls._stage_dict[baseclass].append(stage_name)
 
         print(
             f"Attached {n_base_classes} base classes and {n_stages} fully formed stages to rail.stages"
         )
 
     @classmethod
-    def print_rail_stage_dict(cls):
+    def print_rail_stage_dict(cls) -> None:
         """Print an dict of all the RailSages organized by their base class"""
-        for key, val in cls.STAGE_DICT.items():
+        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+
+        for key, val in cls._stage_dict.items():
             print(f"BaseClass {key}")
             for vv in val:
-                print(f"  {vv}")
+                stage_class = RailStage.pipeline_stages[vv][0]
+                print(f"  {vv} {stage_class.__module__}.{stage_class.__name__}")
+
+    @classmethod
+    def do_stage_type_api_rst(cls, basedir: str = ".") -> None:
+        """Genarate the rst files for the stage tpye documentation"""
+        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+
+        os.makedirs(os.path.join(basedir, "api"), exist_ok=True)
+
+        for key, val in cls._stage_dict.items():
+            if key in RailStage.incomplete_pipeline_stages:
+                base_class = RailStage.incomplete_pipeline_stages[key][0]
+            else:
+                base_class = RailStage.pipeline_stages[key][0]
+
+            api_stage_type = f"{key} Stage Type\n"
+            api_stage_type += "=" * len(api_stage_type)
+            api_stage_type += "\n"
+
+            api_stage_type += (
+                f".. autoclass:: {base_class.__module__}.{base_class.__name__}\n"
+            )
+            api_stage_type += "    :noindex:\n\n"
+
+            subheader = f"{key} Sub-Classes\n"
+            api_stage_type += subheader
+            api_stage_type += "=" * len(subheader)
+            api_stage_type += "\n"
+
+            for vv in val:
+                stage_class = RailStage.pipeline_stages[vv][0]
+
+                api_stage_type += (
+                    f".. autoclass:: {stage_class.__module__}.{stage_class.__name__}\n"
+                )
+                api_stage_type += "   :noindex:\n\n"
+
+            print(f"Writing {key}_stage_type.rst")
+            with open(
+                os.path.join(basedir, "api", f"{key}_stage_type.rst"),
+                "w",
+                encoding="utf-8",
+            ) as api_stage_type_file:
+                api_stage_type_file.write(api_stage_type)
+
+        header = "Types of RAIL stages\n"
+        api_stage_type_index = ""
+        api_stage_type_index += "*" * len(header)
+        api_stage_type_index += "\n"
+        api_stage_type_index += header
+        api_stage_type_index += "*" * len(header)
+        api_stage_type_index += "\n\n"
+
+        api_stage_type_index += ".. toctree::\n"
+        api_stage_type_index += "    :maxdepth: 4\n\n"
+
+        for key in cls._stage_dict:
+            api_stage_type_index += f"    {key}_stage_type\n"
+
+        print("Writing stage_types.rst")
+        with open(
+            os.path.join(basedir, "api", "stage_types.rst"), "w", encoding="utf-8"
+        ) as api_stage_type_index_file:
+            api_stage_type_index_file.write(api_stage_type_index)

@@ -5,7 +5,7 @@ from rail.utils.testing_utils import check_stage_params
 rail.stages.import_and_attach_all()
 
 
-def test_all_stage_params():
+def test_all_stage_params() -> None:
     fail_list = []
 
     for _key, val in RailStage.pipeline_stages.items():

@@ -4,6 +4,9 @@ tomographic bins with uniform binning.
 """
 
 import numpy as np
+
+import qp
+
 from ceci.config import StageParameter as Param
 
 from rail.core.data import Hdf5Handle
@@ -37,35 +40,40 @@ class UniformBinningClassifier(PZClassifier):
     )
     outputs = [("output", Hdf5Handle)]
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(
+        self, start: int, end: int, data: qp.Ensemble, first: bool
+    ) -> None:
         """Process a chunk of data for uniform binning classification.
 
         Parameters
         ----------
-        start : int
-            The starting index of the chunk.
-        end : int
-            The ending index of the chunk.
-        data : qp.Ensemble
-            The data chunk to be processed.
-        first : bool
+        start
+            The starting index of the chunk
+
+        end
+            The ending index of the chunk
+
+        data
+            The data chunk to be processed
+
+        first
             True if this is the first chunk, False otherwise.
         """
         try:
             zb = data.ancil[self.config.point_estimate]
-        except KeyError as msg:  # pragma: no cover
+        except KeyError as missing_key:
             raise KeyError(
                 f"{self.config.point_estimate} is not contained "
                 "in the data ancil, you will need to compute it explicitly."
-            ) from msg
+            ) from missing_key
 
         try:
             _npdf = data.npdf
-        except KeyError as msg:
+        except KeyError as missing_key:
             raise KeyError(
                 f"npdf is not a supported attribute of {type(data)}. "
                 "Are you sure you don't mean to be using a qp ensemble?"
-            ) from msg
+            ) from missing_key
 
         # binning options
         if len(self.config.zbin_edges) >= 2:

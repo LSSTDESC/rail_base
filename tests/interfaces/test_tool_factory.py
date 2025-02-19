@@ -6,7 +6,7 @@ from rail.interfaces import ToolFactory
 from rail.utils.path_utils import find_rail_file
 
 
-def test_tool_factory():
+def test_tool_factory() -> None:
     stage = ToolFactory.build_tool_stage(
         "pq_to_hdf",
         "TableConverter",

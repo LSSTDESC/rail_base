@@ -1,4 +1,7 @@
 import os
+from typing import Any
+
+import qp
 
 from rail.core.data import QPHandle, TableHandle
 from rail.core.stage import RailStage
@@ -10,7 +13,9 @@ tomobins = os.path.join(RAILDIR, "rail/examples_data/testdata/output_tomo.hdf5")
 DS = RailStage.data_store
 
 
-def one_algo(key, summarizer_class, summary_kwargs):
+def one_algo(
+    key: str, summarizer_class: type[RailStage], summary_kwargs: dict[str, Any]
+) -> qp.Ensemble:
     """
     A basic test of running an summaizer subclass
     Run summarize
@@ -29,7 +34,9 @@ def one_algo(key, summarizer_class, summary_kwargs):
     return summary_ens
 
 
-def one_mask_algo(key, summarizer_class, summary_kwargs):
+def one_mask_algo(
+    key: str, summarizer_class: type[RailStage], summary_kwargs: dict[str, Any]
+) -> list[qp.Ensemble]:
     """
     A basic test of running an summaizer subclass
     Run summarize
@@ -62,12 +69,12 @@ def one_mask_algo(key, summarizer_class, summary_kwargs):
     return [summary_ens, summary_2_ens]
 
 
-def test_naive_stack():
+def test_naive_stack() -> None:
     """Basic end to end test for the Naive stack informer to estimator stages"""
     naive_stack_informer_stage = naive_stack.NaiveStackInformer.make_stage()
     naive_stack_informer_stage.inform("")
 
-    summary_config_dict = {}
+    summary_config_dict: dict = {}
     summarizer_class = naive_stack.NaiveStackSummarizer
     _ = one_algo("NaiveStack", summarizer_class, summary_config_dict)
     os.remove(
@@ -77,14 +84,14 @@ def test_naive_stack():
     )
 
 
-def test_point_estimate_hist():
+def test_point_estimate_hist() -> None:
     """Basic end to end test for the point estimate histogram informer to estimator
     stages
     """
     point_est_informer_stage = point_est_hist.PointEstHistInformer.make_stage()
     point_est_informer_stage.inform("")
 
-    summary_config_dict = {}
+    summary_config_dict: dict = {}
     summarizer_class = point_est_hist.PointEstHistSummarizer
     _ = one_algo("PointEstimateHist", summarizer_class, summary_config_dict)
     os.remove(
@@ -94,12 +101,12 @@ def test_point_estimate_hist():
     )
 
 
-def test_var_inference_stack():
+def test_var_inference_stack() -> None:
     """Basic end to end test for the var inference informer to estimator stages"""
     var_inf_informer_stage = var_inf.VarInfStackInformer.make_stage()
     var_inf_informer_stage.inform("")
 
-    summary_config_dict = {}
+    summary_config_dict: dict = {}
     summarizer_class = var_inf.VarInfStackSummarizer
     _ = one_algo("VariationalInference", summarizer_class, summary_config_dict)
     os.remove(
@@ -109,7 +116,7 @@ def test_var_inference_stack():
     )
 
 
-def test_naive_stack_masked():
+def test_naive_stack_masked() -> None:
     """Basic end to end test for the Naive stack informer to estimator stages"""
     summary_config_dict = dict(
         chunk_size=5,
@@ -119,7 +126,7 @@ def test_naive_stack_masked():
     _ = one_algo("NaiveStack", summarizer_class, summary_config_dict)
 
 
-def test_point_estimate_hist_masked():
+def test_point_estimate_hist_masked() -> None:
     """Basic end to end test for the point estimate histogram informer to estimator
     stages
     """

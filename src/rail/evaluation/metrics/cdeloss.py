@@ -1,4 +1,5 @@
 import numpy as np
+import qp
 
 from rail.evaluation.stats_groups import stat_and_pval
 
@@ -8,7 +9,9 @@ from .base import MetricEvaluator
 class CDELoss(MetricEvaluator):
     """Conditional density loss"""
 
-    def __init__(self, qp_ens, zgrid, ztrue):
+    def __init__(
+        self, qp_ens: qp.Ensemble, zgrid: np.ndarray, ztrue: np.ndarray
+    ) -> None:
         """Class constructor"""
         super().__init__(qp_ens)
 
@@ -17,7 +20,7 @@ class CDELoss(MetricEvaluator):
         self._ztrue = ztrue
         self._npdf = qp_ens.npdf
 
-    def evaluate(self):
+    def evaluate(self) -> stat_and_pval:
         """Evaluate the estimated conditional density loss described in
         Izbicki & Lee 2017 (arXiv:1704.08095).
 

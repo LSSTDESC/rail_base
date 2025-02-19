@@ -3,9 +3,20 @@ Abstract base classes defining classifiers.
 """
 
 import gc
+from typing import Any
+
+import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import Hdf5Handle, ModelHandle, QPHandle, TableHandle
+from rail.core.data import (
+    DataHandle,
+    Hdf5Handle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.stage import RailStage
 
 
@@ -28,28 +39,34 @@ class CatClassifier(RailStage):  # pragma: no cover
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", TableHandle)]
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Classifier"""
         super().__init__(args, **kwargs)
-        self._output_handle = None
-        self.model = None
+        self._output_handle: TableHandle | None = None
+        self.model: ModelLike | None = None
         if not isinstance(args, dict):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs):
+    def open_model(self, **kwargs: Any) -> ModelLike:
         """Load the model and/or attach it to this Classifier
 
         Parameters
         ----------
-        model : `object`, `str` or `ModelHandle`
-            Either an object with a trained model,
-            a path pointing to a file that can be read to obtain the trained model,
-            or a `ModelHandle` providing access to the trained model.
+        **kwargs
+            Should include 'model', see notes
+
+        Notes
+        -----
+        The keyword arguement 'model' should be either
+
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
 
         Returns
         -------
-        self.model : `object`
+        ModelLike
             The object encapsulating the trained model.
         """
         model = kwargs.get("model", None)
@@ -66,7 +83,7 @@ class CatClassifier(RailStage):  # pragma: no cover
         self.model = self.set_data("model", model)
         return self.model
 
-    def classify(self, input_data):
+    def classify(self, input_data: TableLike) -> DataHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -83,12 +100,12 @@ class CatClassifier(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        input_data : `dict`
+        input_data
             A dictionary of all input data
 
         Returns
         -------
-        output: `dict`
+        DataHandle
             Class assignment for each galaxy.
         """
         self.set_data("input", input_data)
@@ -111,20 +128,12 @@ class PZClassifier(RailStage):
     inputs = [("input", QPHandle)]
     outputs = [("output", Hdf5Handle)]
 
-    def __init__(self, args, **kwargs):
-        """Initialize the PZClassifier.
-
-        Parameters
-        ----------
-        args : dict
-            Configuration arguments for the classifier.
-        comm : MPI.Comm, optional
-            MPI communicator for parallel processing.
-        """
+    def __init__(self, args: Any, **kwargs: Any) -> None:
+        """Initialize the PZClassifier."""
         super().__init__(args, **kwargs)
-        self._output_handle = None
+        self._output_handle: DataHandle | None = None
 
-    def classify(self, input_data):
+    def classify(self, input_data: qp.Ensemble) -> DataHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -147,12 +156,12 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        input_data : `qp.Ensemble`
+        input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        output: `dict`
+        DataHandle
             Class assignment for each galaxy, typically in the form of a
             dictionary with IDs and class labels.
         """
@@ -161,11 +170,14 @@ class PZClassifier(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def _finalize_run(self):
+    def _finalize_run(self) -> None:
         """Finalize the classification process after processing all chunks."""
+        assert self._output_handle is not None
         self._output_handle.finalize_write()
 
-    def _process_chunk(self, start, end, data, first):
+    def _process_chunk(
+        self, start: int, end: int, data: qp.Ensemble, first: bool
+    ) -> None:
         """Process a chunk of data.
 
         This method should be implemented in subclasses to perform the actual
@@ -173,42 +185,52 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        start : int
+        start
             The starting index of the chunk.
-        end : int
+
+        end
             The ending index of the chunk.
-        data : qp.Ensemble
+
+        data
             The data chunk to be processed.
-        first : bool
+
+        first
             True if this is the first chunk, False otherwise.
         """
         raise NotImplementedError(
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
 
-    def _do_chunk_output(self, class_id, start, end, first):
+    def _do_chunk_output(
+        self, class_id: TableLike, start: int, end: int, first: bool
+    ) -> None:
         """Handle the output of a processed chunk.
 
         Parameters
         ----------
-        class_id : dict
+        class_id
             The classification results for the chunk.
-        start : int
+
+        start
             The starting index of the chunk.
-        end : int
+
+        end
             The ending index of the chunk.
-        first : bool
+
+        first
             True if this is the first chunk, False otherwise.
         """
         if first:
             self._output_handle = self.add_handle("output", data=class_id)
+            assert self._output_handle is not None
             self._output_handle.initialize_write(
                 self._input_length, communicator=self.comm
             )
+        assert self._output_handle is not None
         self._output_handle.set_data(class_id, partial=True)
         self._output_handle.write_chunk(start, end)
 
-    def run(self):
+    def run(self) -> None:
         """Processes the input data in chunks and performs classification.
 
         This method iterates over chunks of the input data, calling the

@@ -6,7 +6,7 @@ Intended subclasses are noisifier that adds LSST noise / other telescope noise
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import PqHandle
+from rail.core.data import DataHandle, PqHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -30,13 +30,13 @@ class Noisifier(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
-    def _initNoiseModel(self):  # pragma: no cover
+    def _initNoiseModel(self) -> None:  # pragma: no cover
         raise NotImplementedError("Noisifier._initNoiseModel()")
 
-    def _addNoise(self):  # pragma: no cover
+    def _addNoise(self) -> None:  # pragma: no cover
         raise NotImplementedError("Noisifier._addNoise()")
 
-    def __call__(self, sample, seed: int = None):
+    def __call__(self, sample: TableLike, seed: int | None = None) -> DataHandle:
         """The main interface method for ``Noisifier``.
 
         Adds noise to the input catalog
@@ -59,9 +59,9 @@ class Noisifier(RailStage):
 
         Parameters
         ----------
-        sample : table-like
+        sample :
             The sample to be degraded
-        seed : int, default=None
+        seed :
             An integer to set the numpy random seed
 
         Returns
@@ -77,6 +77,6 @@ class Noisifier(RailStage):
         self.finalize()
         return self.get_handle("output")
 
-    def run(self):
+    def run(self) -> None:
         self._initNoiseModel()
         self._addNoise()

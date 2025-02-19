@@ -26,7 +26,8 @@ from rail.utils.path_utils import RAILDIR
 #        df = DataFile('dummy', 'x')
 
 
-def do_data_handle(datapath, handle_class):
+
+def do_data_handle(datapath: str, handle_class: type[DataHandle]) -> DataHandle:
     _DS = RailStage.data_store
 
     th = handle_class("data", path=datapath)
@@ -34,6 +35,9 @@ def do_data_handle(datapath, handle_class):
     with pytest.raises(ValueError) as _errinfo:
         th.write()
 
+
+    assert handle_class.__name__ in DataHandle.get_sub_classes()
+        
     assert not th.has_data
     try:
         _check_size = th.size()
@@ -71,7 +75,7 @@ def do_data_handle(datapath, handle_class):
     return th
 
 
-def test_pq_handle():
+def test_pq_handle() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.pq"
     )
@@ -83,7 +87,7 @@ def test_pq_handle():
     assert handle.fileObj is None
 
 
-def test_qp_handle():
+def test_qp_handle() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5"
     )
@@ -98,7 +102,7 @@ def test_qp_handle():
         _bad_dh = QPHandle(tag="bad_tag", data="this is not an Ensemble")
 
 
-def test_qp_or_table_handle_qp():
+def test_qp_or_table_handle_qp() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.hdf5"
     )
@@ -126,7 +130,7 @@ def test_qp_or_table_handle_qp():
         assert xx2[1] - xx2[0] <= 100
 
 
-def test_qp_or_table_handle_table():
+def test_qp_or_table_handle_table() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
     )
@@ -154,7 +158,7 @@ def test_qp_or_table_handle_table():
         assert xx2[1] - xx2[0] <= 100
 
 
-def test_hdf5_handle():
+def test_hdf5_handle() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816.hdf5"
     )
@@ -203,7 +207,7 @@ def test_hdf5_handle():
     os.remove(datapath_chunked)
 
 
-def test_fits_handle():
+def test_fits_handle() -> None:
     datapath = os.path.join(
         RAILDIR, "rail", "examples_data", "testdata", "output_BPZ_lite.fits"
     )
@@ -215,7 +219,7 @@ def test_fits_handle():
     assert handle.fileObj is None
 
 
-def test_model_handle():
+def test_model_handle() -> None:
     DS = RailStage.data_store
     DS.clear()
     model_path = os.path.join(
@@ -264,7 +268,7 @@ def test_model_handle():
     os.remove(model_path_wrap)
 
 
-def test_data_store():
+def test_data_store() -> None:
     DS = RailStage.data_store
     DS.clear()
     DS.__class__.allow_overwrite = False
@@ -330,7 +334,7 @@ def test_data_store():
     os.remove(datapath_pq_copy)
 
 
-def test_common_params():
+def test_common_params() -> None:
     par = copy_param("zmin")
     assert par.default == 0.0
     assert par.value == 0.0
@@ -343,7 +347,7 @@ def test_common_params():
     assert par.dtype == float
 
 
-def test_catalog_utils():
+def test_catalog_utils() -> None:
     CatalogConfigBase.apply("rubin")
     CatalogConfigBase.band_name_dict()["u"] = "LSST_obs_u"
     assert CatalogConfigBase.active_tag() == "rubin"
@@ -356,3 +360,6 @@ def test_catalog_utils():
 
     CatalogConfigBase.apply("dc2")
     set_param_default("redshift_col", "redshift")
+
+    
+    assert 'rubin' in CatalogConfigBase.subclasses()

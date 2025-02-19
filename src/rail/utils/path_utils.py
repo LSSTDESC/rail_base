@@ -8,7 +8,7 @@ import rail.core
 RAILDIR = os.path.abspath(os.path.join(os.path.dirname(rail.core.__file__), "..", ".."))
 
 
-def find_rail_file(relpath):
+def find_rail_file(relpath: str) -> str:
     """Find a file somewhere in rail by searching the namespace path
 
     This lets us avoid issues that the paths can be different depending

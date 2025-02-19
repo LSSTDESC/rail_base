@@ -9,7 +9,7 @@ from rail.tools.table_tools import ColumnMapper, TableConverter
 from rail.utils.path_utils import RAILDIR
 
 
-def test_pipeline():
+def test_pipeline() -> None:
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
     DS.clear()
@@ -66,7 +66,7 @@ def test_pipeline():
             pass
 
 
-def test_golden_v2():
+def test_golden_v2() -> None:
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
     DS.clear()
@@ -118,7 +118,7 @@ def test_golden_v2():
             pass
 
 
-def test_load_pipeline():
+def test_load_pipeline() -> None:
     train_z_class = RailPipeline.load_pipeline_class(
         "rail.pipelines.estimation.train_z_pipeline.TrainZPipeline"
     )

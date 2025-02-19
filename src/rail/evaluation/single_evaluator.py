@@ -4,6 +4,8 @@
 The key feature is that the evaluate method.
 """
 
+from typing import Any, Generator, Iterable
+
 import numpy as np
 from ceci.config import StageParameter as Param
 from qp.metrics import MetricInputType, MetricOutputType
@@ -31,15 +33,15 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
     metric_base_class = BaseMetric
 
-    def __init__(self, args, **kwargs):
+    def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Evaluator"""
         super().__init__(args, **kwargs)
         self._input_data_type = QPOrTableHandle.PdfOrValue.unknown
         self._truth_data_type = QPOrTableHandle.PdfOrValue.unknown
-        self._out_table = {}
-        self._summary_table = {}
+        self._out_table: dict = {}
+        self._summary_table: dict = {}
 
-    def run(self):  # pylint: disable=too-many-branches
+    def run(self) -> None:  # pylint: disable=too-many-branches
         """Run method
 
         Evaluate all the metrics and put them into a table
@@ -58,7 +60,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
         Evaluator.run(self)
 
-    def _process_chunk(self, data_tuple, first):
+    def _process_chunk(self, data_tuple: Any, first: bool) -> None:
         start = data_tuple[0]
         end = data_tuple[1]
         input_data = data_tuple[2]
@@ -148,7 +150,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
         self._output_table_chunk_data(start, end, self._out_table, first)
 
-    def _process_all(self, data_tuple):
+    def _process_all(self, data_tuple: Any) -> None:
         input_data = data_tuple[0]
         truth_data = data_tuple[1]
 
@@ -232,8 +234,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         )
 
     def _process_chunk_single_ensemble(
-        self, this_metric, key, input_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
                 print(
@@ -272,8 +274,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             self._out_table[key] = this_metric.evaluate(input_data)
 
     def _process_chunk_dist_to_dist(
-        self, this_metric, key, input_data, truth_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
                 print(
@@ -311,7 +313,9 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_chunk_dist_to_point(self, this_metric, key, input_data, truth_data):
+    def _process_chunk_dist_to_point(
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
@@ -351,8 +355,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_chunk_point_to_dist(
-        self, this_metric, key, input_data, truth_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
@@ -388,7 +392,9 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_chunk_point_to_point(self, this_metric, key, input_data, truth_data):
+    def _process_chunk_point_to_point(
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
                 print(
@@ -427,8 +433,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_all_single_ensemble(
-        self, this_metric, key, input_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array([this_metric.evaluate(input_data)])
 
@@ -440,8 +446,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             self._out_table[key] = this_metric.evaluate(input_data)
 
     def _process_all_dist_to_dist(
-        self, this_metric, key, input_data, truth_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]
@@ -454,7 +460,9 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_all_dist_to_point(self, this_metric, key, input_data, truth_data):
+    def _process_all_dist_to_point(
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]
@@ -470,8 +478,8 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
     def _process_all_point_to_dist(
-        self, this_metric, key, input_data, truth_data
-    ):  # pragma: no cover
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]
@@ -484,7 +492,9 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _process_all_point_to_point(self, this_metric, key, input_data, truth_data):
+    def _process_all_point_to_point(
+        self, this_metric: BaseMetric, key: str, input_data: Any, truth_data: Any
+    ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             self._summary_table[key] = np.array(
                 [this_metric.evaluate(input_data, truth_data)]
@@ -499,7 +509,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
         else:
             self._out_table[key] = this_metric.evaluate(input_data, truth_data)
 
-    def _setup_iterator(self, itrs=None):
+    def _setup_iterator(self, itrs: list[Iterable] | None = None) -> Generator:
         if itrs is None:
             tags = ["input", "truth"]
             itrs = [

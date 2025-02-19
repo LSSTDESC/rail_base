@@ -23,7 +23,7 @@ inputdata = os.path.join(RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.h
         {"zbin_edges": [0.0, 0.3], "id_name": "CATAID"},
     ],
 )
-def test_UniformBinningClassifier(input_param):
+def test_UniformBinningClassifier(input_param: dict) -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
@@ -37,7 +37,7 @@ def test_UniformBinningClassifier(input_param):
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
-def test_UniformBinningClassifier_binsize():
+def test_UniformBinningClassifier_binsize() -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
@@ -76,7 +76,7 @@ def test_UniformBinningClassifier_binsize():
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
-def test_UniformBinningClassifier_ancil():
+def test_UniformBinningClassifier_ancil() -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
@@ -98,7 +98,7 @@ def test_UniformBinningClassifier_ancil():
         {"zmin": 0.0, "zmax": 0.3, "nbins": 1, "id_name": "CATAID"},
     ],
 )
-def test_EqualCountClassifier(input_param):
+def test_EqualCountClassifier(input_param: dict) -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
@@ -112,7 +112,7 @@ def test_EqualCountClassifier(input_param):
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
-def test_EqualCountClassifier_nobj():
+def test_EqualCountClassifier_nobj() -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
@@ -146,7 +146,7 @@ def test_EqualCountClassifier_nobj():
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
-def test_EqualCountClassifier_ancil():
+def test_EqualCountClassifier_ancil() -> None:
     DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 

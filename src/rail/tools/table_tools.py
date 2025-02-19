@@ -3,15 +3,13 @@
 import tables_io
 from ceci.config import StageParameter as Param
 
-from rail.core.data import Hdf5Handle, PqHandle
+from rail.core.data import DataHandle, Hdf5Handle, PqHandle, TableLike
 from rail.core.stage import RailStage
 
 
 class ColumnMapper(RailStage):
     """Utility stage that remaps the names of columns.
 
-    Notes
-    -----
     1. This operates on pandas dataframs in parquet files.
 
     2. In short, this does:
@@ -28,19 +26,19 @@ class ColumnMapper(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
-    def run(self):
+    def run(self) -> None:
         data = self.get_data("input", allow_missing=True)
         out_data = data.rename(columns=self.config.columns, inplace=self.config.inplace)
         if self.config.inplace:  # pragma: no cover
             out_data = data
         self.add_data("output", out_data)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         printMsg = "Stage that applies remaps the following column names in a pandas DataFrame:\n"
         printMsg += "f{str(self.config.columns)}"
         return printMsg
 
-    def __call__(self, data):
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a table with the columns names changed
 
         Parameters
@@ -62,8 +60,6 @@ class ColumnMapper(RailStage):
 class RowSelector(RailStage):
     """Utility Stage that sub-selects rows from a table by index
 
-    Notes
-    -----
     1. This operates on pandas dataframs in parquet files.
 
     2. In short, this does:
@@ -80,17 +76,17 @@ class RowSelector(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
-    def run(self):
+    def run(self) -> None:
         data = self.get_data("input", allow_missing=True)
         out_data = data.iloc[self.config.start : self.config.stop]
         self.add_data("output", out_data)
 
-    def __repr__(self):  # pragma: no cover
+    def __repr__(self) -> str:  # pragma: no cover
         printMsg = "Stage that applies remaps the following column names in a pandas DataFrame:\n"
         printMsg += "f{str(self.config.columns)}"
         return printMsg
 
-    def __call__(self, data):
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a table with the columns names changed
 
         Parameters
@@ -124,13 +120,13 @@ class TableConverter(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", Hdf5Handle)]
 
-    def run(self):
+    def run(self) -> None:
         data = self.get_data("input", allow_missing=True)
         out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[self.config.output_format]
         out_data = tables_io.convert(data, out_fmt)
         self.add_data("output", out_data)
 
-    def __call__(self, data):
+    def __call__(self, data: TableLike) -> DataHandle:
         """Return a converted table
 
         Parameters
