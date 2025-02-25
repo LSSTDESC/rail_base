@@ -19,6 +19,7 @@ class Model:
         data: Any,
         creation_class_name: str,
         version: int = 0,
+        catalog_tag: str | None = None,
         provenance: dict | None = None,
     ) -> None:
         """Constructor
@@ -34,12 +35,16 @@ class Model:
         version
             Version of the model
 
+        catalog_tag
+            Associated CatalogConfigBase that defined training dataset
+
         provenance
             Provenance infomration
         """
         self.data = data
         self.creation_class_name = creation_class_name
         self.version = version
+        self.catalog_tag = catalog_tag
         if provenance is not None:
             self.provenance = provenance.copy()
         else:
@@ -78,6 +83,7 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
+        catalog_tag: str | None = None,
         provenance: dict | None = None,
     ) -> Model:
         """Read a model from a file.
@@ -94,6 +100,9 @@ class Model:
 
         version:
             Version of the model
+
+        catalog_tag
+            Associated CatalogConfigBase that defined training dataset
 
         provenance:
             Provenance infomration
@@ -112,7 +121,7 @@ class Model:
         if provenance is None:
             provenance = {}
 
-        return cls(read_data, creation_class_name, version, provenance)
+        return cls(read_data, creation_class_name, version, catalog_tag, provenance)
 
     @classmethod
     def wrap(
@@ -121,6 +130,7 @@ class Model:
         outpath: str,
         creation_class_name: str = "dummy",
         version: int = 0,
+        catalog_tag: str | None = None,
         provenance: dict | None = None,
     ) -> Model:
         """Read a model from a file and write it as a `Model` if it is not already
@@ -139,6 +149,9 @@ class Model:
         version:
             Version of the model
 
+        catalog_tag
+            Associated CatalogConfigBase that defined training dataset
+
         provenance:
             Provenance information
 
@@ -147,7 +160,9 @@ class Model:
         Model
             Newly read & converted Model
         """
-        the_model = cls.read(inpath, creation_class_name, version, provenance)
+        the_model = cls.read(
+            inpath, creation_class_name, version, catalog_tag, provenance
+        )
         the_model.write(outpath)
         return the_model
 
@@ -158,6 +173,7 @@ class Model:
         path: str,
         creation_class_name: str = "dummy",
         version: int = 0,
+        catalog_tag: str | None = None,
         provenance: dict | None = None,
     ) -> Model:
         """Write an object to a model file
@@ -178,6 +194,9 @@ class Model:
         version:
             Version of the model
 
+        catalog_tag
+            Associated CatalogConfigBase that defined training dataset
+
         provenance:
             Provenance information
 
@@ -192,7 +211,7 @@ class Model:
         else:
             if provenance is None:
                 provenance = {}
-            write_obj = cls(obj, creation_class_name, version, provenance)
+            write_obj = cls(obj, creation_class_name, version, catalog_tag, provenance)
 
         write_obj.write(path)
         return write_obj

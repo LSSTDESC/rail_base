@@ -15,6 +15,7 @@ class CatalogConfigBase:
     in a given catalog type
     """
 
+    _sub_classes_by_class: dict[str, type[CatalogConfigBase]] = {}
     _sub_classes: dict[str, type[CatalogConfigBase]] = {}
 
     tag: str | None = None
@@ -32,6 +33,7 @@ class CatalogConfigBase:
 
     def __init_subclass__(cls, **kwargs: Any) -> None:
         assert cls.tag is not None
+        cls._sub_classes_by_class[cls.__name__] = cls
         cls._sub_classes[cls.tag] = cls
 
     @classmethod
@@ -45,9 +47,29 @@ class CatalogConfigBase:
         return cls._active_class
 
     @classmethod
+    def subclasses_by_class(cls) -> dict[str, type[CatalogConfigBase]]:
+        """Return the dict of all the sub-classes keyed by class name"""
+        return cls._sub_classes_by_class
+
+    @classmethod
     def subclasses(cls) -> dict[str, type[CatalogConfigBase]]:
-        """Return the dict of all the sub-classes"""
+        """Return the dict of all the sub-classes keyed by tag"""
         return cls._sub_classes
+
+    @classmethod
+    def get_class(cls, class_name: str, module_name: str) -> type[CatalogConfigBase]:
+        """Return a class my name, loading it if needed"""
+        if class_name not in cls._sub_classes_by_class:
+            __import__(module_name)
+        return cls._sub_classes_by_class[class_name]
+
+    @classmethod
+    def apply_class(cls, class_name: str) -> None:
+        """Activate a particular class"""
+        the_class = cls._sub_classes_by_class[class_name]
+        cls._active_tag = the_class.tag
+        cls._active_class = the_class
+        cls._active_class._apply()
 
     @classmethod
     def apply(cls, tag: str) -> None:
