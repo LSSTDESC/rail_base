@@ -511,7 +511,7 @@ Algorithm Packages
                         cls._rail_core_api_options,
                         cls._module_no_index_api_options,
                     )
-                else:
+                else:  # pragma: no cover
                     algorithm_packages += f"   {nsfile}\n"
                     cls.do_pkg_api_rst(
                         basedir,

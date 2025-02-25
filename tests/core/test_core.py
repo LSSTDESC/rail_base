@@ -361,5 +361,7 @@ def test_catalog_utils() -> None:
     CatalogConfigBase.apply("dc2")
     set_param_default("redshift_col", "redshift")
 
+    a_class = CatalogConfigBase.get_class('RomanPlusRubinCatalogConfig', 'rail.utils.catalog_utils')
+    CatalogConfigBase.apply_class(a_class)
     
     assert 'rubin' in CatalogConfigBase.subclasses()
