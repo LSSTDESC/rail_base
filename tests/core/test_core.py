@@ -365,3 +365,5 @@ def test_catalog_utils() -> None:
     CatalogConfigBase.apply_class(a_class.__name__)
     
     assert 'rubin' in CatalogConfigBase.subclasses()
+
+    assert 'RomanPlusRubinCatalogConfig' in CatalogConfigBase.subclasses_by_class()
