@@ -366,6 +366,7 @@ class RailEnv:
 
 .. toctree::
    :maxdepth: 4
+   :caption: {key}
 
 """
 
@@ -403,7 +404,8 @@ class RailEnv:
 .. py:module:: {key}
 
 .. toctree::
-    :maxdepth: 4
+   :maxdepth: 4
+   :caption: {key}
 
 {sub_packages}
 """
@@ -413,7 +415,7 @@ class RailEnv:
             if k2 in cls._skip_packages:  # pragma: no cover
                 continue
 
-            sub_packages += f"    {k2}\n"
+            sub_packages += f"   {k2}\n"
             if k2 in cls._module_dict:
                 cls.do_module_api_str(basedir, k2, cls._module_api_options)
                 continue
@@ -450,7 +452,8 @@ Base Packages
 *************
 
 .. toctree::
-    :maxdepth: 4
+   :maxdepth: 4
+   :caption: Base Packages
 
 {base_packages}
 
@@ -460,7 +463,8 @@ Namespaces
 **********
 
 .. toctree::
-    :maxdepth: 4
+   :maxdepth: 4
+   :caption: Namespaces
 
 {namespaces}
 
@@ -470,7 +474,8 @@ Algorithm Packages
 ******************
 
 .. toctree::
-    :maxdepth: 4
+   :maxdepth: 4
+   :caption: Algorithm Packages
 
 {algorithm_packages}
 
@@ -507,7 +512,7 @@ Algorithm Packages
                         cls._module_no_index_api_options,
                     )
                 else:
-                    algorithm_packages += f"    {nsfile}\n"
+                    algorithm_packages += f"   {nsfile}\n"
                     cls.do_pkg_api_rst(
                         basedir,
                         key,
@@ -517,7 +522,7 @@ Algorithm Packages
                     )
             else:
                 cls.do_namespace_api_rst(basedir, key, val)
-                namespaces += f"    {nsfile}\n"
+                namespaces += f"   {nsfile}\n"
 
         apitoc = apitoc.format(
             base_packages=base_packages,
@@ -530,15 +535,17 @@ Algorithm Packages
             apitocfile.write(apitoc)
 
     @classmethod
-    def import_all_packages(cls) -> None:
+    def import_all_packages(cls, silent: bool = False) -> None:
         """Import all the packages that are available in the RAIL ecosystem"""
         pkgs = cls.list_rail_packages()
         for pkg in pkgs:
             try:
                 _imported_module = importlib.import_module(pkg)
-                print(f"Imported {pkg}")
+                if not silent:
+                    print(f"Imported {pkg}")
             except Exception as msg:  # pragma: no cover
-                print(f"Failed to import {pkg} because: {str(msg)}")
+                if not silent:
+                    print(f"Failed to import {pkg} because: {str(msg)}")
 
     @classmethod
     def attach_stages(cls, to_module: ModuleType) -> None:
@@ -623,7 +630,7 @@ Algorithm Packages
                 base_class = RailStage.pipeline_stages[key][0]
 
             api_stage_type = f"{key} Stage Type\n"
-            api_stage_type += "=" * len(api_stage_type)
+            api_stage_type += "*" * len(api_stage_type)
             api_stage_type += "\n"
 
             api_stage_type += (
