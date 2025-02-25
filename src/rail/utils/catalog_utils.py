@@ -59,7 +59,7 @@ class CatalogConfigBase:
     @classmethod
     def get_class(cls, class_name: str, module_name: str) -> type[CatalogConfigBase]:
         """Return a class my name, loading it if needed"""
-        if class_name not in cls._sub_classes_by_class:
+        if class_name not in cls._sub_classes_by_class:  # pragma: no cover
             __import__(module_name)
         return cls._sub_classes_by_class[class_name]
 
