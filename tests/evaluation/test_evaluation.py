@@ -11,6 +11,7 @@ from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.evaluator import OldEvaluator
 from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
 from rail.evaluation.single_evaluator import SingleEvaluator
+from rail.evaluation.metrics.tomography import KDEBinOverlap
 
 # values for metrics
 OUTRATE = 0.0
@@ -223,3 +224,22 @@ def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     for stage in [single_stage, single_stage_single]:
         os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
+
+        
+def test_kde_overlap_evaluator(get_evaluation_files: tuple[str, str]) -> None:
+    pdfs_file, ztrue_file = get_evaluation_files
+    assert pdfs_file
+
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    
+    ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
+    ztrue_data = DS.read_file('ztrue_data', TableHandle, ztrue_file)
+    
+    from rail.estimation.algos.equal_count import EqualCountClassifier
+    binner = EqualCountClassifier.make_stage()
+    binindex = binner.classify(ensemble)
+    
+    kde_overlap = KDEBinOverlap.make_stage(hdf5_groupname = 'photometry', redshift_col = 'redshift')
+    
+    output = kde_overlap.evaluate(binindex, ztrue_data)
