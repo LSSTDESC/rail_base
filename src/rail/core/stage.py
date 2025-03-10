@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import os
 from typing import Any, Iterable, TypeVar
+from math import ceil
 
 from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
@@ -478,6 +479,14 @@ class RailStage(PipelineStage):
 
         if handle.path and handle.path != "None":  # pylint: disable=no-else-return
             self._input_length = handle.size(groupname=groupname)
+
+            total_chunks_needed = ceil(self._input_length / chunk_size)
+            # If the number of process is larger than we need, we reduce chunk_size
+            # so that all of the processes have some data to work with.
+            if total_chunks_needed < self.size:  # pragma: no cover
+                self.config.chunk_size = int(ceil(self._input_length / self.size))
+                chunk_size = self.config.chunk_size
+                print("Warning: You are reserving more processes than needed, reducing chunk size to", chunk_size, "to use all of the processes")
 
             kwcopy = dict(
                 groupname=groupname,
