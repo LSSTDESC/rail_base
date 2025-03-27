@@ -1,4 +1,4 @@
-""" Parameters that are shared between stages """
+""" Parameters that are shared between stages or depend on input catalog """
 
 from ceci.config import StageParameter as Param
 from ceci.config import StageConfig
