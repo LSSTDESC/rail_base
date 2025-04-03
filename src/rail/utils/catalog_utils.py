@@ -217,29 +217,29 @@ class Roman3BandCatalogConfig(CatalogConfigBase):
 
     tag = "roman_3band"
     bandlist = ['Y106', 'J129', 'H158']
-    maglims = [24.0, 27.66, 27.25]
-    a_env = [4.81, 3.64, 2.70]
+    maglims = [26.4, 26.4, 26.4]
+    a_env = [1.14025753, 0.83118224, 0.59966235]
     band_template = "ROMAN_obs_{band}"
     band_err_template = "ROMAN_obs_{band}_err"
     filter_file_template = "DC2LSST_{band}"
-    ref_band = "Y"
+    ref_band = "Y106"
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1]
 
 
-class Roman6BandCatalogConfig(CatalogConfigBase):
+class Roman7BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
 
-    tag = "roman_6band"
-    bandlist = ['Z087', 'Y106', 'J129', 'H158', 'F184', 'K213']
-    maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
-    a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
+    tag = "roman_7band"
+    bandlist = ['Z087', 'Y106', 'J129', 'W146', 'H158', 'F184', 'K213']
+    maglims = [27.4, 27.4, 27.4, 27.4, 27.4, 27.4]
+    a_env = [1.57491325, 1.14025753, 0.83118224, 0.68098202, 0.59966235, 0.46923204, 0.37072579]
     band_template = "ROMAN_obs_{band}"
     band_err_template = "ROMAN_obs_{band}_err"
     filter_file_template = "DC2LSST_{band}"
-    ref_band = "Y"
+    ref_band = "Y106"
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
