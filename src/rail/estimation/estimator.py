@@ -151,10 +151,23 @@ class CatEstimator(RailStage, PointEstimationMixin):
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
 
+
     def _do_chunk_output(
-        self, qp_dstn: qp.Ensemble, start: int, end: int, first: bool
+        self, qp_dstn: qp.Ensemble, start: int, end: int,data: TableLike, first: bool
     ) -> None:
         qp_dstn = self.calculate_point_estimates(qp_dstn)
+        
+        # if there is no ancil set by the calculate_point_estimate, initiate one
+        if qp_dstn.ancil is None:
+            ancil_dict: dict[str, NDArray] = dict()
+            qp_dstn.set_ancil(ancil_dict)
+        # if there is ID column in the input dataset, attach it to the ancil
+        if data[self.config.id_col] is not None:
+            qp_dstn.ancil.update(id=data[self.config.id_col])
+        # if there is redshift column in the input dataset, attach it to the ancil
+        if data[self.config.redshift_col] is not None:
+            qp_dstn.ancil.update(redshift=data[self.config.redshift_col])
+        
         if first:
             the_handle = self.add_handle("output", data=qp_dstn)
             assert isinstance(the_handle, QPHandle)
@@ -168,3 +181,4 @@ class CatEstimator(RailStage, PointEstimationMixin):
         if self.config.output_mode != "return":
             self._output_handle.write_chunk(start, end)
         return qp_dstn
+
