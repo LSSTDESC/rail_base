@@ -164,10 +164,10 @@ class CatEstimator(RailStage, PointEstimationMixin):
             ancil_dict: dict[str, NDArray] = dict()
             qp_dstn.set_ancil(ancil_dict)
         # if there is ID column in the input dataset, attach it to the ancil
-        if data[self.config.id_col] is not None:
+        if self.config.id_col in data.keys():
             qp_dstn.ancil.update(id=data[self.config.id_col])
         # if there is redshift column in the input dataset, attach it to the ancil
-        if data[self.config.redshift_col] is not None:
+        if self.config.redshift_col in data.keys():
             qp_dstn.ancil.update(redshift=data[self.config.redshift_col])
         
         if first:
