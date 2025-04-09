@@ -42,6 +42,8 @@ class CatEstimator(RailStage, PointEstimationMixin):
         zmin=SHARED_PARAMS,
         zmax=SHARED_PARAMS,
         nzbins=SHARED_PARAMS,
+        id_col=SHARED_PARAMS,
+        redshift_col=SHARED_PARAMS,
     )
     config_options.update(
         **PointEstimationMixin.config_options.copy(),
