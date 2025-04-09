@@ -5,6 +5,9 @@ from numpy.typing import NDArray
 from ceci.config import StageConfig
 
 from rail.core.common_params import SHARED_PARAMS
+import numpy as np
+from scipy.integrate import simps
+from scipy.optimize import minimize_scalar
 
 
 class PointEstimationMixin:
@@ -58,10 +61,12 @@ class PointEstimationMixin:
             skip_zmode = "zmode" in existing_ancil
             skip_zmean = "zmean" in existing_ancil
             skip_zmedian = "zmedian" in existing_ancil
+            skip_zbest = "zbest" in existing_ancil
         else:
             skip_zmode = False
             skip_zmean = False
             skip_zmedian = False
+            skip_zbest = False
 
         if "calculated_point_estimates" in self.config:
             calculated_point_estimates = self.config["calculated_point_estimates"]
@@ -78,6 +83,10 @@ class PointEstimationMixin:
             median_value = self._calculate_median_point_estimate(qp_dist)
             ancil_dict.update(zmedian=median_value)
 
+        if "zbest" in calculated_point_estimates and not skip_zbest:
+            best_value = self._calculate_best_point_estimate(qp_dist)
+            ancil_dict.update(zbest=best_value)
+            
         if calculated_point_estimates:
             if qp_dist.ancil is None:
                 qp_dist.set_ancil(ancil_dict)
@@ -156,3 +165,55 @@ class PointEstimationMixin:
             The median value for each posterior in the qp.Ensemble
         """
         return qp_dist.median()
+
+    
+    
+    def _calculate_best_point_estimate(self, qp_dist: qp.Ensemble,  grid: NDArray | list | None = None
+                                      ) -> NDArray:
+        """
+        Compute zx for all objects that minimizes ∫ dz P(z) * (zx - z)/(1 + z)
+
+        Parameters
+        ----------
+        pdf_vals : np.ndarray
+            Array of shape (N, k), PDF values for N objects evaluated on z_grid
+        z_grid : np.ndarray
+            1D array of redshift grid of shape (k,)
+
+        Returns
+        -------
+        zx_array : np.ndarray
+            Array of optimal zx values of shape (N,)
+        """
+        
+        if grid is None:
+            for key in ["zmin", "zmax", "nzbins"]:
+                if key not in self.config:  # pragma: no cover
+                    raise KeyError(
+                        f"Expected `{key}` to be defined in stage "
+                        "configuration dictionary in order to caluclate mode."
+                    )
+
+            grid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
+
+        
+        pdf_vals = qp_dist.pdf(grid)
+        N = pdf_vals.shape[0]
+        zx_array = np.zeros(N)
+
+        for i in range(N):
+            pz = pdf_vals[i]
+
+            def risk(zx):
+                integrand = pz * loss(zx, grid)
+                return (simps(integrand, grid))
+
+            def loss(zx, grid, gamma = 0.15):
+                dz = (zx - grid) / (1 + grid)
+                return 1-1/(1+(dz/gamma)**2)
+
+            result = minimize_scalar(risk, bounds=(grid[0], grid[-1]), method='bounded')
+            zx_array[i] = result.x
+
+        return zx_array
+
