@@ -9,7 +9,7 @@ from rail.core.stage import RailStage
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.evaluator import OldEvaluator
-from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator
+from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator, PointToPointBinnedEvaluator
 from rail.evaluation.single_evaluator import SingleEvaluator
 from rail.evaluation.metrics.tomography import KDEBinOverlap
 
@@ -188,6 +188,38 @@ def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]) -> None
         os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
+        
+def test_point_to_point_binning_evaluator(get_evaluation_files: tuple[str, str]) -> None:
+    pdfs_file, ztrue_file = get_evaluation_files
+    assert pdfs_file
+
+    DS = RailStage.data_store
+    DS.__class__.allow_overwrite = True
+    stage_dict = dict(
+        metrics=[
+            "point_stats_ez",
+            "point_stats_iqr",
+            "point_bias",
+            "point_outlier_rate",
+            "point_stats_sigma_mad",
+        ],
+        _random_state=None,
+        hdf5_groupname="photometry",
+        point_estimate_key="zmode",
+        chunk_size=10000,
+    )
+
+    ensemble = DS.read_file(key="pdfs_data", handle_class=QPHandle, path=pdfs_file)
+    ztrue_data = DS.read_file("ztrue_data", TableHandle, ztrue_file)
+
+    ptp_stage = PointToPointBinnedEvaluator.make_stage(name='point_to_point_binning', **stage_dict)
+
+
+    _ptp_results = ptp_stage.evaluate(ensemble, ztrue_data)
+
+    for stage in [ptp_stage]:
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
