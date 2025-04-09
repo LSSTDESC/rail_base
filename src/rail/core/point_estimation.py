@@ -6,7 +6,7 @@ from ceci.config import StageConfig
 
 from rail.core.common_params import SHARED_PARAMS
 import numpy as np
-from scipy.integrate import simps
+from scipy.integrate import simpson 
 from scipy.optimize import minimize_scalar
 
 
@@ -206,7 +206,7 @@ class PointEstimationMixin:
 
             def risk(zx):
                 integrand = pz * loss(zx, grid)
-                return (simps(integrand, grid))
+                return (simpson(integrand, grid))
 
             def loss(zx, grid, gamma = 0.15):
                 dz = (zx - grid) / (1 + grid)
