@@ -152,3 +152,11 @@ class PointToPointBinnedEvaluator(Evaluator):
                 summary_table[metric] = np.array([metric_result])
 
         return summary_table
+    
+    def _process_all(self, data_tuple: Any) -> None:
+        estimate_data = np.squeeze(data_tuple[0].ancil[self.config.point_estimate_key])
+        reference_data = data_tuple[1][self.config.hdf5_groupname][
+            self.config.reference_dictionary_key
+        ]
+
+        self._process_all_metrics(estimate_data, reference_data)

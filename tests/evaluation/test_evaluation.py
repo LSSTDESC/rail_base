@@ -212,14 +212,14 @@ def test_point_to_point_binning_evaluator(get_evaluation_files: tuple[str, str])
     ensemble = DS.read_file(key="pdfs_data", handle_class=QPHandle, path=pdfs_file)
     ztrue_data = DS.read_file("ztrue_data", TableHandle, ztrue_file)
 
-    ptp_stage = PointToPointBinnedEvaluator.make_stage(name='point_to_point_binning', **stage_dict)
+    ptp_stage_binning = PointToPointBinnedEvaluator.make_stage(name='point_to_point_binning', **stage_dict)
 
 
-    _ptp_results = ptp_stage.evaluate(ensemble, ztrue_data)
+    _ptp_results = ptp_stage_binning.evaluate(ensemble, ztrue_data)
 
-    for stage in [ptp_stage]:
-        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
-        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
+    # for stage in [ptp_stage]:
+    #     os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+    #     os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
