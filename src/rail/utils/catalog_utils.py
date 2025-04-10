@@ -211,7 +211,7 @@ class RubinCatalogConfig(CatalogConfigBase):
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1]
 
-    
+
 class Roman3BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
 
@@ -245,7 +245,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1]
 
-    
+
 class RomanRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
 
@@ -275,9 +275,105 @@ class ComCamCatalogConfig(CatalogConfigBase):
     filter_file_template = "DC2LSST_{band}"
     ref_band = "i"
     redshift_col = "redshift"
+
+
+class ComCamGaapCatalogConfig(CatalogConfigBase):
+    """Configuration for ComCam data"""
+
+    tag = "com_cam_euclid"
+    bandlist = "ugrizy"
+    maglims = [26.4, 27.8, 27.1, 26.7, 25.8, 24.6]
+    a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
+    band_template = "{band}_gaap1p0Mag"
+    band_err_template = "{band}_gaap1p0MagErr"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i"
+    redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1]
+
+
+class ComCamEuclidCatalogConfig(CatalogConfigBase):
+    """Configuration for ComCam data"""
+
+    tag = "com_cam_euclid"
+    bandlist = "ugrizy"
+    maglims = [26.4, 27.8, 27.1, 26.7, 25.8, 24.6]
+    a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
+    band_template = "{band}_gaap1p0Mag"
+    band_err_template = "{band}_gaap1p0MagErr"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i"
+    redshift_col = "redshift"
+    object_id_col = "objectId"
+    hdf5_groupname = ""
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    @classmethod
+    def band_name_dict(cls) -> dict[str, str]:
+        bands = super().band_name_dict()
+        bands["vis"] = "vis_euclidMag"
+        bands["y"] = "y_euclidMag"
+        bands["h"] = "h_euclidMag"
+        bands["j"] = "j_euclidMag"
+        return bands
+
+    @classmethod
+    def _build_maglim_dict(cls) -> dict[str, float]:
+        maglim_dict = super()._build_maglim_dict()
+        maglim_dict["vis_euclidMag"] = 26.0
+        maglim_dict["y_euclidMag"] = 23.8
+        maglim_dict["h_euclidMag"] = 24.0
+        maglim_dict["j_euclidMag"] = 24.0
+        return maglim_dict
+
+    @classmethod
+    def _build_a_env_dict(cls) -> dict[str, float]:
+        a_env_dict = super()._build_a_env_dict()
+        a_env_dict["vis_euclidMag"] = 0.0
+        a_env_dict["y_euclidMag"] = 0.0
+        a_env_dict["h_euclidMag"] = 0.0
+        a_env_dict["j_euclidMag"] = 0.0
+        return a_env_dict
+
+    @classmethod
+    def _build_band_names(cls) -> list[str]:
+        bands = [cls.band_template.format(band=band) for band in cls.bandlist]
+        bands += [
+            "vis_euclidMag",
+            "y_euclidMag",
+            "h_euclidMag",
+            "j_euclidMag",
+        ]
+        return bands
+
+    @classmethod
+    def _build_band_err_names(cls) -> list[str]:
+        band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
+        band_errs += [
+            "vis_euclidMagErr",
+            "y_euclidMagErr",
+            "h_euclidMagErr",
+            "j_euclidMagErr",
+        ]
+        return band_errs
+
+    @classmethod
+    def _build_ref_band(cls, ref_band: str = "i") -> str:
+        return cls.band_template.format(band=ref_band)
+
+    @classmethod
+    def _build_filter_file_bandlist(cls) -> list[str]:
+        """Contruct the name of the reference band"""
+        filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
+        filter_list += [
+            'EUCLID_vis',
+            'EUCLID_y',
+            'EUCLID_h',
+            'EUCLID_j',
+        ]
+        return filter_list
 
 
 class RomanPlusRubinCatalogConfig(CatalogConfigBase):
@@ -443,7 +539,7 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         ]
         return filter_list
 
-    
+
 class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Roman3Band + Rubin bands in Roman / Rubin simulations"""
 
@@ -525,6 +621,6 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         ]
         return filter_list
 
-    
+
 
 apply_defaults = CatalogConfigBase.apply
