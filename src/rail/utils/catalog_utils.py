@@ -234,7 +234,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
 
     tag = "roman_7band"
     bandlist = ['Z087', 'Y106', 'J129', 'W146', 'H158', 'F184', 'K213']
-    maglims = [27.4, 27.4, 27.4, 27.4, 27.4, 27.4]
+    maglims = [27.4, 27.4, 27.4, 27.4, 27.4, 27.4, 27.4]
     a_env = [1.57491325, 1.14025753, 0.83118224, 0.68098202, 0.59966235, 0.46923204, 0.37072579]
     band_template = "ROMAN_obs_{band}"
     band_err_template = "ROMAN_obs_{band}_err"
@@ -243,7 +243,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
-    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1]
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1]
 
 
 class RomanRubinCatalogConfig(CatalogConfigBase):
@@ -368,10 +368,10 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
         """Contruct the name of the reference band"""
         filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
         filter_list += [
-            'EUCLID_vis',
-            'EUCLID_y',
-            'EUCLID_h',
-            'EUCLID_j',
+            'euclid_vis',
+            'euclid_y',
+            'euclid_h',
+            'euclid_j',
         ]
         return filter_list
 
