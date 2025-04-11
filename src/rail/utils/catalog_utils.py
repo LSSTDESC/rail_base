@@ -360,6 +360,15 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
         return band_errs
 
     @classmethod
+    def _build_err_dict(cls) -> dict[str, str]:
+        the_dict = super()._build_err_dict()
+        the_dict["vis_euclidMag"] = "vis_euclidMagErr"
+        the_dict["y_euclidMag"] = "y_euclidMagErr"
+        the_dict["h_euclidMag"] = "h_euclidMagErr"
+        the_dict["j_euclidMag"] = "j_euclidMagErr"
+        return the_dict
+
+    @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
 
