@@ -227,7 +227,8 @@ class Roman3BandCatalogConfig(CatalogConfigBase):
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1]
-
+    zp_errors = [0.1, 0.1, 0.1]
+    
 
 class Roman7BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
@@ -244,6 +245,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1]
 
 
 class RomanRubinCatalogConfig(CatalogConfigBase):
