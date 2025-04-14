@@ -438,7 +438,7 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
             "ROMAN_obs_F184",
             "ROMAN_obs_H158",
             "ROMAN_obs_J129",
-            "ROMAN_obs_Y016",
+            "ROMAN_obs_Y106",
         ]
         return bands
 
@@ -517,7 +517,7 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         bands += [
             "ROMAN_obs_H158",
             "ROMAN_obs_J129",
-            "ROMAN_obs_Y016",
+            "ROMAN_obs_Y106",
         ]
         return bands
 
@@ -611,7 +611,7 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
             "ROMAN_obs_F184",
             "ROMAN_obs_H158",
             "ROMAN_obs_J129",
-            "ROMAN_obs_Y016",
+            "ROMAN_obs_Y106",
             "ROMAN_obs_Z087",
             "ROMAN_obs_R062",
         ]
