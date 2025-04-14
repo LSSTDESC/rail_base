@@ -471,7 +471,7 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
 class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Roman3Band + Rubin bands in Roman / Rubin simulations"""
 
-    tag = "roman3band_rubin"
+    tag = "roman_3band_rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
@@ -548,7 +548,7 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
 class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Roman3Band + Rubin bands in Roman / Rubin simulations"""
 
-    tag = "roman7band_rubin"
+    tag = "roman_7band_rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
