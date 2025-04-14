@@ -233,7 +233,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
 
     tag = "roman_7band"
-    bandlist = ['Z087', 'Y106', 'J129', 'W146', 'H158', 'F184', 'K213']
+    bandlist = ['W062', 'Z087', 'Y106', 'J129', 'H158', 'F184', 'K213']
     maglims = [27.4, 27.4, 27.4, 27.4, 27.4, 27.4, 27.4]
     a_env = [1.57491325, 1.14025753, 0.83118224, 0.68098202, 0.59966235, 0.46923204, 0.37072579]
     band_template = "ROMAN_obs_{band}"
@@ -483,11 +483,11 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1, 0.1, 0.1]
+    zp_errors =  [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1, 0.1, 0.1]
 
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
-        bands["f"] = "ROMAN_obs_F184"
         bands["h"] = "ROMAN_obs_H158"
         bands["j"] = "ROMAN_obs_J129"
         bands["y"] = "ROMAN_obs_Y106"
@@ -496,26 +496,23 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     @classmethod
     def _build_maglim_dict(cls) -> dict[str, float]:
         maglim_dict = super()._build_maglim_dict()
-        maglim_dict["ROMAN_obs_F184"] = 27.5
-        maglim_dict["ROMAN_obs_H158"] = 28.1
-        maglim_dict["ROMAN_obs_J129"] = 27.8
-        maglim_dict["ROMAN_obs_Y106"] = 27.6
+        maglim_dict["ROMAN_obs_H158"] = 26.4
+        maglim_dict["ROMAN_obs_J129"] = 26.4
+        maglim_dict["ROMAN_obs_Y106"] = 26.4
         return maglim_dict
 
     @classmethod
     def _build_a_env_dict(cls) -> dict[str, float]:
         a_env_dict = super()._build_a_env_dict()
-        a_env_dict["ROMAN_obs_F184"] = 1.1
-        a_env_dict["ROMAN_obs_H158"] = 1.2
-        a_env_dict["ROMAN_obs_J129"] = 1.3
-        a_env_dict["ROMAN_obs_Y106"] = 1.4
+        a_env_dict["ROMAN_obs_H158"] = 0.0
+        a_env_dict["ROMAN_obs_J129"] = 0.0
+        a_env_dict["ROMAN_obs_Y106"] = 0.0
         return a_env_dict
 
     @classmethod
     def _build_band_names(cls) -> list[str]:
         bands = [cls.band_template.format(band=band) for band in cls.bandlist]
         bands += [
-            "ROMAN_obs_F184",
             "ROMAN_obs_H158",
             "ROMAN_obs_J129",
             "ROMAN_obs_Y016",
@@ -526,7 +523,6 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     def _build_band_err_names(cls) -> list[str]:
         band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
         band_errs += [
-            "ROMAN_obs_F184_err",
             "ROMAN_obs_H158_err",
             "ROMAN_obs_J129_err",
             "ROMAN_obs_Y106_err",
@@ -542,18 +538,17 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         """Contruct the name of the reference band"""
         filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
         filter_list += [
-            'ROMAN_obs_F184',
-            'ROMAN_obs_H158',
-            'ROMAN_obs_J129',
-            'ROMAN_obs_Y106',
+            'roman_f158',
+            'roman_f129',
+            'roman_f106',
         ]
         return filter_list
 
 
-class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
+class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Roman3Band + Rubin bands in Roman / Rubin simulations"""
 
-    tag = "roman3band_plus_rubin"
+    tag = "roman7band_rubin"
     bandlist = "ugrizy"
     maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
@@ -564,43 +559,59 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
-    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1, 0.1, 0.1]
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    zp_errors =  [0.1, 0.1, 0.1, 0.1, 0.1 ,0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
+        bands["k"] = "ROMAN_obs_K213"
         bands["f"] = "ROMAN_obs_F184"
         bands["h"] = "ROMAN_obs_H158"
         bands["j"] = "ROMAN_obs_J129"
         bands["y"] = "ROMAN_obs_Y106"
+        bands["z"] = "ROMAN_obs_Z087"
+        bands["w"] = "ROMAN_obs_W062"
+
         return bands
 
     @classmethod
     def _build_maglim_dict(cls) -> dict[str, float]:
         maglim_dict = super()._build_maglim_dict()
-        maglim_dict["ROMAN_obs_F184"] = 27.5
-        maglim_dict["ROMAN_obs_H158"] = 28.1
-        maglim_dict["ROMAN_obs_J129"] = 27.8
-        maglim_dict["ROMAN_obs_Y106"] = 27.6
+        maglim_dict["ROMAN_obs_K213"] = 27.4
+        maglim_dict["ROMAN_obs_F184"] = 27.4
+        maglim_dict["ROMAN_obs_H158"] = 27.4
+        maglim_dict["ROMAN_obs_J129"] = 27.4
+        maglim_dict["ROMAN_obs_Y106"] = 27.4
+        maglim_dict["ROMAN_obs_Z087"] = 27.4
+        maglim_dict["ROMAN_obs_W062"] = 27.4
+
         return maglim_dict
 
     @classmethod
     def _build_a_env_dict(cls) -> dict[str, float]:
         a_env_dict = super()._build_a_env_dict()
-        a_env_dict["ROMAN_obs_F184"] = 1.1
-        a_env_dict["ROMAN_obs_H158"] = 1.2
-        a_env_dict["ROMAN_obs_J129"] = 1.3
-        a_env_dict["ROMAN_obs_Y106"] = 1.4
+        a_env_dict["ROMAN_obs_K213"] = 0.0
+        a_env_dict["ROMAN_obs_F184"] = 0.0
+        a_env_dict["ROMAN_obs_H158"] = 0.0
+        a_env_dict["ROMAN_obs_J129"] = 0.0
+        a_env_dict["ROMAN_obs_Y106"] = 0.0
+        a_env_dict["ROMAN_obs_Z087"] = 0.0
+        a_env_dict["ROMAN_obs_W062"] = 0.0
+
         return a_env_dict
 
     @classmethod
     def _build_band_names(cls) -> list[str]:
         bands = [cls.band_template.format(band=band) for band in cls.bandlist]
         bands += [
+            "ROMAN_obs_K213",
             "ROMAN_obs_F184",
             "ROMAN_obs_H158",
             "ROMAN_obs_J129",
             "ROMAN_obs_Y016",
+            "ROMAN_obs_Z087",
+            "ROMAN_obs_W062",
         ]
         return bands
 
@@ -608,10 +619,14 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     def _build_band_err_names(cls) -> list[str]:
         band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
         band_errs += [
+            "ROMAN_obs_K213_err",
             "ROMAN_obs_F184_err",
             "ROMAN_obs_H158_err",
             "ROMAN_obs_J129_err",
             "ROMAN_obs_Y106_err",
+            "ROMAN_obs_Z087_err",
+            "ROMAN_obs_W062_err",
+
         ]
         return band_errs
 
@@ -624,10 +639,13 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         """Contruct the name of the reference band"""
         filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
         filter_list += [
-            'ROMAN_obs_F184',
-            'ROMAN_obs_H158',
-            'ROMAN_obs_J129',
-            'ROMAN_obs_Y106',
+            'roman_f213',
+            'roman_f184',
+            'roman_f158',
+            'roman_f129',
+            'roman_f106',
+            'roman_f087',
+            'roman_f062',
         ]
         return filter_list
 
