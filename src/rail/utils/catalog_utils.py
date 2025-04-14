@@ -317,9 +317,9 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
         bands["vis"] = "vis_euclidMag"
-        bands["y"] = "y_euclidMag"
-        bands["h"] = "h_euclidMag"
-        bands["j"] = "j_euclidMag"
+        bands["Y"] = "y_euclidMag"
+        bands["H"] = "h_euclidMag"
+        bands["J"] = "j_euclidMag"
         return bands
 
     @classmethod
@@ -407,10 +407,10 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
-        bands["f"] = "ROMAN_obs_F184"
-        bands["h"] = "ROMAN_obs_H158"
-        bands["j"] = "ROMAN_obs_J129"
-        bands["y"] = "ROMAN_obs_Y106"
+        bands["F"] = "ROMAN_obs_F184"
+        bands["H"] = "ROMAN_obs_H158"
+        bands["J"] = "ROMAN_obs_J129"
+        bands["Y"] = "ROMAN_obs_Y106"
         return bands
 
     @classmethod
@@ -490,9 +490,9 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
-        bands["h"] = "ROMAN_obs_H158"
-        bands["j"] = "ROMAN_obs_J129"
-        bands["y"] = "ROMAN_obs_Y106"
+        bands["H"] = "ROMAN_obs_H158"
+        bands["J"] = "ROMAN_obs_J129"
+        bands["Y"] = "ROMAN_obs_Y106"
         return bands
 
     @classmethod
@@ -567,13 +567,13 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
-        bands["k"] = "ROMAN_obs_K213"
-        bands["f"] = "ROMAN_obs_F184"
-        bands["h"] = "ROMAN_obs_H158"
-        bands["j"] = "ROMAN_obs_J129"
-        bands["y"] = "ROMAN_obs_Y106"
-        bands["z"] = "ROMAN_obs_Z087"
-        bands["w"] = "ROMAN_obs_R062"
+        bands["K"] = "ROMAN_obs_K213"
+        bands["F"] = "ROMAN_obs_F184"
+        bands["H"] = "ROMAN_obs_H158"
+        bands["J"] = "ROMAN_obs_J129"
+        bands["Y"] = "ROMAN_obs_Y106"
+        bands["Z"] = "ROMAN_obs_Z087"
+        bands["W"] = "ROMAN_obs_R062"
 
         return bands
 
