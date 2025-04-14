@@ -221,7 +221,7 @@ class Roman3BandCatalogConfig(CatalogConfigBase):
     a_env = [1.14025753, 0.83118224, 0.59966235]
     band_template = "ROMAN_obs_{band}"
     band_err_template = "ROMAN_obs_{band}_err"
-    filter_file_template = "DC2LSST_{band}"
+    filter_file_template = "roman_{band}"
     ref_band = "Y106"
     redshift_col = "redshift"
     object_id_col = "objectId"
@@ -238,7 +238,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     a_env = [1.57491325, 1.14025753, 0.83118224, 0.68098202, 0.59966235, 0.46923204, 0.37072579]
     band_template = "ROMAN_obs_{band}"
     band_err_template = "ROMAN_obs_{band}_err"
-    filter_file_template = "DC2LSST_{band}"
+    filter_file_template = "roman_{band}"
     ref_band = "Y106"
     redshift_col = "redshift"
     object_id_col = "objectId"
@@ -538,9 +538,9 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         """Contruct the name of the reference band"""
         filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
         filter_list += [
-            'roman_f158',
-            'roman_f129',
-            'roman_f106',
+            'roman_H158',
+            'roman_J129',
+            'roman_Y106',
         ]
         return filter_list
 
@@ -639,13 +639,13 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         """Contruct the name of the reference band"""
         filter_list = [cls.filter_file_template.format(band=band) for band in cls.bandlist]
         filter_list += [
-            'roman_f213',
-            'roman_f184',
-            'roman_f158',
-            'roman_f129',
-            'roman_f106',
-            'roman_f087',
-            'roman_f062',
+            'roman_K213',
+            'roman_F184',
+            'roman_H158',
+            'roman_J129',
+            'roman_Y106',
+            'roman_Z087',
+            'roman_W062',
         ]
         return filter_list
 
