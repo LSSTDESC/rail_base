@@ -282,7 +282,7 @@ class ComCamCatalogConfig(CatalogConfigBase):
 class ComCamGaapCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
 
-    tag = "com_cam_euclid"
+    tag = "com_cam_gaap"
     bandlist = "ugrizy"
     maglims = [26.4, 27.8, 27.1, 26.7, 25.8, 24.6]
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
