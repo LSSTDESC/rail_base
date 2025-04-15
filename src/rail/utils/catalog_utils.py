@@ -454,6 +454,15 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
         return band_errs
 
     @classmethod
+    def _build_err_dict(cls) -> dict[str, str]:
+        the_dict = super()._build_err_dict()
+        the_dict["ROMAN_obs_F184"] = "ROMAN_obs_F184_err"
+        the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
+        the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
+        return the_dict
+    
+    @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
 
@@ -531,6 +540,14 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         ]
         return band_errs
 
+    @classmethod
+    def _build_err_dict(cls) -> dict[str, str]:
+        the_dict = super()._build_err_dict()
+        the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
+        the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
+        return the_dict
+    
     @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
@@ -632,6 +649,18 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         ]
         return band_errs
 
+    @classmethod
+    def _build_err_dict(cls) -> dict[str, str]:
+        the_dict = super()._build_err_dict()
+        the_dict["ROMAN_obs_K213"] = "ROMAN_obs_K213_err"
+        the_dict["ROMAN_obs_F184"] = "ROMAN_obs_F184_err"
+        the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
+        the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
+        the_dict["ROMAN_obs_Z087"] = "ROMAN_obs_Z087_err"
+        the_dict["ROMAN_obs_R062"] = "ROMAN_obs_R062_err"
+        return the_dict
+    
     @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
