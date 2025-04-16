@@ -23,7 +23,7 @@ class PZFactory:
         cls,
         stage_name: str,
         stage_class: type[CatEstimator],
-        model_path: str,
+        model_path: str | dict,
         data_path: str = "none",
         **config_params: dict,
     ) -> CatEstimator:
@@ -38,8 +38,8 @@ class PZFactory:
         stage_class: type
             Python class for the stage
 
-        model_path: str
-            Path to the model file used by this estimator
+        model_path: str| dict
+            Path to the model file used by this estimator, or the model itself
 
         data_path: str
             Path to the input data, defaults to 'none'
