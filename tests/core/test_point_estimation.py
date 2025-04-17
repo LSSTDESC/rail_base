@@ -42,7 +42,7 @@ def test_basic_point_estimate() -> None:
     """
 
     config_dict = {
-        "calculated_point_estimates": ["zmean", "zmedian", "zmode"],
+        "calculated_point_estimates": ["zmean", "zmedian", "zmode", "zbest"],
         "zmin": 0.0,
         "zmax": 3.0,
         "nzbins": 301,
@@ -62,6 +62,7 @@ def test_basic_point_estimate() -> None:
     assert "zmode" in result.ancil
     assert "zmedian" in result.ancil
     assert "zmean" in result.ancil
+    assert "zbest" in result.ancil
 
 
 def test_mode_no_grid() -> None:
