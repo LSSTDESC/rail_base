@@ -1,6 +1,6 @@
 """ Parameters that are shared between stages """
 
-from typing import Any
+from typing import Any, Optional
 
 from ceci.config import StageConfig
 from ceci.config import StageParameter as Param
