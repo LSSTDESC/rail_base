@@ -509,7 +509,7 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         maglim_dict = super()._build_maglim_dict()
         maglim_dict["ROMAN_obs_H158"] = 26.4
         maglim_dict["ROMAN_obs_J129"] = 26.4
-        maglim_dict["ROMAN_obs_Y106"] = 26.4
+        maglim_dict["ROMAN_obs_Y106"] = 26.5
         return maglim_dict
 
     @classmethod
@@ -587,24 +587,23 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         bands["K"] = "ROMAN_obs_K213"
         bands["F"] = "ROMAN_obs_F184"
         bands["H"] = "ROMAN_obs_H158"
+        bands["W"] = "ROMAN_obs_W146"
         bands["J"] = "ROMAN_obs_J129"
         bands["Y"] = "ROMAN_obs_Y106"
         bands["Z"] = "ROMAN_obs_Z087"
-        bands["W"] = "ROMAN_obs_R062"
 
         return bands
 
     @classmethod
     def _build_maglim_dict(cls) -> dict[str, float]:
         maglim_dict = super()._build_maglim_dict()
-        maglim_dict["ROMAN_obs_K213"] = 27.4
-        maglim_dict["ROMAN_obs_F184"] = 27.4
-        maglim_dict["ROMAN_obs_H158"] = 27.4
-        maglim_dict["ROMAN_obs_J129"] = 27.4
-        maglim_dict["ROMAN_obs_Y106"] = 27.4
-        maglim_dict["ROMAN_obs_Z087"] = 27.4
-        maglim_dict["ROMAN_obs_R062"] = 27.4
-
+        maglim_dict["ROMAN_obs_K213"] = 25.9
+        maglim_dict["ROMAN_obs_F184"] = 27.0
+        maglim_dict["ROMAN_obs_H158"] = 27.5
+        maglim_dict["ROMAN_obs_W146"] = 28.3
+        maglim_dict["ROMAN_obs_J129"] = 27.6
+        maglim_dict["ROMAN_obs_Y106"] = 27.7
+        maglim_dict["ROMAN_obs_Z087"] = 27.7
         return maglim_dict
 
     @classmethod
@@ -613,10 +612,10 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         a_env_dict["ROMAN_obs_K213"] = 0.37072579
         a_env_dict["ROMAN_obs_F184"] = 0.46923204
         a_env_dict["ROMAN_obs_H158"] = 0.59966235
-        a_env_dict["ROMAN_obs_J129"] = 0.68098202
-        a_env_dict["ROMAN_obs_Y106"] = 0.83118224
-        a_env_dict["ROMAN_obs_Z087"] = 1.14025753
-        a_env_dict["ROMAN_obs_R062"] = 1.57491325 
+        a_env_dict["ROMAN_obs_W146"] = 0.68098202
+        a_env_dict["ROMAN_obs_J129"] = 0.83118224
+        a_env_dict["ROMAN_obs_Y106"] = 1.14025753
+        a_env_dict["ROMAN_obs_Z087"] = 1.57491325
 
         return a_env_dict
 
@@ -627,10 +626,10 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
             "ROMAN_obs_K213",
             "ROMAN_obs_F184",
             "ROMAN_obs_H158",
+            "ROMAN_obs_W146",
             "ROMAN_obs_J129",
             "ROMAN_obs_Y106",
             "ROMAN_obs_Z087",
-            "ROMAN_obs_R062",
         ]
         return bands
 
@@ -641,11 +640,10 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
             "ROMAN_obs_K213_err",
             "ROMAN_obs_F184_err",
             "ROMAN_obs_H158_err",
+            "ROMAN_obs_W146_err",
             "ROMAN_obs_J129_err",
             "ROMAN_obs_Y106_err",
             "ROMAN_obs_Z087_err",
-            "ROMAN_obs_R062_err",
-
         ]
         return band_errs
 
@@ -655,10 +653,10 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         the_dict["ROMAN_obs_K213"] = "ROMAN_obs_K213_err"
         the_dict["ROMAN_obs_F184"] = "ROMAN_obs_F184_err"
         the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        the_dict["ROMAN_obs_W146"] = "ROMAN_obs_W146_err"
         the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
         the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
         the_dict["ROMAN_obs_Z087"] = "ROMAN_obs_Z087_err"
-        the_dict["ROMAN_obs_R062"] = "ROMAN_obs_R062_err"
         return the_dict
     
     @classmethod
@@ -673,10 +671,10 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
             'roman_K213',
             'roman_F184',
             'roman_H158',
+            'roman_W146',
             'roman_J129',
             'roman_Y106',
             'roman_Z087',
-            'roman_R062',
         ]
         return filter_list
 
