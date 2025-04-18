@@ -234,7 +234,7 @@ class Roman7BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
 
     tag = "roman_7band"
-    bandlist = ['R062', 'Z087', 'Y106', 'J129', 'H158', 'F184', 'K213']
+    bandlist = ['Z087', 'Y106', 'J129', 'W146', 'H158', 'F184', 'K213']
     maglims = [27.4, 27.4, 27.4, 27.4, 27.4, 27.4, 27.4]
     a_env = [1.57491325, 1.14025753, 0.83118224, 0.68098202, 0.59966235, 0.46923204, 0.37072579]
     band_template = "ROMAN_obs_{band}"
