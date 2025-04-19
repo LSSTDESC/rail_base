@@ -30,6 +30,7 @@ class CatalogConfigBase:
     redshift_col: str = ""
     object_id_col: str = ""
     lsst_err_band_replace: list[float] = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    replace_error_vals: list[float] = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
     zp_errors: list[float] = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
     _active_tag: str | None = None
     _active_class: type | None = None
