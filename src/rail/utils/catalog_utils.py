@@ -228,7 +228,7 @@ class Roman3BandCatalogConfig(CatalogConfigBase):
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1]
     zp_errors = [0.1, 0.1, 0.1]
-    
+
 
 class Roman7BandCatalogConfig(CatalogConfigBase):
     """Configuration for Rubin data from Roman / Rubin simulations"""
@@ -312,7 +312,7 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
     zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    
+
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
@@ -461,7 +461,7 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
         the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
         the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
         return the_dict
-    
+
     @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
@@ -547,7 +547,7 @@ class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
         the_dict["ROMAN_obs_J129"] = "ROMAN_obs_J129_err"
         the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
         return the_dict
-    
+
     @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
@@ -658,7 +658,7 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
         the_dict["ROMAN_obs_Y106"] = "ROMAN_obs_Y106_err"
         the_dict["ROMAN_obs_Z087"] = "ROMAN_obs_Z087_err"
         return the_dict
-    
+
     @classmethod
     def _build_ref_band(cls, ref_band: str = "i") -> str:
         return cls.band_template.format(band=ref_band)
