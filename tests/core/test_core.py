@@ -358,6 +358,9 @@ def test_catalog_utils() -> None:
     assert CatalogConfigBase.active_tag() == "roman_plus_rubin"
     assert CatalogConfigBase.active_class().tag == "roman_plus_rubin"
 
+    for tag in ['hsc', 'roman_3band', 'roman_7band', 'roman_rubin', 'com_cam', 'com_cam_gaap', 'com_cam_euclid', 'roman_3band_rubin', 'roman_7band_rubin']:
+        CatalogConfigBase.apply(tag)
+    
     CatalogConfigBase.apply("dc2")
     set_param_default("redshift_col", "redshift")
 
