@@ -74,7 +74,7 @@ class RandomGaussEstimator(CatEstimator):
             ),
         )
         qp_d.set_ancil(dict(zmode=zmode))
-        self._do_chunk_output(qp_d, start, end, first, data = data)
+        self._do_chunk_output(qp_d, start, end, first, data=data)
 
     def validate(self) -> None:
         """Validation which checks if the required column names by the stage exist in the data"""

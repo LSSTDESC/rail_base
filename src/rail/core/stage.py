@@ -3,8 +3,8 @@
 from __future__ import annotations
 
 import os
-from typing import Any, Iterable, TypeVar
 from math import ceil
+from typing import Any, Iterable, TypeVar
 
 from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
@@ -486,7 +486,11 @@ class RailStage(PipelineStage):
             if total_chunks_needed < self.size:  # pragma: no cover
                 self.config.chunk_size = int(ceil(self._input_length / self.size))
                 chunk_size = self.config.chunk_size
-                print("Warning: You are reserving more processes than needed, reducing chunk size to", chunk_size, "to use all of the processes")
+                print(
+                    "Warning: You are reserving more processes than needed, reducing chunk size to",
+                    chunk_size,
+                    "to use all of the processes",
+                )
 
             kwcopy = dict(
                 groupname=groupname,

@@ -6,7 +6,7 @@ and returns a pandas DataFrame, and wraps the run method.
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, TableLike, PqHandle
+from rail.core.data import DataHandle, PqHandle, TableLike
 from rail.core.stage import RailStage
 
 

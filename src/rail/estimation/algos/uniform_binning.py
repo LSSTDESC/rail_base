@@ -4,9 +4,7 @@ tomographic bins with uniform binning.
 """
 
 import numpy as np
-
 import qp
-
 from ceci.config import StageParameter as Param
 
 from rail.core.data import Hdf5Handle

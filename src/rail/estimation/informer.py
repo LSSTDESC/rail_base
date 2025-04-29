@@ -10,7 +10,8 @@ from typing import Any
 
 import qp
 
-from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, TableLike
+from rail.core.data import (DataHandle, ModelHandle, QPHandle, TableHandle,
+                            TableLike)
 from rail.core.stage import RailStage
 
 

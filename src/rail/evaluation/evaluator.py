@@ -17,12 +17,10 @@ from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import DataHandle, Hdf5Handle, QPDictHandle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import (
-    PointBias,
-    PointOutlierRate,
-    PointSigmaIQR,
-    PointSigmaMAD,
-)
+from rail.evaluation.metrics.pointestimates import (PointBias,
+                                                    PointOutlierRate,
+                                                    PointSigmaIQR,
+                                                    PointSigmaMAD)
 
 
 def _all_subclasses(a_class: type[BaseMetric]) -> set[type[BaseMetric]]:

@@ -40,7 +40,7 @@ class RailEnv:
         "rail.stages",
         "rail.interfaces",
     ]
-    
+
     _base_stages_names = [
         "CatClassifier",
         "PZClassifier",
@@ -566,7 +566,8 @@ Algorithm Packages
             from rail.stages import *
 
         """
-        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import \
+            RailStage  # pylint: disable=import-outside-toplevel
 
         cls._stage_dict.clear()
         cls._stage_dict["RailStage"] = []
@@ -608,7 +609,8 @@ Algorithm Packages
     @classmethod
     def print_rail_stage_dict(cls) -> None:
         """Print an dict of all the RailSages organized by their base class"""
-        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import \
+            RailStage  # pylint: disable=import-outside-toplevel
 
         for key, val in cls._stage_dict.items():
             print(f"BaseClass {key}")
@@ -619,7 +621,8 @@ Algorithm Packages
     @classmethod
     def do_stage_type_api_rst(cls, basedir: str = ".") -> None:
         """Genarate the rst files for the stage tpye documentation"""
-        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import \
+            RailStage  # pylint: disable=import-outside-toplevel
 
         os.makedirs(os.path.join(basedir, "api"), exist_ok=True)
 

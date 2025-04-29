@@ -8,15 +8,8 @@ from typing import Any
 import qp
 
 from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import (
-    DataHandle,
-    Hdf5Handle,
-    ModelHandle,
-    ModelLike,
-    QPHandle,
-    TableHandle,
-    TableLike,
-)
+from rail.core.data import (DataHandle, Hdf5Handle, ModelHandle, ModelLike,
+                            QPHandle, TableHandle, TableLike)
 from rail.core.stage import RailStage
 
 

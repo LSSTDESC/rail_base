@@ -3,15 +3,18 @@ import os
 import numpy as np
 import qp
 
+from rail.estimation.algos.equal_count import EqualCountClassifier
 import rail.evaluation.metrics.pointestimates as pe
 from rail.core.data import QPHandle, QPOrTableHandle, TableHandle
 from rail.core.stage import RailStage
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
 from rail.evaluation.evaluator import OldEvaluator
-from rail.evaluation.point_to_point_evaluator import PointToPointEvaluator, PointToPointBinnedEvaluator
-from rail.evaluation.single_evaluator import SingleEvaluator
 from rail.evaluation.metrics.tomography import KDEBinOverlap
+from rail.evaluation.point_to_point_evaluator import (
+    PointToPointBinnedEvaluator, PointToPointEvaluator)
+from rail.evaluation.single_evaluator import SingleEvaluator
+
 
 # values for metrics
 OUTRATE = 0.0
@@ -188,8 +191,10 @@ def test_point_to_point_evaluator(get_evaluation_files: tuple[str, str]) -> None
         os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
-        
-def test_point_to_point_binning_evaluator(get_evaluation_files: tuple[str, str]) -> None:
+
+def test_point_to_point_binning_evaluator(
+    get_evaluation_files: tuple[str, str]
+) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
 
@@ -212,14 +217,16 @@ def test_point_to_point_binning_evaluator(get_evaluation_files: tuple[str, str])
     ensemble = DS.read_file(key="pdfs_data", handle_class=QPHandle, path=pdfs_file)
     ztrue_data = DS.read_file("ztrue_data", TableHandle, ztrue_file)
 
-    ptp_stage_binning = PointToPointBinnedEvaluator.make_stage(name='point_to_point_binning', **stage_dict)
-
+    ptp_stage_binning = PointToPointBinnedEvaluator.make_stage(
+        name="point_to_point_binning", **stage_dict
+    )
 
     _ptp_results = ptp_stage_binning.evaluate(ensemble, ztrue_data)
 
     # for stage in [ptp_stage]:
     #     os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
     #     os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
+
 
 def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
@@ -257,21 +264,22 @@ def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
         os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
         os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
-        
+
 def test_kde_overlap_evaluator(get_evaluation_files: tuple[str, str]) -> None:
     pdfs_file, ztrue_file = get_evaluation_files
     assert pdfs_file
 
     DS = RailStage.data_store
     DS.__class__.allow_overwrite = True
-    
-    ensemble = DS.read_file(key='pdfs_data', handle_class=QPHandle, path=pdfs_file)
-    ztrue_data = DS.read_file('ztrue_data', TableHandle, ztrue_file)
-    
-    from rail.estimation.algos.equal_count import EqualCountClassifier
+
+    ensemble = DS.read_file(key="pdfs_data", handle_class=QPHandle, path=pdfs_file)
+    ztrue_data = DS.read_file("ztrue_data", TableHandle, ztrue_file)
+
     binner = EqualCountClassifier.make_stage()
     binindex = binner.classify(ensemble)
-    
-    kde_overlap = KDEBinOverlap.make_stage(hdf5_groupname = 'photometry', redshift_col = 'redshift')
-    
-    output = kde_overlap.evaluate(binindex, ztrue_data)
+
+    kde_overlap = KDEBinOverlap.make_stage(
+        hdf5_groupname="photometry", redshift_col="redshift"
+    )
+
+    _output = kde_overlap.evaluate(binindex, ztrue_data)

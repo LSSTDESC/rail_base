@@ -66,9 +66,9 @@ def test_QuantityCut_bad_params(cuts: Any, error: type[Exception]) -> None:
         QuantityCut.make_stage(cuts=cuts)
 
 
-def test_QuantityCut_returns_correct_shape(
+def test_QuantityCut_returns_correct_shape(  # pylint: disable=redefined-outer-name
     data: Any,
-) -> None:  # pylint: disable=redefined-outer-name
+) -> None:
     """Make sure QuantityCut is returning the correct shape"""
 
     cuts = {

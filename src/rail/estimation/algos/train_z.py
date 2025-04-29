@@ -103,4 +103,4 @@ class TrainZEstimator(CatEstimator):
             data=dict(xvals=self.zgrid, yvals=np.tile(self.train_pdf, (test_size, 1))),
         )
         qp_d.set_ancil(dict(zmode=zmode))
-        self._do_chunk_output(qp_d, start, end, first, data = data)
+        self._do_chunk_output(qp_d, start, end, first, data=data)

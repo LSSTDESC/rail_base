@@ -9,14 +9,8 @@ from typing import Any
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import (
-    DataHandle,
-    ModelHandle,
-    ModelLike,
-    QPHandle,
-    TableHandle,
-    TableLike,
-)
+from rail.core.data import (DataHandle, ModelHandle, ModelLike, QPHandle,
+                            TableHandle, TableLike)
 from rail.core.stage import RailStage
 
 

@@ -6,25 +6,17 @@ import numpy as np
 import pytest
 
 from rail.core.common_params import copy_param, set_param_default
-from rail.core.data import (
-    DataHandle,
-    DataStore,
-    FitsHandle,
-    Hdf5Handle,
-    ModelHandle,
-    PqHandle,
-    QPHandle,
-    QPOrTableHandle,
-)
+from rail.core.data import (DataHandle, DataStore, FitsHandle, Hdf5Handle,
+                            ModelHandle, PqHandle, QPHandle, QPOrTableHandle)
 from rail.core.model import Model
 from rail.core.stage import RailStage
-from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
+from rail.utils.catalog_utils import (CatalogConfigBase,
+                                      RomanPlusRubinCatalogConfig)
 from rail.utils.path_utils import RAILDIR
 
 # def test_data_file():
 #    with pytest.raises(ValueError) as errinfo:
 #        df = DataFile('dummy', 'x')
-
 
 
 def do_data_handle(datapath: str, handle_class: type[DataHandle]) -> DataHandle:
@@ -35,9 +27,8 @@ def do_data_handle(datapath: str, handle_class: type[DataHandle]) -> DataHandle:
     with pytest.raises(ValueError) as _errinfo:
         th.write()
 
-
     assert handle_class.__name__ in DataHandle.get_sub_classes()
-        
+
     assert not th.has_data
     try:
         _check_size = th.size()
@@ -175,9 +166,7 @@ def test_hdf5_handle() -> None:
     )
     handle_chunked = Hdf5Handle("chunked", handle.data, path=datapath_chunked)
     from tables_io.arrayUtils import (  # pylint: disable=import-outside-toplevel
-        getInitializationForODict,
-        sliceDict,
-    )
+        getInitializationForODict, sliceDict)
 
     num_rows = len(handle.data["photometry"]["id"])
     check_num_rows = len(handle()["photometry"]["id"])
@@ -358,16 +347,28 @@ def test_catalog_utils() -> None:
     assert CatalogConfigBase.active_tag() == "roman_plus_rubin"
     assert CatalogConfigBase.active_class().tag == "roman_plus_rubin"
 
-    for tag in ['hsc', 'roman_3band', 'roman_7band', 'roman_rubin', 'com_cam', 'com_cam_gaap', 'com_cam_euclid', 'roman_3band_rubin', 'roman_7band_rubin']:
+    for tag in [
+        "hsc",
+        "roman_3band",
+        "roman_7band",
+        "roman_rubin",
+        "com_cam",
+        "com_cam_gaap",
+        "com_cam_euclid",
+        "roman_3band_rubin",
+        "roman_7band_rubin",
+    ]:
         CatalogConfigBase.apply(tag)
         assert CatalogConfigBase.active_class().band_name_dict()
-        
+
     CatalogConfigBase.apply("dc2")
     set_param_default("redshift_col", "redshift")
 
-    a_class = CatalogConfigBase.get_class('RomanPlusRubinCatalogConfig', 'rail.utils.catalog_utils')
+    a_class = CatalogConfigBase.get_class(
+        "RomanPlusRubinCatalogConfig", "rail.utils.catalog_utils"
+    )
     CatalogConfigBase.apply_class(a_class.__name__)
-    
-    assert 'rubin' in CatalogConfigBase.subclasses()
 
-    assert 'RomanPlusRubinCatalogConfig' in CatalogConfigBase.subclasses_by_class()
+    assert "rubin" in CatalogConfigBase.subclasses()
+
+    assert "RomanPlusRubinCatalogConfig" in CatalogConfigBase.subclasses_by_class()

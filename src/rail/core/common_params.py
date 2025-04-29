@@ -1,6 +1,6 @@
 """ Parameters that are shared between stages """
 
-from typing import Any, Optional
+from typing import Any
 
 from ceci.config import StageConfig
 from ceci.config import StageParameter as Param
@@ -8,8 +8,8 @@ from ceci.config import StageParameter as Param
 lsst_bands = "ugrizy"
 lsst_mag_cols = [f"mag_{band}_lsst" for band in lsst_bands]
 lsst_mag_err_cols = [f"mag_err_{band}_lsst" for band in lsst_bands]
-lsst_def_err_dict = {key: val for key, val in zip(lsst_mag_cols, lsst_mag_err_cols)}
-lsst_def_err_dict['redshift'] = None
+lsst_def_err_dict: dict[str, str|None] = dict(zip(lsst_mag_cols, lsst_mag_err_cols))
+lsst_def_err_dict["redshift"] = None
 
 lsst_def_maglims = dict(
     mag_u_lsst=27.79,
@@ -36,7 +36,7 @@ lsst_filter_list = [
     "DC2LSST_r",
     "DC2LSST_i",
     "DC2LSST_z",
-    "DC2LSST_y"
+    "DC2LSST_y",
 ]
 
 
@@ -66,14 +66,14 @@ SHARED_PARAMS = StageConfig(
         dict,
         lsst_def_err_dict,
         msg="dictionary that contains the columns that will be used to"
-            "predict as the keys and the errors associated with that column as the values."
-            "If a column does not havea an associated error its value shoule be `None`",
+        "predict as the keys and the errors associated with that column as the values."
+        "If a column does not havea an associated error its value shoule be `None`",
     ),
     mag_limits=Param(dict, lsst_def_maglims, msg="Limiting magnitdues by filter"),
     band_a_env=Param(dict, lsst_def_a_env, msg="Redenning parameters"),
     ref_band=Param(str, "mag_i_lsst", msg="band to use in addition to colors"),
     redshift_col=Param(str, "redshift", msg="name of redshift column"),
-    id_col = Param(str, "object_id", msg = "name of the object ID column"),
+    id_col=Param(str, "object_id", msg="name of the object ID column"),
     object_id_col=Param(str, "objectId", msg="name of object id column"),
     zp_errors=Param(
         dtype=list,
@@ -94,13 +94,13 @@ SHARED_PARAMS = StageConfig(
     replace_error_vals=Param(
         dtype=list,
         default=lsst_err_band_replace,
-        msg="list of values to replace negative and nan mag err values"
+        msg="list of values to replace negative and nan mag err values",
     ),
     filter_list=Param(
         dtype=list,
         default=lsst_filter_list,
         msg="list of filter files names (with no '.sed' suffix). Filters must be"
-        "in FILTER dir.  MUST BE IN SAME ORDER as 'bands'"
+        "in FILTER dir.  MUST BE IN SAME ORDER as 'bands'",
     ),
 )
 

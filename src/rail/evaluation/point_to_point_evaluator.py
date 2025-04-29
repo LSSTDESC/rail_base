@@ -2,12 +2,11 @@ from typing import Any
 
 import numpy as np
 from ceci.config import StageParameter as Param
+from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.point_estimate_metric_classes import PointToPointMetric
 
-from rail.core.data import QPHandle, TableHandle
+from rail.core.data import TableLike, QPHandle, TableHandle
 from rail.evaluation.evaluator import Evaluator
-from qp.metrics.base_metric_classes import BaseMetric, MetricOutputType
-from rail.core.data import DataHandle, Hdf5Handle, QPDictHandle, QPHandle
 
 
 class PointToPointEvaluator(Evaluator):
@@ -51,7 +50,6 @@ class PointToPointEvaluator(Evaluator):
 
         self._process_all_metrics(estimate_data, reference_data)
 
-        
 
 class PointToPointBinnedEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
@@ -71,23 +69,29 @@ class PointToPointBinnedEvaluator(Evaluator):
         point_estimate_key=Param(
             str, "zmode", required=False, msg="The key in the point estimate table."
         ),
-        bin_col = Param(str, "redshift", required=False, msg="The column metrics are binned by"),
-        bin_min = Param(float, 0.0, required=False, msg="The mininum value of the binning edge"),
-        bin_max = Param(float, 3.0, required=False, msg="The maximum value of the binning edge"),
-        nbin = Param(int, 10, required=False, msg="The mininum value of the binning edge"),
+        bin_col=Param(
+            str, "redshift", required=False, msg="The column metrics are binned by"
+        ),
+        bin_min=Param(
+            float, 0.0, required=False, msg="The mininum value of the binning edge"
+        ),
+        bin_max=Param(
+            float, 3.0, required=False, msg="The maximum value of the binning edge"
+        ),
+        nbin=Param(
+            int, 10, required=False, msg="The mininum value of the binning edge"
+        ),
         force_exact=Param(
             bool,
             default=True,
             required=False,
             msg="Force the exact calculation.  This will not allow parallelization",
-        )
+        ),
     )
     inputs = [("input", QPHandle), ("truth", TableHandle)]
 
     metric_base_class = PointToPointMetric
-    
-    
-    
+
     def run(self) -> None:
         self._build_config_dict()
 
@@ -97,28 +101,35 @@ class PointToPointBinnedEvaluator(Evaluator):
         reference_data = data[1][self.config.hdf5_groupname][
             self.config.reference_dictionary_key
         ]
-        bin_edges = np.linspace(self.config.bin_min, self.config.bin_max, self.config.nbin)
+        bin_edges = np.linspace(
+            self.config.bin_min, self.config.bin_max, self.config.nbin
+        )
         bin_col = data[1][self.config.hdf5_groupname][self.config.bin_col]
         bin_indices = np.digitize(bin_col, bins=bin_edges) - 1
         self.run_single_node()
         table_list = []
-        
+
         for i in range(len(bin_edges) - 1):
             estimate_data_subset = estimate_data[bin_indices == i]
             reference_data_subset = reference_data[bin_indices == i]
-            
-            summary_table = self._process_all_metrics_binned(estimate_data_subset, reference_data_subset)
+
+            summary_table = self._process_all_metrics_binned(
+                estimate_data_subset, reference_data_subset
+            )
             table_list.append(summary_table)
-                    
+
         out_dict = {}
-        out_dict['bin_center'] = (bin_edges[:-1]+bin_edges[1:])/2
+        out_dict["bin_center"] = (bin_edges[:-1] + bin_edges[1:]) / 2
         metric_keys = table_list[0].keys()
         for key in metric_keys:
-            out_dict[key] = np.array([table_list[j][key][0] for j in range(len(table_list))])
+            out_dict[key] = np.array(
+                [table_list[j][key][0] for j in range(len(table_list))]
+            )
         self._summary_handle = self.add_handle("summary", data=out_dict)
 
-
-    def _process_all_metrics_binned(self, estimate_data: Any, reference_data: Any) -> None:
+    def _process_all_metrics_binned(
+        self, estimate_data: Any, reference_data: Any
+    ) -> TableLike:
         """This function writes out metric values when operating in non-parallel mode.
 
         Parameters
@@ -152,7 +163,7 @@ class PointToPointBinnedEvaluator(Evaluator):
                 summary_table[metric] = np.array([metric_result])
 
         return summary_table
-    
+
     def _process_all(self, data_tuple: Any) -> None:
         estimate_data = np.squeeze(data_tuple[0].ancil[self.config.point_estimate_key])
         reference_data = data_tuple[1][self.config.hdf5_groupname][
