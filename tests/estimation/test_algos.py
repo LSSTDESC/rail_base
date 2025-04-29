@@ -4,9 +4,9 @@ import numpy as np
 import pytest
 import scipy.special
 
-from rail.core.data import PqHandle, TableHandle
+from rail.core.data import PqHandle, TableHandle, QPHandle
 from rail.core.stage import RailStage
-from rail.estimation.algos import random_gauss, train_z
+from rail.estimation.algos import random_gauss, train_z, gaussian_pz
 from rail.utils.path_utils import RAILDIR
 from rail.utils.testing_utils import one_algo
 
@@ -187,3 +187,24 @@ def test_train_pz_with_wrong_columns_table_wgroupname() -> None:
     with pytest.raises(KeyError):
         # testing the case where data is a table
         train_pz._check_column_names(training_data3, train_pz.stage_columns)
+
+
+
+def test_gaussian_pz() -> None:
+        
+    DS.clear()
+    DS.__class__.allow_overwrite = False
+
+    input_path = os.path.join(
+        RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.hdf5"
+    )
+
+    input_data = DS.read_file("input_data", QPHandle, input_path)
+
+    inform_gauss_pz = gaussian_pz.GaussianPzInformer.make_stage()
+    model = inform_gauss_pz.inform(input_data)
+    
+    estimate_gauss_pz = gaussian_pz.GaussianPzEstimator.make_stage(model=model)
+    outdata = estimate_gauss_pz.estimate(input_data)
+    assert outdata.data.npdf == 10
+    

@@ -223,9 +223,9 @@ def test_point_to_point_binning_evaluator(
 
     _ptp_results = ptp_stage_binning.evaluate(ensemble, ztrue_data)
 
-    # for stage in [ptp_stage]:
-    #     os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
-    #     os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
+    for stage in [ptp_stage_binning]:
+        os.remove(stage.get_output(stage.get_aliased_tag("output"), final_name=True))
+        os.remove(stage.get_output(stage.get_aliased_tag("summary"), final_name=True))
 
 
 def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:

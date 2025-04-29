@@ -148,9 +148,14 @@ class PzInformer(RailStage):
         dict[str, DataHandle]
             Handle providing access to trained model
         """
-
-        self.set_data("input", training_data)
-        self.set_data("truth", truth_data)
+        if training_data is None:
+            self.set_data("input", "")
+        else:
+            self.set_data("input", training_data)
+        if truth_data is None:
+            self.set_data("truth", "")
+        else:
+            self.set_data("truth", truth_data)
         self.validate()
         self.run()
         self.finalize()
