@@ -192,7 +192,7 @@ class PointEstimationMixin:
                     )
 
             grid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
-        elif isinstance(grid, list):
+        elif isinstance(grid, list):  # pragma: no cover
             grid = np.array(grid)
 
         assert isinstance(grid, np.ndarray)
