@@ -6,7 +6,7 @@ They are distinguished by their input data types, and the models they output can
 be used for their corresponding Estimator, Summarizer, or Classifier stages.
 """
 
-from typing import Any
+from typing import Any, Generator
 
 import qp
 
@@ -78,8 +78,8 @@ class PzInformer(RailStage):
     """The base class for informing models used to make photo-z data products from
     existing ensembles of p(z) distributions.
 
-    PzSummarizers can use a generic "model", the details of which depends on the sub-class.
-    Some summaer will have associated PzInformer classes, which can be used to inform
+    PzInformer can use a generic "model", the details of which depends on the sub-class.
+    Some summarizer will have associated PzInformer classes, which can be used to inform
     those models.
 
     (Note, "Inform" is more generic than "Train" as it also applies to algorithms that
@@ -92,7 +92,7 @@ class PzInformer(RailStage):
 
     name = "PzInformer"
     config_options = RailStage.config_options.copy()
-    inputs = [("input", QPHandle)]
+    inputs = [("input", QPHandle), ("truth", TableHandle)]
     outputs = [("model", ModelHandle)]
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
@@ -100,7 +100,28 @@ class PzInformer(RailStage):
         super().__init__(args, **kwargs)
         self.model = None
 
-    def inform(self, training_data: qp.Ensemble) -> DataHandle:
+    def _setup_iterator(self) -> Generator:
+        itrs = [
+            self.input_iterator("input", groupname=""),
+            self.input_iterator("truth", groupname=self.config.hdf5_groupname),
+        ]
+
+        for it in zip(*itrs):
+            first = True
+            for s, e, d in it:
+                if first:
+                    start = s
+                    end = e
+                    qp_ens = d
+                    first = False
+                else:
+                    true_redshift = d[self.config.redshift_col]
+
+            yield start, end, qp_ens, true_redshift
+
+    def inform(
+        self, training_data: qp.Ensemble | None=None, truth_data: TableLike | None = None,
+    ) -> dict[str, DataHandle]:
         """The main interface method for Informers
 
         This will attach the input_data to this `Informer`
@@ -119,14 +140,20 @@ class PzInformer(RailStage):
         input_data
             Per-galaxy p(z), and any ancilary data associated with it
 
+        truth_data
+            Table with the true redshifts
+
         Returns
         -------
-        DataHandle
+        dict[str, DataHandle]
             Handle providing access to trained model
         """
 
         self.set_data("input", training_data)
+        self.set_data("truth", truth_data)
         self.validate()
         self.run()
         self.finalize()
-        return self.get_handle("model")
+        return dict(
+            model=self.get_handle("model"),
+        )
