@@ -111,7 +111,7 @@ class SharedParams:
     try:
         _config_text = SHARED_PARAMS.numpy_style_help_text()
         __doc__: str | None = f"\n\nParameters\n----------\n{_config_text}"
-    except Exception:
+    except Exception:  # pragma: no cover
         pass
 
     @staticmethod
