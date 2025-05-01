@@ -52,41 +52,6 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self._output_handle: QPHandle | None = None
         self.model = None
 
-    def open_model(self, **kwargs: Any) -> ModelLike:
-        """Load the model and attach it to this Estimator
-
-        Parameters
-        ----------
-        **kwargs
-            Should include 'model', see notes
-
-        Notes
-        -----
-        The keyword arguement 'model' should be either
-
-        1. an object with a trained model,
-        2. a path pointing to a file that can be read to obtain the trained model,
-        3. or a `ModelHandle` providing access to the trained model.
-
-        Returns
-        -------
-        ModelLike:
-            The object encapsulating the trained model.
-        """
-        model = kwargs.get("model", None)
-        if model is None or model == "None":
-            self.model = None
-            return self.model
-        if isinstance(model, str):
-            self.model = self.set_data("model", data=None, path=model)
-            self.config["model"] = model
-            return self.model
-        if isinstance(model, ModelHandle):
-            if model.has_path:
-                self.config["model"] = model.path
-        self.model = self.set_data("model", model)
-        return self.model
-
     def estimate(self, input_data: TableLike) -> DataHandle:
         """The main interface method for the photo-z estimation
 
@@ -213,41 +178,6 @@ class PzEstimator(RailStage, PointEstimationMixin):
         super().__init__(args, **kwargs)
         self._output_handle: QPHandle | None = None
         self.model = None
-
-    def open_model(self, **kwargs: Any) -> ModelLike:
-        """Load the model and attach it to this Estimator
-
-        Parameters
-        ----------
-        **kwargs
-            Should include 'model', see notes
-
-        Notes
-        -----
-        The keyword arguement 'model' should be either
-
-        1. an object with a trained model,
-        2. a path pointing to a file that can be read to obtain the trained model,
-        3. or a `ModelHandle` providing access to the trained model.
-
-        Returns
-        -------
-        ModelLike:
-            The object encapsulating the trained model.
-        """
-        model = kwargs.get("model", None)
-        if model is None or model == "None":
-            self.model = None
-            return self.model
-        if isinstance(model, str):
-            self.model = self.set_data("model", data=None, path=model)
-            self.config["model"] = model
-            return self.model
-        if isinstance(model, ModelHandle):
-            if model.has_path:
-                self.config["model"] = model.path
-        self.model = self.set_data("model", model)
-        return self.model
 
     def estimate(self, input_data: QPHandle) -> DataHandle:
         """The main interface method for the photo-z estimation

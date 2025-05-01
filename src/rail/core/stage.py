@@ -10,7 +10,7 @@ from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
 from ceci.stage import PipelineStage
 
-from .data import DATA_STORE, DataHandle, DataLike
+from .data import DATA_STORE, DataHandle, DataLike, ModelHandle
 
 T = TypeVar("T", bound="RailPipeline")
 S = TypeVar("S", bound="RailStage")
@@ -604,3 +604,43 @@ class RailStage(PipelineStage):
 
     def _get_stage_columns(self) -> None:
         self.stage_columns = None  # pragma: no cover
+
+    def open_model(self, tag: str = "model", **kwargs: Any) -> ModelLike:
+        """Load the mode and/or attach it to this Stage
+
+        Parameters
+        ----------
+        tag
+            Input tag associated to the model
+
+        **kwargs
+            Should include 'model', see notes
+
+        Notes
+        -----
+        The keyword arguement 'model' should be either
+
+        1. an object with a trained model,
+        2. a path pointing to a file that can be read to obtain the trained model,
+        3. or a `ModelHandle` providing access to the trained model.
+
+        Returns
+        -------
+        Any
+            The object encapsulating the trained model.
+        """
+        if tag not in self.input_tags():  # pragma: no cover
+            raise KeyError(f"Stage {self} can not open model with input tag {tag}")
+        model = kwargs.get(tag, None)
+        if model is None or model == "None":  # pragma: no cover
+            self.model = None
+            return self.model
+        if isinstance(model, str):
+            self.model = self.set_data(tag, data=None, path=model)
+            self.config[tag] = model
+            return self.model
+        if isinstance(model, ModelHandle):
+            if model.has_path:
+                self.config[tag] = model.path
+        self.model = self.set_data(tag, model)
+        return self.model

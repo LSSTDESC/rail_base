@@ -71,46 +71,6 @@ class Creator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def open_model(self, **kwargs: Any) -> ModelLike:
-        """Load the model and/or attach it to this Creator.
-
-        Parameters
-        ----------
-        **kwargs:
-            Set notes for deailts
-
-        Returns
-        -------
-        Model:
-            The object encapsulating the trained model
-
-        Notes
-        -----
-        The 'model' keyword a be one of several things:
-
-        str:
-            It will be treated as a filename
-        ModelHandle:
-            it will be used to access the model directly
-        Any:
-            It will be treate the data for the model
-        None:
-            It well reset the model to None
-        """
-        model = kwargs.get("model", None)
-        if model is None or model == "None":  # pragma: no cover
-            self.model = None
-            return self.model
-        if isinstance(model, str):  # pragma: no cover
-            self.model = self.set_data("model", data=None, path=model)
-            self.config["model"] = model
-            return self.model
-        if isinstance(model, ModelHandle):  # pragma: no cover
-            if model.has_path:
-                self.config["model"] = model.path
-        self.model = self.set_data("model", model)
-        return self.model
-
     def sample(
         self, n_samples: int, seed: int | None = None, **kwargs: Any
     ) -> DataHandle:
@@ -177,41 +137,6 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
         if not isinstance(args, dict):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
-
-    def open_model(self, **kwargs: Any) -> ModelLike:
-        """Load the model and/or attach it to this PosteriorCalculator.
-
-        Parameters
-        ----------
-        **kwargs
-            Should include 'model', see notes
-
-        Notes
-        -----
-        The keyword arguement 'model' should be either
-
-        1. an object with a trained model,
-        2. a path pointing to a file that can be read to obtain the trained model,
-        3. or a `ModelHandle` providing access to the trained model.
-
-        Returns
-        -------
-        ModelLike:
-            The object encapsulating the trained model.
-        """
-        model = kwargs.get("model", None)
-        if model is None or model == "None":  # pragma: no cover
-            self.model = None
-            return self.model
-        if isinstance(model, str):  # pragma: no cover
-            self.model = self.set_data("model", data=None, path=model)
-            self.config["model"] = model
-            return self.model
-        if isinstance(model, ModelHandle):  # pragma: no cover
-            if model.has_path:
-                self.config["model"] = model.path
-        self.model = self.set_data("model", model)
-        return self.model
 
     def get_posterior(self, input_data: TableLike, **kwargs: Any) -> DataHandle:
         """Return posteriors for the given column.

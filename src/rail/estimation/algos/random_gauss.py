@@ -11,7 +11,7 @@ import qp
 from ceci.config import StageParameter as Param
 from scipy.stats import norm
 
-from rail.core.data import TableHandle, TableLike
+from rail.core.data import ModelHandle, TableHandle, TableLike
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
 
@@ -30,7 +30,7 @@ class RandomGaussEstimator(CatEstimator):
     """Random CatEstimator"""
 
     name = "RandomGaussEstimator"
-    inputs = [("input", TableHandle)]
+    inputs = [("input", TableHandle), ("model", ModelHandle)]
     config_options = CatEstimator.config_options.copy()
     config_options.update(
         rand_width=Param(float, 0.025, "ad hock width of PDF"),

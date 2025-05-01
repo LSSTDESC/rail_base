@@ -15,7 +15,7 @@ from rail.core.stage import RailStage
 # for backwards compatibility
 
 
-class CatSummarizer(RailStage):
+class CatSummarizer(RailStage):  # pragma: no cover
     """The base class for classes that go from catalog-like tables
     to ensemble NZ estimates.
 
@@ -128,7 +128,7 @@ class PZSummarizer(RailStage):
         return (bvals_r, yvals_r)
 
 
-class SZPZSummarizer(RailStage):
+class SZPZSummarizer(RailStage):  # pragma: no cover
     """The base class for classes that use two sets of data: a photometry sample with
     spec-z values, and a photometry sample with unknown redshifts, e.g. minisom_som and
     outputs a QP Ensemble with bootstrap realization of the N(z) distribution
@@ -151,41 +151,6 @@ class SZPZSummarizer(RailStage):
         # NOTE: open model removed from init, need to put an
         # `open_model` call explicitly in the run method for
         # each summarizer.
-
-    def open_model(self, **kwargs: Any) -> Any:
-        """Load the mode and/or attach it to this Summarizer
-
-        Parameters
-        ----------
-        **kwargs
-            Should include 'model', see notes
-
-        Notes
-        -----
-        The keyword arguement 'model' should be either
-
-        1. an object with a trained model,
-        2. a path pointing to a file that can be read to obtain the trained model,
-        3. or a `ModelHandle` providing access to the trained model.
-
-        Returns
-        -------
-        Any
-            The object encapsulating the trained model.
-        """
-        model = kwargs.get("model", None)
-        if model is None or model == "None":  # pragma: no cover
-            self.model = None
-            return self.model
-        if isinstance(model, str):
-            self.model = self.set_data("model", data=None, path=model)
-            self.config["model"] = model
-            return self.model
-        if isinstance(model, ModelHandle):
-            if model.has_path:
-                self.config["model"] = model.path
-        self.model = self.set_data("model", model)
-        return self.model
 
     def summarize(self, input_data: qp.Ensemble, spec_data: np.ndarray) -> qp.Ensemble:
         """The main run method for the summarization, should be implemented
