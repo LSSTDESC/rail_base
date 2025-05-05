@@ -19,8 +19,9 @@ class GaussianPzInformer(PzInformer):
     name = "GaussianPzInformer"
     config_options = PzInformer.config_options.copy()
 
-    def run(self) -> None:
-        self.add_data("model", np.array([None]))
+    def _finalize_run(self) -> None:
+        self.model = np.array([None])
+        PzInformer._finalize_run(self)
 
 
 class GaussianPzEstimator(PzEstimator):
