@@ -20,7 +20,9 @@ from rail.estimation.algos.uniform_binning import UniformBinningClassifier
 from rail.estimation.algos.var_inf import (VarInfStackInformer,
                                            VarInfStackSummarizer)
 from rail.estimation.classifier import CatClassifier, PZClassifier
-from rail.estimation.estimator import CatEstimator
+from rail.estimation.estimator import CatEstimator, PzEstimator
+from rail.estimation.informer import CatInformer, PzInformer
+
 from rail.estimation.summarizer import (CatSummarizer, PZSummarizer,
                                         SZPZSummarizer)
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
