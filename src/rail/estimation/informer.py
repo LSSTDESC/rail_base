@@ -38,6 +38,9 @@ class CatInformer(RailStage):
     config_options = RailStage.config_options.copy()
     inputs = [("input", TableHandle)]
     outputs = [("model", ModelHandle)]
+    config_options.update(
+        hdf5_groupname=SHARED_PARAMS,
+    )
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize Informer that can inform models for redshift estimation"""
