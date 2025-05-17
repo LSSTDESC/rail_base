@@ -21,7 +21,7 @@ dependencies = [
     "numpy",
     "click",
     "ceci>=2.1",
-    "qp-prob>=0.8.3",
+    "qp-prob>=1.0.0",
     "scipy>=1.9.0",
 ]
 

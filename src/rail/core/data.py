@@ -9,6 +9,7 @@ from typing import Any, Callable, Iterable, TypeAlias, TypeVar
 
 import qp
 import tables_io
+from tables_io import hdf5 as tab_hdf5
 
 from .model import Model
 
@@ -385,7 +386,7 @@ class TableHandle(DataHandle):
         This will simply open the file and return a file-like object to the caller.
         It will not read or cache the data
         """
-        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
+        return tables_io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
     def _read(cls, path: str, **kwargs: Any) -> TableLike:
@@ -400,7 +401,7 @@ class TableHandle(DataHandle):
     def _size(self, path: str, **kwargs: Any) -> int:
         if path in [None, "none", "None"]:  # pragma: no cover
             return 0
-        return tables_io.io.getInputDataLength(path, **kwargs)
+        return tab_hdf5.get_input_data_length(path, **kwargs)
 
     def _data_size(self, data: TableLike, **kwargs: Any) -> int:
         group_name = kwargs.get("groupname", None)
@@ -424,11 +425,11 @@ class TableHandle(DataHandle):
                 table = self.data
         else:
             table = self.data
-        for start, end in tables_io.ioUtils.data_ranges_by_rank(
+        for start, end in tab_hdf5.data_ranges_by_rank(
             nrows, kwargs.get("chunk_size", 100000), 1, 0
         ):
             if isinstance(self.data, dict):
-                yield start, end, tables_io.arrayUtils.sliceDict(
+                yield start, end, tables_io.array_utils.slice_dict(
                     table, slice(start, end)
                 )
             else:  # pragma: no cover
@@ -447,7 +448,7 @@ class TableHandle(DataHandle):
         parent_groupname: str | None = None,
         **kwargs: Any,
     ) -> None:
-        tables_io.io.check_columns(
+        tables_io.check_columns(
             path, columns_to_check, parent_groupname=parent_groupname, **kwargs
         )
 
@@ -463,7 +464,7 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
     ) -> tuple[GroupLike, FileLike]:
         initial_dict = cls._get_allocation_kwds(data, data_length)
         comm = kwargs.get("communicator", None)
-        group, fout = tables_io.io.initializeHdf5WriteSingle(
+        group, fout = tab_hdf5.initialize_HDF5_write_single(
             path, groupname=None, comm=comm, **initial_dict
         )
         return group, fout
@@ -489,11 +490,11 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
         end: int,
         **kwargs: Any,
     ) -> None:
-        tables_io.io.writeDictToHdf5ChunkSingle(fileObj, data, start, end, **kwargs)
+        tab_hdf5.write_dict_to_HDF5_chunk_single(fileObj, data, start, end, **kwargs)
 
     @classmethod
     def _finalize_write(cls, data: TableLike, fileObj: FileLike, **kwargs: Any) -> None:
-        return tables_io.io.finalizeHdf5Write(fileObj, **kwargs)
+        return tab_hdf5.finalize_HDF5_write(fileObj, **kwargs)
 
 
 class FitsHandle(TableHandle):
@@ -508,7 +509,7 @@ class PqHandle(TableHandle):
     suffix = "pq"
 
     def _size(self, path: str, **kwargs: Any) -> int:
-        return tables_io.io.getInputDataLengthPq(path, **kwargs)
+        return tab_hdf5.get_input_data_length(path, **kwargs)
 
 
 class QPHandle(DataHandle):
@@ -525,7 +526,7 @@ class QPHandle(DataHandle):
         This will simply open the file and return a FileLike object to the caller.
         It will not read or cache the data
         """
-        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
+        return tables_io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
     def _read(cls, path: str, **kwargs: Any) -> qp.Ensemble:
@@ -575,14 +576,14 @@ class QPHandle(DataHandle):
             return self._data_size(self.data)
         if path in [None, "none", "None"]:  # pragma: no cover
             return 0
-        return tables_io.io.getInputDataLengthHdf5(path, groupname="data")
+        return tab_hdf5.get_input_data_length(path, groupname="data")
 
     def _data_size(self, data: qp.Ensemble, **kwargs: Any) -> int:
         return self.data.npdf
 
     def _in_memory_iterator(self, **kwargs: Any) -> Iterable:
         nrows = self.data.npdf
-        for start, end in tables_io.ioUtils.data_ranges_by_rank(
+        for start, end in tab_hdf5.data_ranges_by_rank(
             nrows, kwargs.get("chunk_size", 100000), 1, 0
         ):
             yield start, end, self.data[start:end]
@@ -608,7 +609,7 @@ class QPDictHandle(DataHandle):
         This will simply open the file and return a FileLike object to the caller.
         It will not read or cache the data
         """
-        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
+        return tables_io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
     def _read(cls, path: str, **kwargs: Any) -> dict[str, qp.Ensemble]:
@@ -659,7 +660,7 @@ class QPOrTableHandle(QPHandle, Hdf5Handle):
         This will simply open the file and return a file-like object to the caller.
         It will not read or cache the data
         """
-        return tables_io.io.io_open(path, **kwargs)  # pylint: disable=no-member
+        return tables_io.io_open(path, **kwargs)  # pylint: disable=no-member
 
     @classmethod
     def _read(cls, path: str, **kwargs: Any) -> qp.Ensemble | TableLike:

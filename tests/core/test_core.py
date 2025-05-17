@@ -6,12 +6,19 @@ import numpy as np
 import pytest
 
 from rail.core.common_params import copy_param, set_param_default
-from rail.core.data import (DataHandle, DataStore, FitsHandle, Hdf5Handle,
-                            ModelHandle, PqHandle, QPHandle, QPOrTableHandle)
+from rail.core.data import (
+    DataHandle,
+    DataStore,
+    FitsHandle,
+    Hdf5Handle,
+    ModelHandle,
+    PqHandle,
+    QPHandle,
+    QPOrTableHandle,
+)
 from rail.core.model import Model
 from rail.core.stage import RailStage
-from rail.utils.catalog_utils import (CatalogConfigBase,
-                                      RomanPlusRubinCatalogConfig)
+from rail.utils.catalog_utils import CatalogConfigBase, RomanPlusRubinCatalogConfig
 from rail.utils.path_utils import RAILDIR
 
 # def test_data_file():
@@ -165,15 +172,17 @@ def test_hdf5_handle() -> None:
         "test_dc2_training_9816_chunked.hdf5",
     )
     handle_chunked = Hdf5Handle("chunked", handle.data, path=datapath_chunked)
-    from tables_io.arrayUtils import (  # pylint: disable=import-outside-toplevel
-        getInitializationForODict, sliceDict)
+    from tables_io.utils.array_utils import (  # pylint: disable=import-outside-toplevel
+        get_initialization_for_ODict,
+        slice_dict,
+    )
 
     num_rows = len(handle.data["photometry"]["id"])
     check_num_rows = len(handle()["photometry"]["id"])
     assert num_rows == check_num_rows
     chunk_size = 1000
     data = handle.data["photometry"]
-    init_dict = getInitializationForODict(data)
+    init_dict = get_initialization_for_ODict(data)
     with handle_chunked.open(mode="w") as fout:
         for k, v in init_dict.items():
             fout.create_dataset(k, v[0], v[1])
@@ -182,7 +191,7 @@ def test_hdf5_handle() -> None:
             end = i + chunk_size
             end = min(end, num_rows)
             handle_chunked.set_data(
-                sliceDict(handle.data["photometry"], slice(start, end)), partial=True
+                slice_dict(handle.data["photometry"], slice(start, end)), partial=True
             )
             handle_chunked.write_chunk(start, end)
     write_size = handle_chunked.size()
