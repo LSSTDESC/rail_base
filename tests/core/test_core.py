@@ -219,7 +219,6 @@ def test_fits_handle() -> None:
 
 def test_model_handle() -> None:
     DS = RailStage.data_store
-    DS.clear()
     model_path = os.path.join(
         RAILDIR,
         "rail",
@@ -256,8 +255,13 @@ def test_model_handle() -> None:
 
     _model4 = mh4.read()
 
-    assert model1 is model2
-    assert model2 is model3
+    for k, v in model1.items():
+        if isinstance(v, np.ndarray):
+            assert (v == model2[k]).all()
+            assert (v == model3[k]).all()
+        else:
+            assert v == model2[k]
+            assert v == model3[k]
 
     mh3 = ModelHandle("model3", path=model_path_copy, data=model1)
     with mh3.open(mode="w") as fout:
@@ -268,7 +272,6 @@ def test_model_handle() -> None:
 
 def test_data_store() -> None:
     DS = RailStage.data_store
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     datapath_hdf5 = os.path.join(
@@ -284,49 +287,24 @@ def test_data_store() -> None:
         RAILDIR, "rail", "examples_data", "testdata", "test_dc2_training_9816_copy.pq"
     )
 
-    DS.add_data("hdf5", None, Hdf5Handle, path=datapath_hdf5)
-    DS.add_data("pq", None, PqHandle, path=datapath_pq)
+    hdf5_handle = DS.read_file("hdf5", Hdf5Handle, path=datapath_hdf5)
+    pq_handle = DS.read_file("pq", PqHandle, path=datapath_pq)
 
-    with DS.open("hdf5") as f:
+    with hdf5_handle.open() as f:
         assert f
 
-    data_pq = DS.read("pq")
-    data_hdf5 = DS.read("hdf5")
+    data_pq = pq_handle.read()
+    data_hdf5 = hdf5_handle.read()
 
-    DS.add_data("pq_copy", data_pq, PqHandle, path=datapath_pq_copy)
-    DS.add_data("hdf5_copy", data_hdf5, Hdf5Handle, path=datapath_hdf5_copy)
-    DS.write("pq_copy")
-    DS.write("hdf5_copy")
-
-    with pytest.raises(KeyError) as _errinfo:
-        DS.read("nope")
-    with pytest.raises(KeyError) as _errinfo:
-        DS.open("nope")
-    with pytest.raises(KeyError) as _errinfo:
-        DS.write("nope")
-
-    with pytest.raises(TypeError) as _errinfo:
-        DS["nope"] = None
-    with pytest.raises(ValueError) as _errinfo:
-        DS["pq"] = DS["pq"]
-    with pytest.raises(ValueError) as _errinfo:
-        DS.pq = DS["pq"]
+    pq_copy = DS.add_data("pq_copy", data_pq, PqHandle, path=datapath_pq_copy)
+    hdf5_copy = DS.add_data("hdf5_copy", data_hdf5, Hdf5Handle, path=datapath_hdf5_copy)
+    pq_copy.write()
+    hdf5_copy.write()
 
     a_handle = DS.add_handle("pq_copy_2", PqHandle, path=datapath_pq_copy)
     assert a_handle
 
     assert repr(DS)
-
-    DS2 = DataStore(pq=DS.pq)
-    assert isinstance(DS2.pq, DataHandle)
-
-    # pop the 'pq' data item to avoid overwriting file under git control
-    DS.pop("pq")
-    # pop the 'pq_copy_2' because it is empty
-    DS.pop("pq_copy_2")
-
-    DS.write_all()
-    DS.write_all(force=True)
 
     os.remove(datapath_hdf5_copy)
     os.remove(datapath_pq_copy)

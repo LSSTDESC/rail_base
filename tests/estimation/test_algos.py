@@ -72,7 +72,6 @@ def test_train_pz() -> None:
 
 
 def test_train_pz_with_wrong_columns_path() -> None:
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     datapath_pq = os.path.join(
@@ -102,7 +101,6 @@ def test_train_pz_with_wrong_columns_path() -> None:
 
 
 def test_train_pz_with_wrong_columns_nogroupname() -> None:
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     datapath_pq = os.path.join(
@@ -129,7 +127,6 @@ def test_train_pz_with_wrong_columns_nogroupname() -> None:
 
 
 def test_train_pz_with_wrong_columns_table() -> None:
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     datapath_pq = os.path.join(
@@ -160,7 +157,6 @@ def test_train_pz_with_wrong_columns_table() -> None:
 
 
 def test_train_pz_with_wrong_columns_table_wgroupname() -> None:
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     traindata = os.path.join(
@@ -193,7 +189,6 @@ def test_train_pz_with_wrong_columns_table_wgroupname() -> None:
 
 def test_gaussian_pz() -> None:
         
-    DS.clear()
     DS.__class__.allow_overwrite = False
 
     input_path = os.path.join(

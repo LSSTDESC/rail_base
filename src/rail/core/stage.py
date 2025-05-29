@@ -10,7 +10,9 @@ from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
 from ceci.stage import PipelineStage
 
-from .data import DATA_STORE, DataHandle, DataLike, ModelHandle
+from .data import DATA_STORE
+from .data_types import DataLike, ModelLike
+from .handle import DataHandle, ModelHandle
 
 T = TypeVar("T", bound="RailPipeline")
 S = TypeVar("S", bound="RailStage")
@@ -252,6 +254,8 @@ class RailStage(PipelineStage):
         self._input_length: int | None = None
         self.io = StageIO(self)
         self.stage_columns: list[str] | None = None
+        self._handles: dict[str, DataHandle] = {}
+        self.model: ModelLike | None = None
 
     @classmethod
     def make_and_connect(cls: type[S], **kwargs: Any) -> S:
@@ -295,21 +299,21 @@ class RailStage(PipelineStage):
             The path to the data, only needed if we might need to read the data
 
         allow_missing
-            If False this will raise a key error if the tag is not in the DataStore
+            If False this will raise a key error if the DataHandle has not been made
 
         Returns
         -------
         DataHandle
             The handle that give access to the associated data
         """
-        aliased_tag = self.get_aliased_tag(tag)
-        handle = self.data_store.get(aliased_tag)
-        if handle is None:
-            if not allow_missing:
-                raise KeyError(
-                    f"{self.instance_name} failed to get data by handle {aliased_tag}, associated to {tag}"
-                )
-            handle = self.add_handle(tag, path=path)
+        if tag in self._handles:
+            return self._handles[tag]
+        if not allow_missing:
+            aliased_tag = self.get_aliased_tag(tag)
+            raise KeyError(
+                f"Stage {self.name} does not have a DataHandle {tag} aliased to {aliased_tag}"
+            )
+        handle = self.add_handle(tag, path=path)
         return handle
 
     def add_handle(
@@ -345,10 +349,8 @@ class RailStage(PipelineStage):
         handle = handle_type(
             aliased_tag, path=path, data=data, creator=self.instance_name
         )
-        print(
-            f"Inserting handle into data store.  {aliased_tag}: {handle.path}, {handle.creator}"
-        )
-        self.data_store[aliased_tag] = handle
+        print(f"Created Handle.  {aliased_tag}: {handle.path}, {handle.creator}")
+        self._handles[tag] = handle
         return handle
 
     def get_data(self, tag: str, allow_missing: bool = True) -> DataLike:
@@ -416,6 +418,7 @@ class RailStage(PipelineStage):
                 if data.has_path:
                     self._inputs[tag] = data.path
             arg_data = data.data
+            self._handles[tag] = data
         else:
             if path is None:
                 arg_data = data
@@ -478,8 +481,8 @@ class RailStage(PipelineStage):
         chunk_size = kwargs.get("chunk_size", self.config.chunk_size)
 
         if handle.path:
-            if handle.path in ['None', 'none']:
-                return []            
+            if handle.path in ["None", "none"]:
+                return []
             self._input_length = handle.size(groupname=groupname)
 
             total_chunks_needed = ceil(self._input_length / chunk_size)

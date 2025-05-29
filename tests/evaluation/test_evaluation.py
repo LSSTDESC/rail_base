@@ -5,7 +5,7 @@ import qp
 
 from rail.estimation.algos.equal_count import EqualCountClassifier
 import rail.evaluation.metrics.pointestimates as pe
-from rail.core.data import QPHandle, QPOrTableHandle, TableHandle
+from rail.core.data import QPHandle, QPOrTableHandle, TableHandle, Hdf5Handle
 from rail.core.stage import RailStage
 from rail.evaluation.dist_to_dist_evaluator import DistToDistEvaluator
 from rail.evaluation.dist_to_point_evaluator import DistToPointEvaluator
@@ -71,7 +71,7 @@ def test_evaluation_stage() -> None:
     _zgrid, zspec, pdf_ens, _true_ez = construct_test_ensemble()
     pdf = DS.add_data("pdf", pdf_ens, QPHandle)
     truth_table = dict(redshift=zspec)
-    truth = DS.add_data("truth", truth_table, TableHandle)
+    truth = DS.add_data("truth", truth_table, Hdf5Handle)
     evaluator = OldEvaluator.make_stage(name="Eval", redshift_col="redshift")
     evaluator.evaluate(pdf, truth)
 
@@ -249,8 +249,8 @@ def test_single_evaluator(get_evaluation_files: tuple[str, str]) -> None:
         truth_point_estimates=["redshift"],
         chunk_size=1000,
     )
-    ensemble_d = DS.add_data("pdfs_data_2", None, QPOrTableHandle, path=pdfs_file)
-    ztrue_data_d = DS.add_data("ztrue_data_2", None, QPOrTableHandle, path=ztrue_file)
+    ensemble_d = DS.read_file("pdfs_data_2", QPOrTableHandle, path=pdfs_file)
+    ztrue_data_d = DS.read_file("ztrue_data_2", QPOrTableHandle, path=ztrue_file)
 
     single_stage = SingleEvaluator.make_stage(name="single", **stage_dict)
     single_stage_single = SingleEvaluator.make_stage(

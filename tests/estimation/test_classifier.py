@@ -24,7 +24,6 @@ inputdata = os.path.join(RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.h
     ],
 )
 def test_UniformBinningClassifier(input_param: dict) -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = UniformBinningClassifier.make_stage(
@@ -38,7 +37,6 @@ def test_UniformBinningClassifier(input_param: dict) -> None:
 
 
 def test_UniformBinningClassifier_binsize() -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = UniformBinningClassifier.make_stage(
@@ -77,7 +75,6 @@ def test_UniformBinningClassifier_binsize() -> None:
 
 
 def test_UniformBinningClassifier_ancil() -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = UniformBinningClassifier.make_stage(
@@ -99,7 +96,6 @@ def test_UniformBinningClassifier_ancil() -> None:
     ],
 )
 def test_EqualCountClassifier(input_param: dict) -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = EqualCountClassifier.make_stage(
@@ -113,7 +109,6 @@ def test_EqualCountClassifier(input_param: dict) -> None:
 
 
 def test_EqualCountClassifier_nobj() -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = EqualCountClassifier.make_stage(
@@ -147,7 +142,6 @@ def test_EqualCountClassifier_nobj() -> None:
 
 
 def test_EqualCountClassifier_ancil() -> None:
-    DS.clear()
     input_data = DS.read_file("input_data", QPHandle, inputdata)
 
     tomo = EqualCountClassifier.make_stage(

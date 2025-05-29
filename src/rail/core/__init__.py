@@ -1,11 +1,32 @@
 """Core code for RAIL"""
 
-from .common_params import (SHARED_PARAMS, SharedParams, copy_param,
-                            set_param_default, set_param_defaults)
-from .data import (DATA_STORE, DataHandle, DataStore, FitsHandle, Hdf5Handle,
-                   ModelDict, ModelHandle, PqHandle, QPDictHandle, QPHandle,
-                   QPOrTableHandle, TableHandle)
+from .common_params import (
+    SHARED_PARAMS,
+    SharedParams,
+    copy_param,
+    set_param_default,
+    set_param_defaults,
+)
+from .data_types import (
+    DataLike,
+    GroupLike,
+    ModelLike,
+    TableLike,
+    FileLike,
+)
+from .data import DATA_STORE, DataStore
 from .introspection import RailEnv
+from .handle import (
+    DataHandle,
+    FitsHandle,
+    Hdf5Handle,
+    ModelHandle,
+    PqHandle,
+    QPDictHandle,
+    QPHandle,
+    QPOrTableHandle,
+    TableHandle,
+)
 from .model import Model
 from .point_estimation import PointEstimationMixin
 from .stage import RailPipeline, RailStage, StageIO
@@ -16,6 +37,11 @@ __all__ = [
     "set_param_default",
     "set_param_defaults",
     "SHARED_PARAMS",
+    "DataLike",
+    "GroupLike",
+    "ModelLike",
+    "TableLike",
+    "FileLike",
     "DataHandle",
     "TableHandle",
     "Hdf5Handle",
@@ -25,7 +51,6 @@ __all__ = [
     "QPDictHandle",
     "QPOrTableHandle",
     "Model",
-    "ModelDict",
     "ModelHandle",
     "DataStore",
     "DATA_STORE",

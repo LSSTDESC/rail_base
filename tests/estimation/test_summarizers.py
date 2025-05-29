@@ -21,7 +21,6 @@ def one_algo(
     Run summarize
     """
     DS.__class__.allow_overwrite = True
-    DS.clear()
     test_data = DS.read_file("test_data", QPHandle, testdata)
     summarizer = summarizer_class.make_stage(name=key, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data)
@@ -42,7 +41,6 @@ def one_mask_algo(
     Run summarize
     """
     DS.__class__.allow_overwrite = True
-    DS.clear()
     test_data = DS.read_file("test_data", QPHandle, testdata)
     tomo_bins = DS.read_file("tomo_bins", TableHandle, tomobins)
 

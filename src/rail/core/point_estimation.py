@@ -208,7 +208,7 @@ class PointEstimationMixin:
                 integrand = pz * loss(zx, grid)
                 return simpson(integrand, grid)
 
-            def loss(zx: NDArray, grid: NDArray, gamma: float=0.15) -> np.ndarray:
+            def loss(zx: NDArray, grid: NDArray, gamma: float = 0.15) -> np.ndarray:
                 dz = (zx - grid) / (1 + grid)
                 return 1 - 1 / (1 + (dz / gamma) ** 2)
 

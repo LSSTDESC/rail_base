@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from rail.core.data import DATA_STORE, DataHandle, TableHandle
+from rail.core.data import DATA_STORE, DataHandle, PqHandle
 from rail.creation.degraders.addRandom import AddColumnOfRandom
 from rail.creation.degraders.quantityCut import QuantityCut
 
@@ -26,7 +26,7 @@ def data() -> DataHandle:
 
     # return data in handle wrapping a pandas DataFrame
     df = pd.DataFrame(x, columns=["redshift", "u", "g", "r", "i", "z", "y"])
-    return DS.add_data("data", df, TableHandle, path="dummy.pd")
+    return DS.add_data("data", df, PqHandle)
 
 
 @pytest.fixture
@@ -45,7 +45,7 @@ def data_forspec() -> DataHandle:
 
     # return data in handle wrapping a pandas DataFrame
     df = pd.DataFrame(x, columns=["redshift", "u", "g", "r", "i", "z", "y"])
-    return DS.add_data("data_forspec", df, TableHandle, path="dummy_forspec.pd")
+    return DS.add_data("data_forspec", df, PqHandle)
 
 
 @pytest.mark.parametrize(
