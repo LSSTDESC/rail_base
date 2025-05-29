@@ -104,6 +104,100 @@ def update_source(outdir: str, dry_run: bool, package_file: str) -> None:
             os.system(com_line)
 
 
+def git_status(outdir: str, dry_run: bool, package_file: str) -> None:
+    with open(package_file, encoding="utf-8") as pfile:
+        package_dict = yaml.safe_load(pfile)
+
+    logfile = os.path.abspath("./git_status.log")
+
+    try:
+        os.unlink(logfile)
+    except:
+        pass
+    os.system(f"touch {logfile}")
+    
+    currentpath = os.path.abspath(".")
+    for key, _val in package_dict.items():
+        abspath = os.path.abspath(f"{outdir}/{key}")
+
+        if os.path.exists(f"{outdir}/{key}") is not True:  # pragma: no cover
+            print(f"Package {outdir}/{key} does not exist!")
+            continue
+
+        os.system(f"echo '------- {key} ---------' >> {logfile}")
+        com_line = f"cd {abspath} && git status >> {logfile} && cd {currentpath}"
+
+        if dry_run:
+            print(com_line)
+        else:  # pragma: no cover
+            os.system(com_line)
+
+    print(f"Wrote output to {logfile}")
+
+
+def git_diff(outdir: str, dry_run: bool, package_file: str) -> None:
+    with open(package_file, encoding="utf-8") as pfile:
+        package_dict = yaml.safe_load(pfile)
+
+    logfile = os.path.abspath("./git_diff.log")
+
+    try:
+        os.unlink(logfile)
+    except:
+        pass
+    os.system(f"touch {logfile}")
+    
+    currentpath = os.path.abspath(".")
+    for key, _val in package_dict.items():
+        abspath = os.path.abspath(f"{outdir}/{key}")
+
+        if os.path.exists(f"{outdir}/{key}") is not True:  # pragma: no cover
+            print(f"Package {outdir}/{key} does not exist!")
+            continue
+
+        os.system(f"echo '------- {key} ---------' >> {logfile}")
+        com_line = f"cd {abspath} && git diff >> {logfile} && cd {currentpath}"
+
+        if dry_run:
+            print(com_line)
+        else:  # pragma: no cover
+            os.system(com_line)
+
+    print(f"Wrote output to {logfile}")
+    
+
+def git_describe(outdir: str, dry_run: bool, package_file: str) -> None:
+    with open(package_file, encoding="utf-8") as pfile:
+        package_dict = yaml.safe_load(pfile)
+
+    logfile = os.path.abspath("./git_tags.log")
+
+    try:
+        os.unlink(logfile)
+    except:
+        pass    
+    os.system(f"touch {logfile}")
+    
+    currentpath = os.path.abspath(".")
+    for key, _val in package_dict.items():
+        abspath = os.path.abspath(f"{outdir}/{key}")
+
+        if os.path.exists(f"{outdir}/{key}") is not True:  # pragma: no cover
+            print(f"Package {outdir}/{key} does not exist!")
+            continue
+
+        os.system(f"echo '{key}' >> {logfile}")
+        com_line = f"cd {abspath} && git describe --tags >> {logfile} && cd {currentpath}"
+
+        if dry_run:
+            print(com_line)
+        else:  # pragma: no cover
+            os.system(com_line)
+
+    print(f"Wrote output to {logfile}")
+    
+    
+
 def install(outdir: str, from_source: bool, dry_run: bool, package_file: str) -> None:
     with open(package_file, encoding="utf-8") as pfile:
         package_dict = yaml.safe_load(pfile)
