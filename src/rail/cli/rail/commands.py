@@ -46,6 +46,23 @@ def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
     return 0
 
 
+@dev_group.command(name="clone-source")
+@options.outdir(default="..")
+@options.git_mode()
+@options.dry_run()
+@options.package_file()
+def clone_source(
+    outdir: str,
+    git_mode: options.GitMode,
+    dry_run: bool,
+    package_file: str,
+    **_kwargs: Any,
+) -> int:
+    """Install packages from source"""
+    scripts.clone_source(outdir, git_mode, dry_run, package_file)
+    return 0
+
+
 @cli.group(name="dev")
 def dev_group() -> None:
     """Development related sub-commands"""
