@@ -18,13 +18,8 @@ from rail.utils import catalog_utils
 def cli() -> None:
     """RAIL utility scripts"""
 
-
-@cli.group(name="dev")
-def dev_group() -> None:
-    """Development related sub-commands"""
-
     
-@dev_group.command(name="render-nb")
+@cli.command(name="render-nb")
 @options.outdir(default="docs")
 @options.clear_output()
 @options.dry_run()
@@ -40,6 +35,20 @@ def render_nb(
 ) -> int:
     """Render jupyter notebooks"""
     return scripts.render_nb(outdir, clear_output, dry_run, inputs, skip)
+
+
+@cli.command(name="get-data")
+@options.bpz_demo_data()
+@options.verbose_download()
+def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
+    """Downloads data from NERSC (if not already found)"""
+    scripts.get_data(verbose, **kwargs)
+    return 0
+
+
+@cli.group(name="dev")
+def dev_group() -> None:
+    """Development related sub-commands"""
 
 
 @dev_group.command(name="clone-source")
@@ -109,15 +118,6 @@ def install(
 ) -> int:
     """Install rail packages one by one, to be fault tolerant"""
     scripts.install(outdir, from_source, dry_run, package_file)
-    return 0
-
-
-@dev_group.command(name="get-data")
-@options.bpz_demo_data()
-@options.verbose_download()
-def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
-    """Downloads data from NERSC (if not already found)"""
-    scripts.get_data(verbose, **kwargs)
     return 0
 
 
