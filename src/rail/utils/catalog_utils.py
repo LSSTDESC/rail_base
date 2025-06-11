@@ -358,7 +358,6 @@ class ComCamKronCatalogConfig(CatalogConfigBase):
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
 
-
 class ComCamEuclidCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
 
