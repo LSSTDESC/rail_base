@@ -305,7 +305,7 @@ class RubinFLCatalogConfig(CatalogConfigBase):
     redshift_col = "redshift"
     replace_error_vals = [0.1, 0.1, 0.1, 0.1]
     zp_errors = [0.1, 0.1, 0.1, 0.1]
-    
+
 
 class ComCamGaapCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
@@ -340,7 +340,7 @@ class ComCamKronCatalogConfig(CatalogConfigBase):
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
-    
+
 
 class ComCamEuclidCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
@@ -744,6 +744,46 @@ class Roman7BandPlusRubinCatalogConfig(CatalogConfigBase):
             "roman_K213",
         ]
         return filter_list
+
+
+
+DP1_FILTERS = 'ugrizy'
+DP1_FLUX_TYPES = ['cModel', 'kron', 'sersic', 'gaap1p0', 'psf', 'gaap3p0']
+DP1_A_ENV_IN = Dc2CatalogConfig.build_base_dict()['band_a_env']
+DP1_MAGLIMS_IN = Dc2CatalogConfig.build_base_dict()['mag_limits']
+DP1_A_ENV_LIST = []
+DP1_REPLACE_ERR_VALS = []
+DP1_MAGLIMS = []
+DP1_ZP_ERRORS = []
+DP1_BANDS = []
+for filter_ in DP1_FILTERS:
+    for flux_type_ in DP1_FLUX_TYPES:
+        band = f"{filter_}_{flux_type_}"
+        DP1_BANDS.append(band)
+        DP1_A_ENV_LIST.append(DP1_A_ENV_IN[f"mag_{filter_}_cModel_obj_dered"])
+        DP1_MAGLIMS.append(DP1_MAGLIMS_IN[f"mag_{filter_}_cModel_obj_dered"])
+        DP1_REPLACE_ERR_VALS.append(0.1)
+        DP1_ZP_ERRORS.append(0.1)
+
+
+class DP1AllFluxesCatalogConfig(CatalogConfigBase):
+    """Configuration for ComCam data"""
+
+    tag = "dp1_all"
+    bandlist = DP1_BANDS
+    maglims = DP1_MAGLIMS
+    a_env = DP1_A_ENV_LIST
+    band_template = "{band}Mag"
+    band_err_template = "{band}MagErr"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i_psf"
+    redshift_col = "redshift"
+    object_id_col = "objectId"
+    hdf5_groupname = ""
+    replace_error_vals = DP1_REPLACE_ERR_VALS
+    zp_errors = DP1_ZP_ERRORS
+
+
 
 
 apply_defaults = CatalogConfigBase.apply
