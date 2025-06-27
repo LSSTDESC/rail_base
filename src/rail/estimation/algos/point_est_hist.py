@@ -71,6 +71,7 @@ class PointEstHistSummarizer(PZSummarizer):
                 s, e, test_data, mask, first, bootstrap_matrix, single_hist, hist_vals
             )
             first = False
+            del test_data
         if self.comm is not None:  # pragma: no cover
             hist_vals, single_hist = self._join_histograms(hist_vals, single_hist)
 
