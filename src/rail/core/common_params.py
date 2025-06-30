@@ -73,7 +73,7 @@ SHARED_PARAMS = StageConfig(
     band_a_env=Param(dict, lsst_def_a_env, msg="Redenning parameters"),
     ref_band=Param(str, "mag_i_lsst", msg="band to use in addition to colors"),
     redshift_col=Param(str, "redshift", msg="name of redshift column"),
-    id_col=Param(str, "object_id", msg="name of the object ID column"),
+    id_col=Param(str, "objectId", msg="name of the object ID column"),
     object_id_col=Param(str, "objectId", msg="name of object id column"),
     zp_errors=Param(
         dtype=list,
@@ -82,7 +82,7 @@ SHARED_PARAMS = StageConfig(
     ),
     calc_summary_stats=Param(
         dtype=bool,
-        default=False,
+        default=True,
         msg="Compute summary statistics",
     ),
     calculated_point_estimates=Param(
