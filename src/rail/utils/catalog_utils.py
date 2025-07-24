@@ -322,7 +322,8 @@ class ComCamGaapCatalogConfig(CatalogConfigBase):
     object_id_col = "objectId"
     hdf5_groupname = ""
     replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    
+
+        
 class ComCamGaap4BandCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
 
@@ -378,38 +379,38 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
         bands = super().band_name_dict()
-        bands["vis"] = "vis_euclidMag"
-        bands["Y"] = "y_euclidMag"
-        bands["J"] = "j_euclidMag"
-        bands["H"] = "h_euclidMag"
+        bands["vis"] = "euclid_vis_psfMag"
+        bands["Y"] = "euclid_y_unifMag"
+        bands["J"] = "euclid_j_unifMag"
+        bands["H"] = "euclid_h_unifMag"
         return bands
 
     @classmethod
     def _build_maglim_dict(cls) -> dict[str, float]:
         maglim_dict = super()._build_maglim_dict()
-        maglim_dict["vis_euclidMag"] = 26.0
-        maglim_dict["y_euclidMag"] = 23.8
-        maglim_dict["j_euclidMag"] = 24.0
-        maglim_dict["h_euclidMag"] = 24.0
+        maglim_dict["euclid_vis_psfMag"] = 26.0
+        maglim_dict["euclid_y_unifMag"] = 23.8
+        maglim_dict["euclid_j_unifMag"] = 24.0
+        maglim_dict["euclid_h_unifMag"] = 24.0
         return maglim_dict
 
     @classmethod
     def _build_a_env_dict(cls) -> dict[str, float]:
         a_env_dict = super()._build_a_env_dict()
-        a_env_dict["vis_euclidMag"] = 0.0
-        a_env_dict["y_euclidMag"] = 0.0
-        a_env_dict["j_euclidMag"] = 0.0
-        a_env_dict["h_euclidMag"] = 0.0
+        a_env_dict["euclid_vis_psfMag"] = 0.0
+        a_env_dict["euclid_y_unifMag"] = 0.0
+        a_env_dict["euclid_j_unifMag"] = 0.0
+        a_env_dict["euclid_h_unifMag"] = 0.0
         return a_env_dict
 
     @classmethod
     def _build_band_names(cls) -> list[str]:
         bands = [cls.band_template.format(band=band) for band in cls.bandlist]
         bands += [
-            "vis_euclidMag",
-            "y_euclidMag",
-            "j_euclidMag",
-            "h_euclidMag",
+            "euclid_vis_psfMag",
+            "euclid_y_unifMag",
+            "euclid_j_unifMag",
+            "euclid_h_unifMag",
         ]
         return bands
 
@@ -417,20 +418,20 @@ class ComCamEuclidCatalogConfig(CatalogConfigBase):
     def _build_band_err_names(cls) -> list[str]:
         band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
         band_errs += [
-            "vis_euclidMagErr",
-            "y_euclidMagErr",
-            "j_euclidMagErr",
-            "h_euclidMagErr",
+            "euclid_vis_psfMagErr",
+            "euclid_y_unifMagErr",
+            "euclid_j_unifMagErr",
+            "euclid_h_unifMagErr",
         ]
         return band_errs
 
     @classmethod
     def _build_err_dict(cls) -> dict[str, str | None]:
         the_dict = super()._build_err_dict()
-        the_dict["vis_euclidMag"] = "vis_euclidMagErr"
-        the_dict["y_euclidMag"] = "y_euclidMagErr"
-        the_dict["j_euclidMag"] = "j_euclidMagErr"
-        the_dict["h_euclidMag"] = "h_euclidMagErr"
+        the_dict["euclid_vis_psfMag"] = "euclid_vis_psfMagErr"
+        the_dict["euclid_y_unifMag"] = "euclid_y_unifMagErr"
+        the_dict["euclid_j_unifMag"] = "euclid_j_unifMagErr"
+        the_dict["euclid_h_unifMag"] = "euclid_h_unifMagErr"
         return the_dict
 
     @classmethod
