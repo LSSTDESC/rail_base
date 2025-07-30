@@ -46,7 +46,7 @@ def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
     return 0
 
 
-@cli.command.command(name="clone-source", deprecated="In the future use 'rail dev clone-source ...' instead")
+@cli.command(name="clone-source", deprecated="In the future use 'rail dev clone-source ...' instead")
 @options.outdir(default="..")
 @options.git_mode()
 @options.dry_run()
