@@ -46,6 +46,46 @@ def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
     return 0
 
 
+@cli.command.command(name="clone-source", deprecated="In the future use 'rail dev clone-source ...' instead")
+@options.outdir(default="..")
+@options.git_mode()
+@options.dry_run()
+@options.package_file()
+def clone_source(
+    outdir: str,
+    git_mode: options.GitMode,
+    dry_run: bool,
+    package_file: str,
+    **_kwargs: Any,
+) -> int:
+    """Install packages from source"""
+    scripts.clone_source(outdir, git_mode, dry_run, package_file)
+    return 0
+
+
+@cli.command(name="update-source", deprecated="In the future use 'rail dev update-source ...' instead")
+@options.outdir(default="..")
+@options.dry_run()
+@options.package_file()
+def update_source(outdir: str, dry_run: bool, package_file: str, **_kwargs: Any) -> int:
+    """Update packages from source"""
+    scripts.update_source(outdir, dry_run, package_file)
+    return 0
+
+
+@cli.command(name="install", deprecated="In the future use 'rail dev install' ... instead")
+@options.outdir(default="..")
+@options.dry_run()
+@options.from_source()
+@options.package_file()
+def install(
+    outdir: str, dry_run: bool, from_source: bool, package_file: str, **_kwargs: Any
+) -> int:
+    """Install rail packages one by one, to be fault tolerant"""
+    scripts.install(outdir, from_source, dry_run, package_file)
+    return 0
+
+
 @cli.group(name="dev")
 def dev_group() -> None:
     """Development related sub-commands"""
