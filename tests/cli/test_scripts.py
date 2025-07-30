@@ -49,7 +49,13 @@ def test_install() -> None:
 def test_info() -> None:
     scripts.info(print_all=True)
 
+    
+def test_git_stuff() -> None:
+    scripts.git_status("..", True, "rail_packages.yml")
+    scripts.git_diff("..", True, "rail_packages.yml")
+    scripts.git_describe("..", True, "rail_packages.yml")
 
+    
 def test_build_pipeline() -> None:
     scripts.build_pipeline(
         "rail.pipelines.estimation.train_z_pipeline.TrainZPipeline",
