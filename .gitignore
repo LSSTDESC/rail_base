@@ -6,6 +6,13 @@ __pycache__/
 # C extensions
 *.so
 
+# data files
+src/rail/examples_data/estimation_data/data/AB/*.AB
+src/rail/examples_data/estimation_data/data/SED/DC2_DONOTUSE_*.sed
+src/rail/examples_data/estimation_data/data/SED/*_ebv0*.sed
+*.tar
+
+
 # Distribution / packaging
 .Python
 build/
