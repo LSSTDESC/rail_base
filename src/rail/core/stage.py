@@ -409,27 +409,37 @@ class RailStage(PipelineStage):
         DataLike
             The data accesed by the handle assocated to the tag
         """
+        # First we grab the handle that we will be using
+        handle = self.get_handle(tag, path=path, allow_missing=True)
+
         if isinstance(data, DataHandle):
+            # If we were passed a DataHandle, we use that
             aliased_tag = data.tag
             if tag in self.input_tags():
                 self._aliases[tag] = aliased_tag
                 if data.has_path:
                     self._inputs[tag] = data.path
-            arg_data = data.data
+                    handle.path = data.path
+                if data.has_data:
+                    handle.data = data.data
+                elif do_read:
+                    handle.read()
+        elif not isinstance(data, (type(None), str)):
+            # If we were passed data, we use that and reset the path
+            handle.data = data
+            if path in ['None', 'none', None]:
+                handle.path = 'None'
         else:
-            if path is None:
-                arg_data = data
-            elif not os.path.isfile(path):
-                raise FileNotFoundError(f"Unable to find file: {path}")
-            else:
-                arg_data = None
+            # Data is None, we use the path
+            if path not in ['None', 'none', None]:
+                # Path exists, use that                
+                if not os.path.isfile(path):
+                    raise FileNotFoundError(f"Unable to find file: {path}")
+                handle.path = path
+                if do_read:
+                    # Read the data using the handle
+                    handle.read()
 
-        handle = self.get_handle(tag, path=path, allow_missing=True)
-        if not handle.has_data:
-            if arg_data is None and do_read:
-                handle.read()
-            if arg_data is not None:
-                handle.data = arg_data
         return handle.data
 
     def add_data(self, tag: str, data: DataLike = None) -> DataLike:

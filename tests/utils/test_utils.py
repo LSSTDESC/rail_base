@@ -59,7 +59,7 @@ def test_set_data_nonexistent_file() -> None:
 
     col_map = ColumnMapper.make_stage(name="col_map", columns={})
     with pytest.raises(FileNotFoundError) as err:
-        col_map.set_data("model", None, path="./bad_directory/no_file.py")
+        col_map.set_data("input", None, path="./bad_directory/no_file.py")
         assert "Unable to find file" in err.context
 
 
