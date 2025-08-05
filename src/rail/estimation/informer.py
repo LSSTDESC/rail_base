@@ -119,7 +119,7 @@ class PzInformer(RailStage):
 
         if input_itr:
             itrs.append(input_itr)
-        else:
+        else:  # pragma: no cover
             return []
         if truth_itr:  # pragma: no cover
             itrs.append(truth_itr)
