@@ -517,7 +517,7 @@ class RailStage(PipelineStage):
             )
             kwcopy.update(**kwargs)
             return handle.iterator(**kwcopy)
-        
+
         # If data is in memory and not in a file, it means is small enough to process it
         # in a single chunk.
         elif in_memory:  # pragma: no cover
