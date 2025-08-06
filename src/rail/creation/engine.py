@@ -41,6 +41,7 @@ class Modeler(RailStage):  # pragma: no cover
             but the filetype and format depend entirely on the
             modeling approach
         """
+        self.validate()
         self.run()
         self.finalize()
         return self.get_handle("model")
