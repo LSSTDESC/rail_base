@@ -487,9 +487,7 @@ class RailStage(PipelineStage):
 
         chunk_size = kwargs.get("chunk_size", self.config.chunk_size)
 
-        if handle.path:
-            if handle.path in ['None', 'none']:
-                return []            
+        if handle.path and handle.path not in ['None', 'none']:
             self._input_length = handle.size(groupname=groupname)
 
             total_chunks_needed = ceil(self._input_length / chunk_size)
