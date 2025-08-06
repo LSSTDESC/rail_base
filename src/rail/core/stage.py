@@ -487,9 +487,14 @@ class RailStage(PipelineStage):
 
         chunk_size = kwargs.get("chunk_size", self.config.chunk_size)
 
-        if handle.path:
-            if handle.path in ['None', 'none']:
-                return []            
+        on_disk: bool= False
+        in_memory: bool= False
+        if handle.path not in [None, 'None', 'none']:
+            on_disk = True
+        if handle.data is not None:
+            in_memory = True
+        
+        if on_disk:
             self._input_length = handle.size(groupname=groupname)
 
             total_chunks_needed = ceil(self._input_length / chunk_size)
@@ -512,10 +517,10 @@ class RailStage(PipelineStage):
             )
             kwcopy.update(**kwargs)
             return handle.iterator(**kwcopy)
-
+        
         # If data is in memory and not in a file, it means is small enough to process it
         # in a single chunk.
-        else:  # pragma: no cover
+        elif in_memory:  # pragma: no cover
             if self.config.hdf5_groupname:
                 test_data = self.get_data(tag)[self.config.hdf5_groupname]
                 self._input_length = self.get_handle(tag).data_size(
@@ -528,6 +533,10 @@ class RailStage(PipelineStage):
             iterator = [[s, self._input_length, test_data]]
             return iterator
 
+        # Data is neither on disk or in memory, return empty list
+        else:
+            return []
+        
     def connect_input(
         self,
         other: PipelineStage,
