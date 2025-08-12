@@ -62,6 +62,8 @@ def test_train_pz() -> None:
     results, rerun_results, _ = one_algo(
         "TrainZ", train_algo, pz_algo, train_config_dict, estim_config_dict
     )
+
+    assert (results.ancil['distribution_type']==0).all()
     assert np.isclose(results.ancil["zmode"], zb_expected).all()
     assert np.isclose(results.ancil["zmode"], rerun_results.ancil["zmode"]).all()
 
