@@ -116,22 +116,21 @@ class CatEstimator(RailStage, PointEstimationMixin):
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover
 
-
     @classmethod
     def default_distribution_type(cls) -> DistributionType:
         """Return the type of distribtuion that this estimator creates
 
         By default this is DistributionType.ad_hoc
-        But this can be overrided by sub-classes to return 
+        But this can be overrided by sub-classes to return
         DistributionType.posetrior or DistributionType.likelihood if appropriate
         """
         return DistributionType.ad_hoc
-    
+
     def _calculate_summary_stats(
         self,
         qp_dstn: qp.Ensemble,
     ) -> qp.Ensemble:
-        
+
         if qp_dstn.ancil is None:  # pragma: no cover
             ancil_dict: dict[str, np.ndarray] = dict()
             qp_dstn.set_ancil(ancil_dict)
@@ -164,7 +163,6 @@ class CatEstimator(RailStage, PointEstimationMixin):
             qp_dstn.ancil['z_mean'] = np.expand_dims(means, -1)
             qp_dstn.ancil['z_std'] = np.expand_dims(stds, -1)
 
-
         return qp_dstn
 
     def _do_chunk_output(
@@ -176,7 +174,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
         data: Optional[TableLike] = None,
     ) -> None:
         qp_dstn = self.calculate_point_estimates(qp_dstn)
-        
+
         if self.config.calc_summary_stats:
             qp_dstn = self._calculate_summary_stats(qp_dstn)
 
@@ -192,7 +190,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
             # if there is redshift column in the input dataset, attach it to the ancil
             if self.config.redshift_col in data.keys():  # pragma: no cover
                 qp_dstn.ancil.update(redshift=data[self.config.redshift_col])
-                
+
             if 'distribution_type' not in qp_dstn.ancil:
                 qp_dstn.ancil.update(distribution_type=np.repeat(self.default_distribution_type().value, end-start))
 
