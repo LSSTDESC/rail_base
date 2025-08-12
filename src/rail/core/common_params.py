@@ -56,6 +56,7 @@ SHARED_PARAMS = StageConfig(
     ),
     nonobserved_val=Param(
         float, -99.0, msg="guard value for non-observations"
+    ),
     bands=Param(
         list, lsst_mag_cols, msg="Names of columns for magnitgude by filter band"
     ),
