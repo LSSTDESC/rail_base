@@ -156,6 +156,7 @@ class CatalogConfigBase:
             ref_band=cls._build_ref_band(cls.ref_band),
             redshift_col=cls.redshift_col,
             nondetect_val=np.nan,
+            nonobserved_val=np.inf,
             hdf5_groupname=cls.hdf5_groupname,
             replace_error_vals=cls.replace_error_vals,
             filter_list=cls._build_filter_file_bandlist(),

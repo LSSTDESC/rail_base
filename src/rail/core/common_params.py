@@ -54,6 +54,8 @@ SHARED_PARAMS = StageConfig(
     nondetect_val=Param(
         float, 99.0, msg="value to be replaced with magnitude limit for non detects"
     ),
+    nonobserved_val=Param(
+        float, -99.0, msg="guard value for non-observations"
     bands=Param(
         list, lsst_mag_cols, msg="Names of columns for magnitgude by filter band"
     ),
