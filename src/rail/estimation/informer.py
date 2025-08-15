@@ -15,6 +15,7 @@ from rail.core.common_params import SHARED_PARAMS
 from rail.core.data import (DataHandle, ModelHandle, QPHandle, TableHandle,
                             TableLike)
 from rail.core.stage import RailStage
+import tables_io
 
 
 class CatInformer(RailStage):
@@ -78,6 +79,18 @@ class CatInformer(RailStage):
         self.finalize()
         return self.get_handle("model")
 
+    def _convert_table_format(data: TableLike, out_fmt_str: str="numpyDict") -> TableLike:
+        """
+        Utility function to convert existing Tabular data to a numpy dictionary,
+        ingestable for most informer and estimators.
+        To be called in run().
+        """
+        # required format for informer/estimator
+        out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[out_fmt_str] 
+        out_data = tables_io.convert(data, out_fmt)
+        # overwrite set_data
+        return out_data
+        
 
 class PzInformer(RailStage):
     """The base class for informing models used to make photo-z data products from

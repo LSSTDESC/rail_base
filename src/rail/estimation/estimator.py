@@ -18,6 +18,7 @@ from rail.core.enums import DistributionType
 
 # for backwards compatibility, to avoid break stuff that imports it from here
 from .informer import CatInformer  # pylint: disable=unused-import
+import tables_io
 
 
 class CatEstimator(RailStage, PointEstimationMixin):
@@ -207,6 +208,19 @@ class CatEstimator(RailStage, PointEstimationMixin):
         if self.config.output_mode != "return":
             self._output_handle.write_chunk(start, end)
         return qp_dstn
+
+
+    def _convert_table_table_format(self, data: TableLike, out_fmt_str: str="numpyDict") -> TableLike:
+        """
+        Utility function to convert existing Tabular data to a numpy dictionary,
+        ingestable for most informer and estimators.
+        To be called in _process_chunk().
+        """
+        # required format for informer/estimator
+        out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[out_fmt_str] 
+        out_data = tables_io.convert(data, out_fmt)
+        # overwrite set_data
+        return out_data
 
 
 class PzEstimator(RailStage, PointEstimationMixin):
