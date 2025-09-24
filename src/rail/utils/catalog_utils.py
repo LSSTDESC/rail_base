@@ -308,6 +308,23 @@ class RubinFLCatalogConfig(CatalogConfigBase):
     zp_errors = [0.1, 0.1, 0.1, 0.1]
 
 
+class DESCatalogConfig(CatalogConfigBase):
+    """Configuration for Rubin first look data """
+
+    tag = "des"
+    bandlist = ['g', 'r', 'i', 'z']
+    maglims = [27.8, 27.1, 26.7, 25.8]
+    a_env = [4.81, 3.64, 2.70, 2.06]
+    band_template = "DES_{band}_mag"
+    band_err_template = "DES_{band}_mag_err"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i"
+    redshift_col = "ZTRUE"
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1]
+
+
+
 class ComCamGaapCatalogConfig(CatalogConfigBase):
     """Configuration for ComCam data"""
 
