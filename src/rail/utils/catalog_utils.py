@@ -631,7 +631,153 @@ class RomanPlusRubinCatalogConfig(CatalogConfigBase):
         ]
         return filter_list
 
+    
+class RomanHBandPlusRubin5YrCatalogConfig(CatalogConfigBase):
+    """Configuration for RomanHBand + Rubin bands in Roman / Rubin simulations"""
 
+    tag = "roman_HBand_rubin_5yr"
+    bandlist = ['u', 'g', 'r', 'i', 'z', 'y']
+    maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
+    a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
+    band_template = "LSST_obs_{band}"
+    band_err_template = "LSST_obs_{band}_err"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i"
+    redshift_col = "redshift"
+    object_id_col = "objectId"
+    hdf5_groupname = ""
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    @classmethod
+    def band_name_dict(cls) -> dict[str, str]:
+        bands = super().band_name_dict()
+        bands["H"] = "ROMAN_obs_H158"
+        return bands
+
+    @classmethod
+    def _build_maglim_dict(cls) -> dict[str, float]:
+        maglim_dict = super()._build_maglim_dict()
+        maglim_dict["ROMAN_obs_H158"] = 25.1
+        return maglim_dict
+
+    @classmethod
+    def _build_a_env_dict(cls) -> dict[str, float]:
+        a_env_dict = super()._build_a_env_dict()
+        a_env_dict["ROMAN_obs_H158"] = 0.59966235
+        return a_env_dict
+
+    @classmethod
+    def _build_band_names(cls) -> list[str]:
+        bands = [cls.band_template.format(band=band) for band in cls.bandlist]
+        bands += [
+            "ROMAN_obs_H158",
+        ]
+        return bands
+
+    @classmethod
+    def _build_band_err_names(cls) -> list[str]:
+        band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
+        band_errs += [
+            "ROMAN_obs_H158_err",
+        ]
+        return band_errs
+
+    @classmethod
+    def _build_err_dict(cls) -> dict[str, str | None]:
+        the_dict = super()._build_err_dict()
+        the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        return the_dict
+
+    @classmethod
+    def _build_ref_band(cls, ref_band: str = "i") -> str:
+        return cls.band_template.format(band=ref_band)
+
+    @classmethod
+    def _build_filter_file_bandlist(cls) -> list[str]:
+        """Contruct the name of the reference band"""
+        filter_list = [
+            cls.filter_file_template.format(band=band) for band in cls.bandlist
+        ]
+        filter_list += [
+            "roman_H158",
+        ]
+        return filter_list
+
+
+class RomanHBandPlusRubin10YrCatalogConfig(CatalogConfigBase):
+    """Configuration for RomanHBand + Rubin bands in Roman / Rubin simulations"""
+
+    tag = "roman_HBand_rubin_10yr"
+    bandlist = ['u', 'g', 'r', 'i', 'z', 'y']
+    maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
+    a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
+    band_template = "LSST_obs_{band}"
+    band_err_template = "LSST_obs_{band}_err"
+    filter_file_template = "DC2LSST_{band}"
+    ref_band = "i"
+    redshift_col = "redshift"
+    object_id_col = "objectId"
+    hdf5_groupname = ""
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+
+    @classmethod
+    def band_name_dict(cls) -> dict[str, str]:
+        bands = super().band_name_dict()
+        bands["H"] = "ROMAN_obs_H158"
+        return bands
+
+    @classmethod
+    def _build_maglim_dict(cls) -> dict[str, float]:
+        maglim_dict = super()._build_maglim_dict()
+        maglim_dict["ROMAN_obs_H158"] = 25.1
+        return maglim_dict
+
+    @classmethod
+    def _build_a_env_dict(cls) -> dict[str, float]:
+        a_env_dict = super()._build_a_env_dict()
+        a_env_dict["ROMAN_obs_H158"] = 0.59966235
+        return a_env_dict
+
+    @classmethod
+    def _build_band_names(cls) -> list[str]:
+        bands = [cls.band_template.format(band=band) for band in cls.bandlist]
+        bands += [
+            "ROMAN_obs_H158",
+        ]
+        return bands
+
+    @classmethod
+    def _build_band_err_names(cls) -> list[str]:
+        band_errs = [cls.band_err_template.format(band=band) for band in cls.bandlist]
+        band_errs += [
+            "ROMAN_obs_H158_err",
+        ]
+        return band_errs
+
+    @classmethod
+    def _build_err_dict(cls) -> dict[str, str | None]:
+        the_dict = super()._build_err_dict()
+        the_dict["ROMAN_obs_H158"] = "ROMAN_obs_H158_err"
+        return the_dict
+
+    @classmethod
+    def _build_ref_band(cls, ref_band: str = "i") -> str:
+        return cls.band_template.format(band=ref_band)
+
+    @classmethod
+    def _build_filter_file_bandlist(cls) -> list[str]:
+        """Contruct the name of the reference band"""
+        filter_list = [
+            cls.filter_file_template.format(band=band) for band in cls.bandlist
+        ]
+        filter_list += [
+            "roman_H158",
+        ]
+        return filter_list
+
+    
 class Roman3BandPlusRubinCatalogConfig(CatalogConfigBase):
     """Configuration for Roman3Band + Rubin bands in Roman / Rubin simulations"""
 
