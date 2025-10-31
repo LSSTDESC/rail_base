@@ -637,7 +637,8 @@ class RomanHBandPlusRubin5YrCatalogConfig(CatalogConfigBase):
 
     tag = "roman_HBand_rubin_5yr"
     bandlist = ['u', 'g', 'r', 'i', 'z', 'y']
-    maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
+
+    maglims = [25.12, 26.36, 26.50, 25.98, 25.32, 24.40]
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
     band_template = "LSST_obs_{band}"
     band_err_template = "LSST_obs_{band}_err"
@@ -710,7 +711,8 @@ class RomanHBandPlusRubin10YrCatalogConfig(CatalogConfigBase):
 
     tag = "roman_HBand_rubin_10yr"
     bandlist = ['u', 'g', 'r', 'i', 'z', 'y']
-    maglims = [24.0, 27.66, 27.25, 26.6, 26.24, 25.35]
+    maglims = [25.53, 26.76, 26.88, 26.37, 25.72, 24.76]
+    
     a_env = [4.81, 3.64, 2.70, 2.06, 1.58, 1.31]
     band_template = "LSST_obs_{band}"
     band_err_template = "LSST_obs_{band}_err"
