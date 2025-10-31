@@ -646,8 +646,8 @@ class RomanHBandPlusRubin5YrCatalogConfig(CatalogConfigBase):
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
-    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
@@ -719,8 +719,8 @@ class RomanHBandPlusRubin10YrCatalogConfig(CatalogConfigBase):
     redshift_col = "redshift"
     object_id_col = "objectId"
     hdf5_groupname = ""
-    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
-    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    replace_error_vals = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
+    zp_errors = [0.1, 0.1, 0.1, 0.1, 0.1, 0.1, 0.1]
 
     @classmethod
     def band_name_dict(cls) -> dict[str, str]:
