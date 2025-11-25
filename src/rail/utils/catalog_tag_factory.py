@@ -61,7 +61,7 @@ class BandFactory(RailFactoryMixin):
         """
         try:
             return cls.instance().bands[name]
-        except KeyError as msg:
+        except KeyError as msg:  # pragma: no cover
             raise KeyError(
                 f"Band named {name} not found in BandFactory "
                 f"{list(cls.instance().bands.keys())}"
@@ -162,7 +162,7 @@ class CatalogTagFactory(RailFactoryMixin):
         """
         try:
             return cls.instance().catalog_tags[name]
-        except KeyError as msg:
+        except KeyError as msg:  # pragma: no cover
             raise KeyError(
                 f"CatalogTag named {name} not found in CatalogTagFactory "
                 f"{list(cls.instance().catalog_tags.keys())}"

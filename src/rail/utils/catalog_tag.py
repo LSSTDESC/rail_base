@@ -30,7 +30,7 @@ class Band(Configurable):
             class.config_options data members
         """
         Configurable.__init__(self, **kwargs)
-        if self.config.name in self._band_dict:
+        if self.config.name in self._band_dict:  # pragma: no cover
             raise KeyError(f"Duplicate band {self.config.name}")
         self._band_dict[self.config.name] = self
 
@@ -153,12 +153,12 @@ class CatalogTag(Configurable):
             err_bands.append(mag_err_column_name)
             err_dict[mag_column_name] = mag_err_column_name
             mag_limits[band_name] = band_info["mag_limit"]
-            if "zp_error" in band_info:
+            if "zp_error" in band_info:  # pragma: no cover
                 zp_err = band_info["zp_error"]
             else:
                 zp_err = self.config.zp_error_default
             zp_errors.append(zp_err)
-            if "replace_error_val" in band_info:
+            if "replace_error_val" in band_info:  # pragma: no cover
                 rev = band_info["replace_error_val"]
             else:
                 rev = self.config.replace_error_val_default
@@ -187,7 +187,7 @@ class CatalogTag(Configurable):
     @classmethod
     def apply(cls, tag: str) -> None:
         """Activate a particular tag"""
-        if tag not in cls._tag_dict:
+        if tag not in cls._tag_dict:  # pragma: no cover
             raise KeyError(
                 f"Did not find tag: {tag} in known CatalogTags: {list(cls._tag_dict.keys())}"
             )

@@ -45,8 +45,12 @@ def test_load_catalog_tag_yaml() -> None:
 
 
     # Test the interactive stuff
-    CatalogTagFactory.clear()
+    catalog_utils.clear()
+    BandFactory.add_band(a_band)
     CatalogTagFactory.add_catalog_tag(a_catalog_tag)
+
+    check_band = BandFactory.get_band('comcam_u')
+    assert isinstance(check_band, Band)
 
     check_catalog_tag = CatalogTagFactory.get_catalog_tag("com_cam")
     assert isinstance(check_catalog_tag, CatalogTag)

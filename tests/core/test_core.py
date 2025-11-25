@@ -367,6 +367,7 @@ def test_catalog_utils() -> None:
         "com_cam_euclid",
         "roman_3band_rubin",
         "roman_7band_rubin",
+        "com_cam_euclid_nir",
     ]:
         CatalogConfigBase.apply(tag)
         assert CatalogConfigBase.active_class().band_name_dict()
