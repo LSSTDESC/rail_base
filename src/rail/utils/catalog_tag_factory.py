@@ -77,6 +77,11 @@ class BandFactory(RailFactoryMixin):
         """Return the dictionary of Bands"""
         return self._bands
 
+    def clear_instance(self) -> None:
+        """Clear out the contents of the factory"""
+        Band.clear()
+        RailFactoryMixin.clear_instance(self)
+
     def print_instance_contents(self) -> None:
         """Print the contents of the factory"""
         print("----------------")
@@ -126,6 +131,11 @@ class CatalogTagFactory(RailFactoryMixin):
         RailFactoryMixin.__init__(self)
         self._catalog_tags = self.add_dict(CatalogTag)
 
+    def clear_instance(self) -> None:
+        """Clear out the contents of the factory"""
+        CatalogTag.clear()
+        RailFactoryMixin.clear_instance(self)
+
     @classmethod
     def get_catalog_tags(cls) -> dict[str, CatalogTag]:
         """Return the dict of all the CatalogTags"""
@@ -173,5 +183,3 @@ class CatalogTagFactory(RailFactoryMixin):
         print("----------------")
         print("CatalogTags:")
         RailFactoryMixin.print_instance_contents(self)
-
-        

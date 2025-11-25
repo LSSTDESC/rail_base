@@ -125,13 +125,15 @@ def test_data_hdf5_iter() -> None:
 
 def test_catalog_tags():
 
+    catalog_utils.clear()
+
     for key in CatalogConfigBase.subclasses().keys():
-        if key in ['dp1_all']:
-            continue        
-        
+        if key in ["dp1_all"]:
+            continue
+
         catalog_utils.apply_defaults_old(key)
         sp1 = SHARED_PARAMS.copy()
-        
+
         catalog_utils.apply_defaults(key)
         sp2 = SHARED_PARAMS.copy()
 
@@ -147,4 +149,3 @@ def test_catalog_tags():
                 assert np.isnan(sp2[k2]), f"For {key}:{k2}"
             else:
                 assert sp2[k2] == v2, f"For {key}:{k2}"
-        
