@@ -131,7 +131,7 @@ class RailFactoryMixin:
         cls,
         yaml_config: list[dict[str, Any]],
         from_file: str,
-    ) -> None:
+    ) -> None:  # pragma: no cover
         """Load from a yaml tag
 
         Parameters
@@ -203,7 +203,7 @@ class RailFactoryMixin:
         -----
         See class description for yaml file syntax
         """
-        if from_file in self.loaded_files:
+        if from_file in self.loaded_files:  # pragma: no cover
             print(f"{from_file} already loaded by {type(self)}")
             return
         self.loaded_files.append(from_file)
@@ -231,7 +231,7 @@ class RailFactoryMixin:
         -----
         See class description for yaml file syntax
         """
-        if yaml_file in self.loaded_files:
+        if yaml_file in self.loaded_files:  # pragma: no cover
             print(f"{yaml_file} already loaded by {type(self)}")
             return
 

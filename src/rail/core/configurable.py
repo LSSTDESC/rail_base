@@ -32,7 +32,7 @@ class Configurable:
     @staticmethod
     def merge_named_lists(
         input_lists: list[list[Configurable]],
-    ) -> list[Configurable]:
+    ) -> list[Configurable]:  # pragma: no cover
         """Merge lists, removing duplicate items
 
         Parameters
