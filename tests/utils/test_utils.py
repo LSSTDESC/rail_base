@@ -1,12 +1,16 @@
 import os
 from types import GeneratorType
+import numpy as np
 
 import pytest
 
 from rail.core.data import Hdf5Handle, ModelHandle, TableHandle
 from rail.core.stage import RailStage
+from rail.core.common_params import SHARED_PARAMS
 from rail.tools.table_tools import ColumnMapper, RowSelector, TableConverter
 from rail.utils.path_utils import RAILDIR, find_rail_file
+from rail.utils.catalog_utils_old import CatalogConfigBase
+from rail.utils import catalog_utils
 
 
 def test_find_rail_file() -> None:
@@ -117,3 +121,30 @@ def test_data_hdf5_iter() -> None:
     for i, xx in enumerate(x):
         assert xx[0] == i * 1000
         assert xx[1] - xx[0] <= 1000
+
+
+def test_catalog_tags():
+
+    for key in CatalogConfigBase.subclasses().keys():
+        if key in ['dp1_all']:
+            continue        
+        
+        catalog_utils.apply_defaults_old(key)
+        sp1 = SHARED_PARAMS.copy()
+        
+        catalog_utils.apply_defaults(key)
+        sp2 = SHARED_PARAMS.copy()
+
+        for k2, v2 in sp1.items():
+            if isinstance(v2, list):
+                assert v2 == sp2[k2], f"For {key}:{k2}"
+            elif isinstance(v2, dict):
+                for k3, v3 in v2.items():
+                    assert v3 == v2[k3], f"For {key}:{k2}"
+            elif isinstance(v2, str):
+                assert sp2[k2] == v2, f"For {key}:{k2}"
+            elif np.isnan(v2):
+                assert np.isnan(sp2[k2]), f"For {key}:{k2}"
+            else:
+                assert sp2[k2] == v2, f"For {key}:{k2}"
+        
