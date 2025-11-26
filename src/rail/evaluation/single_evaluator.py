@@ -204,7 +204,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                         self._process_all_point_to_point(
                             this_metric,
                             key_val,
-                            point_data,
+                            np.squeeze(point_data),
                             truth_data[truth_point_estimate_],
                         )
             elif (

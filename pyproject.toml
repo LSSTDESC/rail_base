@@ -23,6 +23,7 @@ dependencies = [
     "ceci>=2.1",
     "qp-prob>=1.0.0",
     "scipy>=1.9.0",
+    "setuptools>=62", # Used to manage connections between RAIL packages
 ]
 
 
