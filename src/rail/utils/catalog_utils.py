@@ -6,7 +6,7 @@ from .catalog_utils_old import CatalogConfigBase
 from .catalog_tag_factory import BandFactory, CatalogTagFactory
 from .catalog_tag import CatalogTag
 
-DEFAULT_CATAlOG_TAG_FILE: str = find_rail_file("examples_data/catalogs.yaml")
+DEFAULT_CATAlOG_TAG_FILE: str = find_rail_file("examples_data/catalog_data/default_catalogs.yaml")
 LOADED_DEFAULTS = False
 
 
@@ -22,6 +22,16 @@ def clear() -> None:
     LOADED_DEFAULTS = False
     BandFactory.clear()
     CatalogTagFactory.clear()
+
+
+def get_tag(tag: str) -> CatalogTag:
+    """Return a particular tag"""
+    return CatalogTag.get_tag(tag)
+
+
+def get_active_tag() -> CatalogTag | None:
+    """Return the currently active tag"""
+    return CatalogTag.get_active_tag()
 
 
 def apply_defaults(tag: str) -> None:

@@ -83,6 +83,8 @@ class CatalogTag(Configurable):
 
     _tag_dict: dict[str, CatalogTag] = {}
 
+    _active_tag: str | None = None
+
     def __init__(self, **kwargs: Any) -> None:
         """C'tor
 
@@ -116,7 +118,20 @@ class CatalogTag(Configurable):
 
     @classmethod
     def clear(cls) -> None:
+        cls._active_tag = None
         cls._tag_dict.clear()
+
+    def band_name_dict(self) -> dict[str, str]:
+        """Retrun the mapping from band to column names"""
+        ret_dict: dict[str, str] = {}
+        for band_name in self.config.band_list:
+            band_info: dict = self.config.bands[band_name]
+            if "mag_column_name" in band_info:
+                mag_column_name = band_info["mag_column_name"]
+            else:
+                mag_column_name = self.config.mag_column_template.format(band=band_name)
+            ret_dict[band_name] = mag_column_name
+        return ret_dict
 
     def _build_shared_params(self) -> dict:
         """Build the various shared params"""
@@ -185,12 +200,23 @@ class CatalogTag(Configurable):
         common_params.set_param_defaults(**self._base_dict)
 
     @classmethod
-    def apply(cls, tag: str) -> None:
-        """Activate a particular tag"""
+    def get_active_tag(cls) -> CatalogTag | None:
+        """Return the currently active tag"""
+        if cls._active_tag is None:  # pragma: no cover
+            return None
+        return cls.get_tag(cls._active_tag)
+
+    @classmethod
+    def get_tag(cls, tag: str) -> CatalogTag:
         if tag not in cls._tag_dict:  # pragma: no cover
             raise KeyError(
                 f"Did not find tag: {tag} in known CatalogTags: {list(cls._tag_dict.keys())}"
             )
+        return cls._tag_dict[tag]
+
+    @classmethod
+    def apply(cls, tag: str) -> None:
+        """Activate a particular tag"""
+        tag_object = cls.get_tag(tag)
         cls._active_tag = tag
-        tag_object = cls._tag_dict[tag]
         tag_object.apply_tag()
