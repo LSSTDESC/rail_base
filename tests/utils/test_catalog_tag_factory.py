@@ -16,6 +16,7 @@ def test_load_catalog_tag_yaml() -> None:
     catalog_utils.apply_defaults("com_cam")
 
     assert catalog_utils.get_active_tag().config.name == "com_cam"
+    assert catalog_utils.get_tag('com_cam').config.name == "com_cam"
 
     # Printing
     BandFactory.print_contents()
