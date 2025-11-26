@@ -137,6 +137,8 @@ def test_catalog_tags():
         catalog_utils.apply_defaults(key)
         sp2 = SHARED_PARAMS.copy()
 
+        _band_name_dict = catalog_utils.get_active_tag().band_name_dict()
+
         for k2, v2 in sp1.items():
             if isinstance(v2, list):
                 assert v2 == sp2[k2], f"For {key}:{k2}"

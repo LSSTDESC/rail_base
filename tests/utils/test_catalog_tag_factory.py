@@ -12,8 +12,10 @@ def test_load_catalog_tag_yaml() -> None:
     # clear the catalog configurations
     catalog_utils.clear()
 
-    # Load defaults 
-    catalog_utils.apply_defaults('com_cam')
+    # Load defaults
+    catalog_utils.apply_defaults("com_cam")
+
+    assert catalog_utils.get_active_tag().config.name == "com_cam"
 
     # Printing
     BandFactory.print_contents()
@@ -29,10 +31,10 @@ def test_load_catalog_tag_yaml() -> None:
     a_band = BandFactory.get_band("comcam_u")
     assert isinstance(a_band, Band)
 
-    assert a_band.full_class_name().find('Band') >= 0
-    assert a_band.get('a_env') == 4.81
-    a_band.to_yaml_dict()['Band']['a_env'] = 4.81
-    
+    assert a_band.full_class_name().find("Band") >= 0
+    assert a_band.get("a_env") == 4.81
+    a_band.to_yaml_dict()["Band"]["a_env"] = 4.81
+
     # test the catalog tag stuff
     the_catalog_tags = CatalogTagFactory.get_catalog_tags()
     assert isinstance(the_catalog_tags["com_cam"], CatalogTag)
@@ -43,13 +45,12 @@ def test_load_catalog_tag_yaml() -> None:
     a_catalog_tag = CatalogTagFactory.get_catalog_tag("com_cam")
     assert isinstance(a_catalog_tag, CatalogTag)
 
-
     # Test the interactive stuff
     catalog_utils.clear()
     BandFactory.add_band(a_band)
     CatalogTagFactory.add_catalog_tag(a_catalog_tag)
 
-    check_band = BandFactory.get_band('comcam_u')
+    check_band = BandFactory.get_band("comcam_u")
     assert isinstance(check_band, Band)
 
     check_catalog_tag = CatalogTagFactory.get_catalog_tag("com_cam")
