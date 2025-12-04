@@ -10,7 +10,23 @@ from rail.core.configurable import Configurable
 
 
 class Band(Configurable):
+    """Information about a particular filter Band
+    used for photometric redshifts.
 
+    This is just a name and a redenning
+    parameter: a_env.   
+
+    The name is used for lookup and should be unique.
+    It should match the name of the associated filter file.
+    These are typically found in:
+    rail_base/src/rail/examples_data/estimation_data/data/FILTER
+
+    The a_env parameter can be computed from filter 
+    curves using code in `rail_astro_tools`:
+
+    https://github.com/LSSTDESC/rail_astro_tools/blob/main/src/rail/tools/filter_tools.py
+    """
+    
     config_options: dict[str, Param] = dict(
         name=Param(str, None, required=True, msg="Name for this band"),
         a_env=Param(float, None, required=True, msg="Reddening parameter"),
@@ -45,7 +61,60 @@ class Band(Configurable):
 
 
 class CatalogTag(Configurable):
+    """Helper class to specify particulars about a particular catalog.
 
+    This keep track of things like the mapping between band names and columns,
+    names of special columns like the objectId and the 'true' redshift, gaurd
+    values used to specify non-detections or non-observations.
+
+    Expected usage is that user will define a yaml file with the various
+    datasets that they wish to use with the following example syntax:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+      Catalogs:
+        - CatalogTag:
+            name: "com_cam"
+            mag_column_template: "{band}_cModelMag"
+            mag_err_column_template: "{band}_cModelMagErr"
+            filter_template: "comcam_{band}"
+            band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+            bands:
+              u:
+                mag_limit: 26.4
+             g:
+                mag_limit: 27.8
+             r:
+                mag_limit: 27.1
+             i:
+                mag_limit: 26.7
+             z:
+                mag_limit: 25.8
+             y:
+                mag_limit: 24.6
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+    Notes
+    -----
+    The files in the yaml file should match the class config_options.
+
+    The mapping between bands and magnitude, magnitude error columns
+    is constructed by looping over the band_list add resolving
+    mag_column_template and mag_err_column_template.
+
+    Similarly, the mapping between bands and filters is constructed
+    by looping over the band_list add resolving filter_template.
+
+    The `bands` field is used to provide band-specific overrides.
+    At a minimum this must include 5-sigma limiting magnitdues.
+
+    But it may also include specfic overrides for the names of the
+    mag_column, mag_err_columns and filter template file.
+    """
+    
     config_options = dict(
         name=Param(
             str, None, required=True, msg="Tag to associate to this Catalog type"

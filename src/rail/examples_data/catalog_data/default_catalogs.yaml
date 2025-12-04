@@ -1,3 +1,17 @@
+# Information about a filter bands
+# For each band this is just a name and a redenning
+# parameter: a_env.   
+
+# The name is used for lookup and should be unique.
+# It should match the name of the associated filter file.
+#
+# These are typically found in:
+# rail_base/src/rail/examples_data/estimation_data/data/FILTER
+#
+# The a_env parameter can be computed from filter 
+# curves using code in `rail_astro_tools`:
+#
+# https://github.com/LSSTDESC/rail_astro_tools/blob/main/src/rail/tools/filter_tools.py
 Bands:
   - Band:
       name: comcam_u
@@ -83,7 +97,26 @@ Bands:
   - Band:
       name: roman_Z087
       a_env: 1.57
-
+#
+# Particulars about specific catalogs.
+# 
+# These keep track of things like the mapping between band names and columns,
+# names of special columns like the objectId and the 'true' redshift, gaurd
+# values used to specify non-detections or non-observations.
+#
+# The mapping between bands and magnitude, magnitude error columns
+# is constructed by looping over the band_list add resolving
+# mag_column_template and mag_err_column_template.
+#
+# Similarly, the mapping between bands and filters is constructed
+# by looping over the band_list add resolving filter_template.
+#
+# The `bands` field is used to provide band-specific overrides.
+# At a minimum this must include 5-sigma limiting magnitdues.
+#
+# But it may also include specfic overrides for the names of the
+# mag_column, mag_err_columns and filter template file.
+#
 CatalogTags:
   - CatalogTag:
       name: "com_cam"
