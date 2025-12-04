@@ -97,6 +97,23 @@ Bands:
   - Band:
       name: roman_Z087
       a_env: 1.57
+# These are just copied from the comcam values and should be updated
+  - Band:
+      name: DECam_g
+      a_env: 3.64
+  - Band:
+      name: DECam_r
+      a_env: 2.70
+  - Band:
+      name: DECam_i
+      a_env: 2.06
+  - Band:
+      name: DECam_z
+      a_env: 1.58
+  - Band:
+      name: DECam_y
+      a_env: 1.31
+      
 #
 # Particulars about specific catalogs.
 # 
@@ -520,3 +537,20 @@ CatalogTags:
           mag_column_name: "ROMAN_obs_K213"
           mag_err_column_name: "ROMAN_obs_K213_err"
           mag_limit: 25.9
+  - CatalogTag:
+      name: "des"
+      mag_column_template: "DES_{band}_mag"
+      mag_err_column_template: "DES_{band}_mag_err"
+      filter_template: "DECam_{band}"
+      band_list: ['g', 'r', 'i', 'z']
+      redshift_col: "ZTRUE"
+      object_id_col: "OBJID"      
+      bands:
+        g:
+          mag_limit: 24.4
+        r:
+          mag_limit: 23.8
+        i:
+          mag_limit: 23.1
+        z:
+          mag_limit: 21.7
