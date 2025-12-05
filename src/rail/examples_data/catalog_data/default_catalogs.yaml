@@ -1,5 +1,5 @@
 # Information about a filter bands
-# For each band this is just a name and a redenning
+# For each band this is just a name and a reddening
 # parameter: a_env.   
 
 # The name is used for lookup and should be unique.
@@ -51,16 +51,16 @@ Bands:
       a_env: 1.31
   - Band:
       name: euclid_H
-      a_env: 0.
+      a_env: 0.47
   - Band:
       name: euclid_J
-      a_env: 0.
+      a_env: 0.76
   - Band:
       name: euclid_Y
-      a_env: 0.
+      a_env: 1.10
   - Band:
       name: euclid_vis
-      a_env: 0.
+      a_env: 2.24
   - Band:
       name: hsc_g
       a_env: 3.64
@@ -118,7 +118,7 @@ Bands:
 # Particulars about specific catalogs.
 # 
 # These keep track of things like the mapping between band names and columns,
-# names of special columns like the objectId and the 'true' redshift, gaurd
+# names of special columns like the objectId and the 'true' redshift, guard
 # values used to specify non-detections or non-observations.
 #
 # The mapping between bands and magnitude, magnitude error columns
@@ -132,7 +132,8 @@ Bands:
 # At a minimum this must include 5-sigma limiting magnitdues.
 #
 # But it may also include specfic overrides for the names of the
-# mag_column, mag_err_columns and filter template file.
+# mag_column, mag_err_columns and filter template file, for example when a
+# subset of band_list entries do not follow the patterns in the templates.
 #
 CatalogTags:
   - CatalogTag:
