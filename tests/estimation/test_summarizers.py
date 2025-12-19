@@ -10,7 +10,7 @@ from rail.utils.path_utils import RAILDIR
 
 testdata = os.path.join(RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.hdf5")
 tomobins = os.path.join(RAILDIR, "rail/examples_data/testdata/output_tomo.hdf5")
-DS = RailStage.data_store
+# DS = RailStage.data_store
 
 
 def one_algo(
@@ -20,9 +20,10 @@ def one_algo(
     A basic test of running an summaizer subclass
     Run summarize
     """
-    DS.__class__.allow_overwrite = True
-    DS.clear()
-    test_data = DS.read_file("test_data", QPHandle, testdata)
+    # DS.__class__.allow_overwrite = True
+    # DS.clear()
+    # test_data = DS.read_file("test_data", QPHandle, testdata)
+    test_data = QPHandle("test_data", path=testdata)
     summarizer = summarizer_class.make_stage(name=key, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data)
     os.remove(
@@ -41,10 +42,12 @@ def one_mask_algo(
     A basic test of running an summaizer subclass
     Run summarize
     """
-    DS.__class__.allow_overwrite = True
-    DS.clear()
-    test_data = DS.read_file("test_data", QPHandle, testdata)
-    tomo_bins = DS.read_file("tomo_bins", TableHandle, tomobins)
+    # DS.__class__.allow_overwrite = True
+    # DS.clear()
+    # test_data = DS.read_file("test_data", QPHandle, testdata)
+    # tomo_bins = DS.read_file("tomo_bins", TableHandle, tomobins)
+    test_data = QPHandle("test_data", path=testdata)
+    tomo_bins = TableHandle("tomo_bins", path=tomobins)
 
     summarizer = summarizer_class.make_stage(name=key, selected_bin=1, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data, tomo_bins)

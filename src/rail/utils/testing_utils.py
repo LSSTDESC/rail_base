@@ -14,8 +14,8 @@ from rail.utils.path_utils import RAILDIR
 
 traindata = os.path.join(RAILDIR, "rail/examples_data/testdata/training_100gal.hdf5")
 validdata = os.path.join(RAILDIR, "rail/examples_data/testdata/validation_10gal.hdf5")
-DS = RailStage.data_store
-DS.__class__.allow_overwrite = True
+# DS = RailStage.data_store
+# DS.__class__.allow_overwrite = True
 
 
 def one_algo(
@@ -33,9 +33,9 @@ def one_algo(
     Then, load tempmodelfile.tmp and re-run, return
     both datasets.
     """
-    DS.clear()
-    training_data = DS.read_file("training_data", TableHandle, traindata)
-    validation_data = DS.read_file("validation_data", TableHandle, validdata)
+    # DS.clear()
+    training_data = TableHandle("training_data", path=traindata)
+    validation_data = TableHandle("validation_data", path=validdata)
 
     if single_trainer is not None:
         train_pz = single_trainer.make_stage(**train_kwargs)
@@ -73,12 +73,21 @@ def one_algo(
         elif is_classifier:  # pragma: no cover
             estim_3 = pz_3.classify(validation_data)
 
-    os.remove(pz.get_output(pz.get_aliased_tag("output"), final_name=True))
+    try:
+        os.remove(pz.get_output(pz.get_aliased_tag("output"), final_name=True))
+    except FileNotFoundError:
+        pass
     if pz_2 is not None:
-        os.remove(pz_2.get_output(pz_2.get_aliased_tag("output"), final_name=True))
+        try:
+            os.remove(pz_2.get_output(pz_2.get_aliased_tag("output"), final_name=True))
+        except FileNotFoundError:
+            pass
 
     if pz_3 is not None:
-        os.remove(pz_3.get_output(pz_3.get_aliased_tag("output"), final_name=True))
+        try:
+            os.remove(pz_3.get_output(pz_3.get_aliased_tag("output"), final_name=True))
+        except FileNotFoundError:
+            pass
     model_file = estim_kwargs.get("model", "None")
     if model_file != "None":
         try:

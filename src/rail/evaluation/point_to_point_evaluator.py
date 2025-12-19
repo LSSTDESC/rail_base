@@ -5,7 +5,8 @@ from ceci.config import StageParameter as Param
 from qp.metrics.base_metric_classes import MetricOutputType
 from qp.metrics.point_estimate_metric_classes import PointToPointMetric
 
-from rail.core.data import TableLike, QPHandle, TableHandle
+from rail.core.data import QPHandle, TableHandle, TableLike
+from rail.core.common_params import SharedParams
 from rail.evaluation.evaluator import Evaluator
 
 
@@ -13,11 +14,11 @@ class PointToPointEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "PointToPointEvaluator"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
+    interactive_function = "point_to_point_evaluator"
     config_options = Evaluator.config_options.copy()
     config_options.update(
-        hdf5_groupname=Param(
-            str, "photometry", required=False, msg="HDF5 Groupname for truth table."
-        ),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),  # for truth table
         reference_dictionary_key=Param(
             str,
             "redshift",
@@ -55,11 +56,11 @@ class PointToPointBinnedEvaluator(Evaluator):
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "PointToPointBinnedEvaluator"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
+    interactive_function = "point_to_point_binned_evaluator"
     config_options = Evaluator.config_options.copy()
     config_options.update(
-        hdf5_groupname=Param(
-            str, "photometry", required=False, msg="HDF5 Groupname for truth table."
-        ),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),  # for truth table
         reference_dictionary_key=Param(
             str,
             "redshift",

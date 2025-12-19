@@ -11,7 +11,7 @@ col_remapper_test:
     mag_y_lsst_err: mag_err_y_lsst
     mag_z_lsst_err: mag_err_z_lsst
   config: null
-  inplace: false
+  in_place: false
   input: None
   name: col_remapper_test
   output_mode: default
@@ -23,7 +23,7 @@ col_remapper_train:
   columns: *id001
   config: null
   hdf5_groupname: ''
-  inplace: false
+  in_place: false
   input: None
   name: col_remapper_train
   output_mode: default
@@ -295,7 +295,7 @@ point_estimate_test:
   name: point_estimate_test
   nzbins: 301
   output_mode: default
-  point_estimate: zmode
+  point_estimate_key: zmode
   zmax: 3.0
   zmin: 0.0
 quantity_cut:

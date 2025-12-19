@@ -8,7 +8,8 @@ import numpy as np
 import qp
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, QPHandle, TableHandle, TableLike
+from rail.core.data import QPHandle, TableHandle, TableLike
+from rail.core.common_params import SharedParams
 from rail.estimation.informer import PzInformer
 from rail.estimation.summarizer import PZSummarizer
 
@@ -17,6 +18,8 @@ class NaiveStackInformer(PzInformer):
     """Placeholder Informer"""
 
     name = "NaiveStackInformer"
+    entrypoint_function = "inform"  # the user-facing science function for this class
+    interactive_function = "naive_stack_informer"
     config_options = PzInformer.config_options.copy()
 
     def _finalize_run(self) -> None:
@@ -28,13 +31,15 @@ class NaiveStackSummarizer(PZSummarizer):
     """Summarizer which stacks individual P(z)"""
 
     name = "NaiveStackSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
+    interactive_function = "naive_stack_summarizer"
     config_options = PZSummarizer.config_options.copy()
     config_options.update(
-        zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-        zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
-        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        zmin=SharedParams.copy_param("zmin"),
+        zmax=SharedParams.copy_param("zmax"),
+        nzbins=SharedParams.copy_param("nzbins"),
         seed=Param(int, 87, msg="random seed"),
-        nsamples=Param(int, 1000, msg="Number of sample distributions to create"),
+        n_samples=Param(int, 1000, msg="Number of sample distributions to create"),
     )
     inputs = [("input", QPHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
@@ -42,6 +47,34 @@ class NaiveStackSummarizer(PZSummarizer):
     def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.zgrid: np.ndarray | None = None
+
+    def summarize(
+        self, input_data: qp.Ensemble, **kwargs
+    ) -> QPHandle | dict[str, QPHandle]:
+        """Summarizer for NaiveStack which returns multiple items
+
+        Parameters
+        ----------
+        input_data : qp.Ensemble
+            Per-galaxy p(z), and any ancillary data associated with it
+
+        Returns
+        -------
+        QPHandle | dict[str, QPHandle]
+            Ensemble with n(z), and any ancillary data
+            Return type depends on `output_mode`
+        """
+        self.set_data("input", input_data)
+        self.run()
+        self.finalize()
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            results = self.get_handle("output")
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
+        return results
 
     def _setup_iterator(self) -> Generator:
         itr = self.input_iterator("input")
@@ -56,9 +89,9 @@ class NaiveStackSummarizer(PZSummarizer):
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
         )
         assert self.zgrid is not None
-        # Initiallizing the stacking pdf's
+        # Initializing the stacking pdf's
         yvals = np.zeros((1, len(self.zgrid)))
-        bvals = np.zeros((self.config.nsamples, len(self.zgrid)))
+        bvals = np.zeros((self.config.n_samples, len(self.zgrid)))
         bootstrap_matrix = self._broadcast_bootstrap_matrix()
 
         first = True
@@ -103,7 +136,7 @@ class NaiveStackSummarizer(PZSummarizer):
             0,
         )
         # qp_d is the normalized probability of the stack, we need to know how many galaxies were
-        for i in range(self.config.nsamples):
+        for i in range(self.config.n_samples):
             bootstrap_draws = bootstrap_matrix[:, i]
             # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
             chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end)
@@ -114,6 +147,8 @@ class NaiveStackSummarizer(PZSummarizer):
 
 class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     name = "NaiveStackMaskedSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
+    interactive_function = "naive_stack_masked_summarizer"
     config_options = NaiveStackSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, -1, msg="bin to use"),
@@ -146,27 +181,30 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                 else:
                     mask = d["class_id"] == self.config.selected_bin
             if mask is None:
-                mask = np.ones(pz_data.npdf, dtype=bool)
-            yield start, end, pz_data, mask
+                mask = np.ones(
+                    pz_data.npdf,  # pylint: disable=possibly-used-before-assignment
+                    dtype=bool,
+                )
+            yield start, end, pz_data, mask  # pylint: disable=possibly-used-before-assignment
 
     def summarize(
-        self, input_data: qp.Ensemble, tomo_bins: TableLike | None = None
-    ) -> DataHandle:
+        self, input_data: qp.Ensemble, tomo_bins: TableLike | None = None, **kwargs
+    ) -> QPHandle:
         """Override the Summarizer.summarize() method to take tomo bins
         as an additional input
 
         Parameters
         ----------
-        input_data
-            Per-galaxy p(z), and any ancilary data associated with it
+        input_data : qp.Ensemble
+            Per-galaxy p(z), and any ancillary data associated with it
 
-        tomo_bins
-            Tomographic bins file
+        tomo_bins : TableLike | None, optional
+            Tomographic bins file, by default None
 
         Returns
         -------
-        DataHandle
-            Ensemble with n(z), and any ancilary data
+        QPHandle
+            Ensemble with n(z), and any ancillary data
         """
         self.set_data("input", input_data)
         if tomo_bins is None:

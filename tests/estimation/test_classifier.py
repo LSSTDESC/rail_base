@@ -9,8 +9,8 @@ from rail.estimation.algos.equal_count import EqualCountClassifier
 from rail.estimation.algos.uniform_binning import UniformBinningClassifier
 from rail.utils.path_utils import RAILDIR
 
-DS = RailStage.data_store
-DS.__class__.allow_overwrite = True
+# DS = RailStage.data_store
+# DS.__class__.allow_overwrite = True
 
 inputdata = os.path.join(RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.hdf5")
 
@@ -19,34 +19,37 @@ inputdata = os.path.join(RAILDIR, "rail/examples_data/testdata/output_BPZ_lite.h
     "input_param",
     [
         {"zbin_edges": [0.0, 0.3]},
-        {"zmin": 0.0, "zmax": 0.3, "nbins": 1},
-        {"zbin_edges": [0.0, 0.3], "id_name": "CATAID"},
+        {"zmin": 0.0, "zmax": 0.3, "n_tom_bins": 1},
+        {"zbin_edges": [0.0, 0.3], "object_id_col": "CATAID"},
     ],
 )
 def test_UniformBinningClassifier(input_param: dict) -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data_handle = QPHandle("input_data", path=inputdata)
 
     tomo = UniformBinningClassifier.make_stage(
-        point_estimate="zmode",
+        point_estimate_key="zmode",
         no_assign=-99,
         **input_param,
     )
 
-    _out_data = tomo.classify(input_data)
+    _out_data = tomo.classify(input_data_handle)
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
 
 def test_UniformBinningClassifier_binsize() -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data = QPHandle("input_data", path=inputdata)
+    input_data.read()  # make sure the data is read in
 
     tomo = UniformBinningClassifier.make_stage(
-        point_estimate="zmode",
+        point_estimate_key="zmode",
         no_assign=-99,
         zmin=0.0,
         zmax=2.0,
-        nbins=2,
+        n_tom_bins=2,
     )
     output_data = tomo.classify(input_data)
     out_data = output_data.data
@@ -77,15 +80,17 @@ def test_UniformBinningClassifier_binsize() -> None:
 
 
 def test_UniformBinningClassifier_ancil() -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data_handle = QPHandle("input_data", path=inputdata)
+    input_data = input_data_handle.read()
 
     tomo = UniformBinningClassifier.make_stage(
-        point_estimate="zmedian",
+        point_estimate_key="zmedian",
         no_assign=-99,
         zmin=0.0,
         zmax=2.0,
-        nbins=2,
+        n_tom_bins=2,
     )
     with pytest.raises(KeyError):
         _out_data = tomo.classify(input_data)
@@ -94,16 +99,18 @@ def test_UniformBinningClassifier_ancil() -> None:
 @pytest.mark.parametrize(
     "input_param",
     [
-        {"zmin": 0.0, "zmax": 0.3, "nbins": 1},
-        {"zmin": 0.0, "zmax": 0.3, "nbins": 1, "id_name": "CATAID"},
+        {"zmin": 0.0, "zmax": 0.3, "n_tom_bins": 1},
+        {"zmin": 0.0, "zmax": 0.3, "n_tom_bins": 1, "object_id_col": "CATAID"},
     ],
 )
 def test_EqualCountClassifier(input_param: dict) -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data_handle = QPHandle("input_data", path=inputdata)
+    input_data = input_data_handle.read()
 
     tomo = EqualCountClassifier.make_stage(
-        point_estimate="zmode",
+        point_estimate_key="zmode",
         no_assign=-99,
         **input_param,
     )
@@ -113,15 +120,17 @@ def test_EqualCountClassifier(input_param: dict) -> None:
 
 
 def test_EqualCountClassifier_nobj() -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data_handle = QPHandle("input_data", path=inputdata)
+    input_data = input_data_handle.read()
 
     tomo = EqualCountClassifier.make_stage(
-        point_estimate="zmode",
+        point_estimate_key="zmode",
         no_assign=-99,
         zmin=0.0,
         zmax=2.0,
-        nbins=2,
+        n_tom_bins=2,
     )
     output_data = tomo.classify(input_data)
     out_data = output_data.data
@@ -147,15 +156,17 @@ def test_EqualCountClassifier_nobj() -> None:
 
 
 def test_EqualCountClassifier_ancil() -> None:
-    DS.clear()
-    input_data = DS.read_file("input_data", QPHandle, inputdata)
+    # DS.clear()
+    # input_data = DS.read_file("input_data", QPHandle, inputdata)
+    input_data_handle = QPHandle("input_data", path=inputdata)
+    input_data = input_data_handle.read()
 
     tomo = EqualCountClassifier.make_stage(
-        point_estimate="zmedian",
+        point_estimate_key="zmedian",
         no_assign=-99,
         zmin=0.0,
         zmax=2.0,
-        nbins=2,
+        n_tom_bins=2,
     )
     with pytest.raises(KeyError):
         _out_data = tomo.classify(input_data)

@@ -18,7 +18,7 @@ from rail.utils import catalog_utils
 def cli() -> None:
     """RAIL utility scripts"""
 
-    
+
 @cli.command(name="render-nb")
 @options.outdir(default="docs")
 @options.clear_output()
@@ -46,7 +46,10 @@ def get_data(verbose: bool, **kwargs: Any) -> int:  # pragma: no cover
     return 0
 
 
-@cli.command(name="clone-source", deprecated="In the future use 'rail dev clone-source ...' instead")
+@cli.command(
+    name="clone-source",
+    deprecated="In the future use 'rail dev clone-source ...' instead",
+)
 @options.outdir(default="..")
 @options.git_mode()
 @options.dry_run()
@@ -63,7 +66,10 @@ def clone_source(
     return 0
 
 
-@cli.command(name="update-source", deprecated="In the future use 'rail dev update-source ...' instead")
+@cli.command(
+    name="update-source",
+    deprecated="In the future use 'rail dev update-source ...' instead",
+)
 @options.outdir(default="..")
 @options.dry_run()
 @options.package_file()
@@ -73,7 +79,9 @@ def update_source(outdir: str, dry_run: bool, package_file: str, **_kwargs: Any)
     return 0
 
 
-@cli.command(name="install", deprecated="In the future use 'rail dev install' ... instead")
+@cli.command(
+    name="install", deprecated="In the future use 'rail dev install' ... instead"
+)
 @options.outdir(default="..")
 @options.dry_run()
 @options.from_source()
@@ -218,7 +226,7 @@ def print_stages(**kwargs: Any) -> int:
 def pipe_group() -> None:
     """Pipeline related sub-commands"""
 
-    
+
 @pipe_group.command(name="build")
 @options.pipeline_class()
 @options.output_yaml()
@@ -245,7 +253,7 @@ def build_pipe(
     )
     return 0
 
-    
+
 @pipe_group.command(name="run-stage")
 @options.pipeline_yaml()
 @options.stage_name()

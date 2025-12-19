@@ -30,6 +30,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
     """
 
     suffix: str | None = ""
+    interactive_type = None
 
     # This is to keep track of all the sub-types
     _data_handle_type_dict: dict[str, type[DataHandle]] = {}
@@ -252,7 +253,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         """
         if self.fileObj is None:  # pragma: no cover
             raise ValueError(
-                f"TableHandle.finalize_wite() called before open for {self.tag} : {self.path}"
+                f"TableHandle.finalize_write() called before open for {self.tag} : {self.path}"
             )
         self._finalize_write(self.data, self.fileObj, **kwargs)
 
@@ -294,7 +295,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
         raise NotImplementedError("DataHandle._size")  # pragma: no cover
 
     def data_size(self, **kwargs: Any) -> int:
-        """Return the size of the in memorry data"""
+        """Return the size of the in memory data"""
         if self.data is None:  # pragma: no cover
             return 0
         return self._data_size(self.data, **kwargs)
@@ -365,6 +366,7 @@ class TableHandle(DataHandle):
     """DataHandle for single tables of data"""
 
     suffix: str | None = None
+    interactive_type = "A tablesio-compatible table"
 
     def set_data(self, data: TableLike, partial: bool = False) -> None:
         """Set the data for a chunk, and set the partial flag if this is not all the data"""
@@ -457,6 +459,7 @@ class Hdf5Handle(TableHandle):  # pragma: no cover
     """DataHandle for a table written to HDF5"""
 
     suffix = "hdf5"
+    interactive_type = "dict"
 
     @classmethod
     def _initialize_write(
@@ -507,6 +510,7 @@ class PqHandle(TableHandle):
     """DataHandle for a parquet table"""
 
     suffix = "pq"
+    interactive_type = "pandas.core.frame.DataFrame"
 
     def _size(self, path: str, **kwargs: Any) -> int:
         return tab_hdf5.get_input_data_length(path, **kwargs)
@@ -516,6 +520,7 @@ class QPHandle(DataHandle):
     """DataHandle for qp ensembles"""
 
     suffix = "hdf5"
+    interactive_type = "qp.core.ensemble.Ensemble"
 
     @classmethod
     def _open(cls, path: str, **kwargs: Any) -> FileLike:
@@ -802,6 +807,7 @@ class ModelHandle(DataHandle):
     """DataHandle for machine learning models"""
 
     suffix = "pkl"
+    interactive_type = "numpy.ndarray"
 
     model_factory = ModelDict()
 
@@ -850,7 +856,7 @@ class DataStore(dict):
 
         Note
         ----
-        All of the values must be data handles of this will raise a TypeError
+        All of the values must be data handles or this will raise a TypeError
         """
         super(dict, self).__init__()
         for key, val in kwargs.items():
@@ -970,9 +976,9 @@ class DataStore(dict):
             handle.write(**local_kwargs)
 
 
-_DATA_STORE = DataStore()
+# _DATA_STORE = DataStore()
 
 
-def DATA_STORE() -> DataStore:
-    """Return the factory instance"""
-    return _DATA_STORE
+# def DATA_STORE() -> DataStore:
+#     """Return the factory instance"""
+#     return _DATA_STORE

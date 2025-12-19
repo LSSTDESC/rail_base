@@ -13,14 +13,16 @@ from ceci.stage import PipelineStage
 from qp.metrics.base_metric_classes import BaseMetric, MetricOutputType
 from qp.metrics.pit import PIT
 
-from rail.core.common_params import SHARED_PARAMS
+from rail.core.common_params import SHARED_PARAMS, SharedParams
 from rail.core.data import DataHandle, Hdf5Handle, QPDictHandle, QPHandle
 from rail.core.stage import RailStage
 from rail.evaluation.metrics.cdeloss import CDELoss
-from rail.evaluation.metrics.pointestimates import (PointBias,
-                                                    PointOutlierRate,
-                                                    PointSigmaIQR,
-                                                    PointSigmaMAD)
+from rail.evaluation.metrics.pointestimates import (
+    PointBias,
+    PointOutlierRate,
+    PointSigmaIQR,
+    PointSigmaMAD,
+)
 
 
 def _all_subclasses(a_class: type[BaseMetric]) -> set[type[BaseMetric]]:
@@ -42,6 +44,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
     """Evaluate the performance of a photo-z estimator against reference point estimate"""
 
     name = "Evaluator"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
         metrics=Param(
@@ -53,13 +56,10 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
         metric_config=Param(
             dict, msg="configuration of individual_metrics", default={}
         ),
-        chunk_size=Param(
-            int,
-            10000,
-            required=False,
-            msg="The default number of PDFs to evaluate per loop.",
-        ),
-        _random_state=Param(
+        chunk_size=SharedParams.copy_param(
+            "chunk_size"
+        ),  # number of PDFs to evaluate per loop
+        seed=Param(
             float,
             default=None,
             required=False,
@@ -94,7 +94,9 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
         self._single_distribution_summary_data: dict = {}
         self._metric_config_dict: dict = {}
 
-    def evaluate(self, data: qp.Ensemble, truth: Any) -> dict[str, DataHandle]:
+    def evaluate(
+        self, data: qp.Ensemble, truth: Any, **kwargs
+    ) -> dict[str, DataHandle]:
         """Evaluate the performance of an estimator
 
         This will attach the input data and truth to this `Evaluator`
@@ -108,10 +110,9 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
 
         Parameters
         ----------
-        data
+        data : qp.Ensemble
             The sample to evaluate
-
-        truth
+        truth : Any
             Table with the truth information
 
         Returns
@@ -395,8 +396,8 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
                 )
                 continue
             sub_dict = {}
-            if "limits" in self.config:
-                sub_dict["limits"] = self.config.limits
+            if "metric_integration_limits" in self.config:
+                sub_dict["limits"] = self.config.metric_integration_limits
             sub_dict.update(self.config.metric_config.get("general", {}))
             sub_dict.update(self.config.metric_config.get(metric_name_, {}))
             self._metric_config_dict[metric_name_] = sub_dict
@@ -413,23 +414,25 @@ class OldEvaluator(RailStage):
     """Evaluate the performance of a photo-Z estimator"""
 
     name = "OldEvaluator"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
+    interactive_function = "old_evaluator"
     config_options = RailStage.config_options.copy()
     config_options.update(
-        zmin=Param(float, 0.0, msg="min z for grid"),
-        zmax=Param(float, 3.0, msg="max z for grid"),
-        nzbins=Param(int, 301, msg="# of bins in zgrid"),
+        zmin=SharedParams.copy_param("zmin"),
+        zmax=SharedParams.copy_param("zmax"),
+        nzbins=SharedParams.copy_param("nzbins"),
         pit_metrics=Param(str, "all", msg="PIT-based metrics to include"),
         point_metrics=Param(str, "all", msg="Point-estimate metrics to include"),
-        hdf5_groupname=Param(
-            str, "", msg="Name of group in hdf5 where redshift data is located"
-        ),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),
         do_cde=Param(bool, True, msg="Evaluate CDE Metric"),
-        redshift_col=SHARED_PARAMS,
+        redshift_col=SharedParams.copy_param("redshift_col"),
     )
+
+    config_options["hdf5_groupname"].set_default("")  # change default value
     inputs = [("input", QPHandle), ("truth", Hdf5Handle)]
     outputs = [("output", Hdf5Handle)]
 
-    def evaluate(self, data: qp.Ensemble, truth: Any) -> DataHandle:
+    def evaluate(self, data: qp.Ensemble, truth: Any, **kwargs) -> Hdf5Handle:
         """Evaluate the performance of an estimator
 
         This will attach the input data and truth to this `Evaluator`
@@ -441,15 +444,15 @@ class OldEvaluator(RailStage):
 
         Parameters
         ----------
-        data
+        data : qp.Ensemble
             The sample to evaluate
 
-        truth
+        truth : Any
             Table with the truth information
 
         Returns
         -------
-        DataHandle
+        Hdf5Handle
             The evaluation metrics
         """
 

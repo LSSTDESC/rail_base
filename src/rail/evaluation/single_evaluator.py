@@ -12,6 +12,7 @@ from qp.metrics import MetricInputType, MetricOutputType
 from qp.metrics.base_metric_classes import BaseMetric
 
 from rail.core.data import QPOrTableHandle
+from rail.core.common_params import SharedParams
 from rail.evaluation.evaluator import Evaluator
 
 
@@ -19,15 +20,15 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     """Evaluate the performance of a photo-Z estimator"""
 
     name = "SingleEvaluator"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
+    interactive_function = "single_evaluator"
     config_options = Evaluator.config_options.copy()
     config_options.update(
         point_estimates=Param(list, msg="List of point estimates to use", default=[]),
         truth_point_estimates=Param(
             list, msg="List of true point values to use", default=[]
         ),
-        hdf5_groupname=Param(
-            str, "photometry", required=False, msg="HDF5 Groupname for truth table."
-        ),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),  # for truth table
     )
     inputs = [("input", QPOrTableHandle), ("truth", QPOrTableHandle)]
 

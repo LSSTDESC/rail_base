@@ -5,7 +5,7 @@ import numpy as np
 import pandas as pd
 import pytest
 
-from rail.core.data import DATA_STORE, DataHandle, TableHandle
+from rail.core.data import DataHandle, TableHandle
 from rail.creation.degraders.addRandom import AddColumnOfRandom
 from rail.creation.degraders.quantityCut import QuantityCut
 
@@ -14,8 +14,8 @@ from rail.creation.degraders.quantityCut import QuantityCut
 def data() -> DataHandle:
     """Some dummy data to use below."""
 
-    DS = DATA_STORE()
-    DS.__class__.allow_overwrite = True
+    # DS = DATA_STORE()
+    # DS.__class__.allow_overwrite = True
 
     # generate random normal data
     rng = np.random.default_rng(0)
@@ -26,15 +26,16 @@ def data() -> DataHandle:
 
     # return data in handle wrapping a pandas DataFrame
     df = pd.DataFrame(x, columns=["redshift", "u", "g", "r", "i", "z", "y"])
-    return DS.add_data("data", df, TableHandle, path="dummy.pq")
+    # return DS.add_data("data", df, TableHandle, path="dummy.pq")
+    return TableHandle("input", df, path="dummy.pq")
 
 
 @pytest.fixture
 def data_forspec() -> DataHandle:
     """Some dummy data to use below."""
 
-    DS = DATA_STORE()
-    DS.__class__.allow_overwrite = True
+    # DS = DATA_STORE()
+    # DS.__class__.allow_overwrite = True
 
     # generate random normal data
     rng = np.random.default_rng(0)
@@ -45,7 +46,8 @@ def data_forspec() -> DataHandle:
 
     # return data in handle wrapping a pandas DataFrame
     df = pd.DataFrame(x, columns=["redshift", "u", "g", "r", "i", "z", "y"])
-    return DS.add_data("data_forspec", df, TableHandle, path="dummy_forspec.pq")
+    # return DS.add_data("data_forspec", df, TableHandle, path="dummy_forspec.pq")
+    return df
 
 
 @pytest.mark.parametrize(

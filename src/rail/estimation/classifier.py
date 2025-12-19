@@ -7,9 +7,16 @@ from typing import Any
 
 import qp
 
-from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import (DataHandle, Hdf5Handle, ModelHandle, ModelLike,
-                            QPHandle, TableHandle, TableLike)
+from rail.core.common_params import SHARED_PARAMS, SharedParams
+from rail.core.data import (
+    DataHandle,
+    Hdf5Handle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.stage import RailStage
 
 
@@ -24,10 +31,11 @@ class CatClassifier(RailStage):  # pragma: no cover
     """
 
     name = "CatClassifier"
+    entrypoint_function = "classify"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
-        chunk_size=SHARED_PARAMS,
-        hdf5_groupname=SHARED_PARAMS,
+        chunk_size=SharedParams.copy_param("chunk_size"),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),
     )
     inputs = [("model", ModelHandle), ("input", TableHandle)]
     outputs = [("output", TableHandle)]
@@ -41,7 +49,7 @@ class CatClassifier(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def classify(self, input_data: TableLike) -> DataHandle:
+    def classify(self, input_data: TableLike, **kwargs) -> TableHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -58,12 +66,12 @@ class CatClassifier(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        input_data
+        input_data : TableLike
             A dictionary of all input data
 
         Returns
         -------
-        DataHandle
+        TableHandle
             Class assignment for each galaxy.
         """
         self.set_data("input", input_data)
@@ -81,17 +89,19 @@ class PZClassifier(RailStage):
     """
 
     name = "PZClassifier"
+    entrypoint_function = "classify"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=SHARED_PARAMS)
+    config_options.update(chunk_size=SharedParams.copy_param("chunk_size"))
     inputs = [("input", QPHandle)]
     outputs = [("output", Hdf5Handle)]
+    _partial_output = {}
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
         """Initialize the PZClassifier."""
         super().__init__(args, **kwargs)
         self._output_handle: DataHandle | None = None
 
-    def classify(self, input_data: qp.Ensemble) -> DataHandle:
+    def classify(self, input_data: qp.Ensemble, **kwargs) -> TableHandle:
         """The main run method for the classifier, should be implemented
         in the specific subclass.
 
@@ -114,12 +124,12 @@ class PZClassifier(RailStage):
 
         Parameters
         ----------
-        input_data
+        input_data : qp.Ensemble
             Per-galaxy p(z), and any ancilary data associated with it
 
         Returns
         -------
-        DataHandle
+        TableHandle
             Class assignment for each galaxy, typically in the form of a
             dictionary with IDs and class labels.
         """
@@ -131,7 +141,11 @@ class PZClassifier(RailStage):
     def _finalize_run(self) -> None:
         """Finalize the classification process after processing all chunks."""
         assert self._output_handle is not None
-        self._output_handle.finalize_write()
+        if self.config.output_mode != "return":
+            self._output_handle.finalize_write()
+        elif self.config.output_mode == "return":
+            # update output handle assuming that the data is in a dictionary format
+            self._output_handle.set_data(self._partial_output)
 
     def _process_chunk(
         self, start: int, end: int, data: qp.Ensemble, first: bool
@@ -181,12 +195,18 @@ class PZClassifier(RailStage):
         if first:
             self._output_handle = self.add_handle("output", data=class_id)
             assert self._output_handle is not None
-            self._output_handle.initialize_write(
-                self._input_length, communicator=self.comm
-            )
+            if self.config.output_mode != "return":
+                self._output_handle.initialize_write(
+                    self._input_length, communicator=self.comm
+                )
         assert self._output_handle is not None
         self._output_handle.set_data(class_id, partial=True)
-        self._output_handle.write_chunk(start, end)
+        if self.config.output_mode != "return":
+            self._output_handle.write_chunk(start, end)
+        elif self.config.output_mode == "return":
+            self._partial_output.update(
+                class_id
+            )  # TODO: this is assuming the output data handle is a dictionary, check this is valid
 
     def run(self) -> None:
         """Processes the input data in chunks and performs classification.

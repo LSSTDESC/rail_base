@@ -2,6 +2,7 @@
 # coding: utf-8
 
 from rail.core.stage import RailPipeline, RailStage
+
 # Various rail modules
 from rail.estimation.algos.train_z import TrainZEstimator, TrainZInformer
 from rail.evaluation.single_evaluator import SingleEvaluator
@@ -16,8 +17,8 @@ class TrainZPipeline(RailPipeline):
     def __init__(self) -> None:
         RailPipeline.__init__(self)
 
-        DS = RailStage.data_store
-        DS.__class__.allow_overwrite = True
+        # DS = RailStage.data_store
+        # DS.__class__.allow_overwrite = True
 
         self.inform_trainz = TrainZInformer.build(
             aliases=dict(input="input_train"),

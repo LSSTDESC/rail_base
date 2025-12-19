@@ -10,9 +10,9 @@ from rail.utils.path_utils import RAILDIR
 
 
 def test_pipeline() -> None:
-    DS = RailStage.data_store
-    DS.__class__.allow_overwrite = True
-    DS.clear()
+    # DS = RailStage.data_store
+    # DS.__class__.allow_overwrite = True
+    # DS.clear()
 
     input_file = os.path.join(
         RAILDIR, "rail/examples_data/goldenspike_data/data//test_flow_data.pq"
@@ -67,9 +67,9 @@ def test_pipeline() -> None:
 
 
 def test_golden_v2() -> None:
-    DS = RailStage.data_store
-    DS.__class__.allow_overwrite = True
-    DS.clear()
+    # DS = RailStage.data_store
+    # DS.__class__.allow_overwrite = True
+    # DS.clear()
     pipe = RailPipeline()
 
     input_file = os.path.join(
