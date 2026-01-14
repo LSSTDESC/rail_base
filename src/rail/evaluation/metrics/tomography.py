@@ -77,7 +77,7 @@ class KDEBinOverlap(RailStage):
                     p_j = kde_j(eval_grid)
 
                     # Compute overlap as the integral of the minimum of both distributions
-                    overlap = np.trapz(np.minimum(p_i, p_j), eval_grid)
+                    overlap = np.trapezoid(np.minimum(p_i, p_j), eval_grid)
                     overlap_matrix[i, j] = overlap
                     overlap_matrix[j, i] = overlap  # Symmetric matrix
 

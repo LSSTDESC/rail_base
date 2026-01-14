@@ -55,7 +55,7 @@ def test_UniformBinningClassifier_binsize() -> None:
     assert len(out_data["class_id"]) == len(out_data["row_index"])
 
     # check that the assignment is as expected:
-    assert (np.in1d(np.unique(out_data["class_id"]), [1, 2, -99])).all()
+    assert (np.isin(np.unique(out_data["class_id"]), [1, 2, -99])).all()
 
     zb = input_data.data.ancil["zmode"]
     if 1 in out_data["class_id"]:
@@ -127,7 +127,7 @@ def test_EqualCountClassifier_nobj() -> None:
     out_data = output_data.data
 
     # check that there are equal number of object in each bin modulo Ngal%Nbins
-    assert (np.in1d(np.unique(out_data["class_id"]), [1, 2, -99])).all()
+    assert (np.isin(np.unique(out_data["class_id"]), [1, 2, -99])).all()
 
     Ngal = sum(out_data["class_id"] != -99)
     exp_Ngal_perbin = int(Ngal / 2)
