@@ -186,23 +186,23 @@ class RailPipeline(MiniPipeline):
         )
 
         # make sure stage_config_dict is a dict of stages_config
-        if isinstance(stages_config, str): # pragma: no cover
+        if isinstance(stages_config, str):  # pragma: no cover
             with open(stages_config, "r") as f:
                 stages_config_dict = yaml.safe_load(f) or {}
         else:
             stages_config_dict = stages_config or {}
-        
+
         # loop through stages
         for key, exec_cfg in pipe.stage_execution_config.items():
-            stage_cfg = (stages_config_dict.get(key) or {})
+            stage_cfg = stages_config_dict.get(key) or {}
             nprocess = stage_cfg.get("nprocess")
-        
+
             if nprocess is None:
                 continue
-            else: # pragma: no cover
-        
+            else:  # pragma: no cover
+
                 exec_cfg.nprocess = nprocess
-            
+
                 # bump max_threads if needed
                 site_cfg = exec_cfg.site.config
                 if nprocess > site_cfg.get("max_threads", 0):
@@ -581,6 +581,10 @@ class RailStage(PipelineStage):
                 test_data = self.get_data(tag)
                 self._input_length = self.get_handle(tag).data_size()
             s = 0
+            self.config.chunk_size = (
+                self._input_length
+            )  # set new chunk size so future functions know this has changed
+
             iterator = [[s, self._input_length, test_data]]
             return iterator
 
