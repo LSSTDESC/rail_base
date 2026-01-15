@@ -34,7 +34,8 @@ def var_inf_stack_informer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
 
     Returns
@@ -63,13 +64,14 @@ def var_inf_stack_summarizer(**kwargs) -> Any:
     input : qp.Ensemble
         Per-galaxy p(z), and any ancillary data associated with it
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -77,10 +79,10 @@ def var_inf_stack_summarizer(**kwargs) -> Any:
     seed : int, optional
         random seed
         Default: 87
-    niter : int, optional
+    n_iter : int, optional
         The number of iterations in the variational inference
         Default: 100
-    nsamples : int, optional
+    n_samples : int, optional
         The number of samples used in dirichlet uncertainty
         Default: 500
 

@@ -50,16 +50,17 @@ def cmnn_estimator(**kwargs) -> Any:
     input : TableLike
         A dictionary of all input data
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -81,16 +82,16 @@ def cmnn_estimator(**kwargs) -> Any:
         Force recomputation of point estimates
         Default: False
     bands : list, optional
-        Names of columns for magnitgude by filter band
+        Names of columns for magnitude by filter band
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     err_bands : list, optional
-        Names of columns for magnitgude errors by filter band
+        Names of columns for magnitude errors by filter band
         Default: ['mag_err_u_lsst', 'mag_err_g_lsst', 'mag_err_r_lsst',...]
     nondetect_val : float, optional
         value to be replaced with magnitude limit for non detects
         Default: 99.0
     mag_limits : dict, optional
-        Limiting magnitdues by filter
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     seed : int, optional
         random seed used in selection mode
@@ -157,16 +158,16 @@ def cmnn_informer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     bands : list, optional
-        Names of columns for magnitgude by filter band
+        Names of columns for magnitude by filter band
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     err_bands : list, optional
-        Names of columns for magnitgude errors by filter band
+        Names of columns for magnitude errors by filter band
         Default: ['mag_err_u_lsst', 'mag_err_g_lsst', 'mag_err_r_lsst',...]
     redshift_col : str, optional
         name of redshift column
         Default: redshift
     mag_limits : dict, optional
-        Limiting magnitdues by filter
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     nondetect_val : float, optional
         value to be replaced with magnitude limit for non detects

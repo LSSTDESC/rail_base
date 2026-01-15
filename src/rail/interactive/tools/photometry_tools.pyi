@@ -29,7 +29,7 @@ def dereddener(**kwargs) -> Any:
         Template for the magnitude columns
         Default: mag_{band}_lsst
     band_a_env : dict, optional
-        Redenning parameters
+        Reddening parameters
         Default: {'mag_u_lsst': 4.81, 'mag_g_lsst': 3.64, 'mag_r_lsst': 2.7,...}
     dustmap_name : str, optional
         Name of the dustmap in question
@@ -79,7 +79,7 @@ def dust_map_base(**kwargs) -> Any:
         Template for the magnitude columns
         Default: mag_{band}_lsst
     band_a_env : dict, optional
-        Redenning parameters
+        Reddening parameters
         Default: {'mag_u_lsst': 4.81, 'mag_g_lsst': 3.64, 'mag_r_lsst': 2.7,...}
     dustmap_name : str, optional
         Name of the dustmap in question
@@ -273,7 +273,7 @@ def reddener(**kwargs) -> Any:
         Template for the magnitude columns
         Default: mag_{band}_lsst
     band_a_env : dict, optional
-        Redenning parameters
+        Reddening parameters
         Default: {'mag_u_lsst': 4.81, 'mag_g_lsst': 3.64, 'mag_r_lsst': 2.7,...}
     dustmap_name : str, optional
         Name of the dustmap in question

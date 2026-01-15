@@ -37,13 +37,13 @@ def uniform_binning_classifier(**kwargs) -> Any:
     input : qp.Ensemble
         Per-galaxy p(z), and any ancilary data associated with it
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
-    id_name : str, optional
-        Column name for the object ID in the input data, if empty the row index is used
-        as the ID.
+    object_id_col : str, optional
+        name of object id column
         Default:
-    point_estimate : str, optional
+    point_estimate_key : str, optional
         Which point estimate to use
         Default: zmode
     zbin_edges : list, optional
@@ -51,12 +51,12 @@ def uniform_binning_classifier(**kwargs) -> Any:
         entries), all settings below will be ignored.
         Default: []
     zmin : float, optional
-        Minimum redshift of the sample
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        Maximum redshift of the sample
+        The maximum redshift of the z grid or sample
         Default: 3.0
-    nbins : int, optional
+    n_tom_bins : int, optional
         Number of tomographic bins
         Default: 5
     no_assign : int, optional

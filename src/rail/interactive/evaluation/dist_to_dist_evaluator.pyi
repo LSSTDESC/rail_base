@@ -38,18 +38,19 @@ def dist_to_dist_evaluator(**kwargs) -> Any:
         configuration of individual_metrics
         Default: {}
     chunk_size : int, optional
-        The default number of PDFs to evaluate per loop.
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
-    _random_state : float, optional
+    seed : float, optional
         Random seed value to use for reproducible results.
         Default: None
-    limits : list, optional
+    metric_integration_limits : list, optional
         The default end points for calculating metrics on a grid.
         Default: [0.0, 3.0]
     dx : float, optional
         The default step size when calculating metrics on a grid.
         Default: 0.01
-    num_samples : int, optional
+    n_samples : int, optional
         The number of random samples to select for certain metrics.
         Default: 100
 

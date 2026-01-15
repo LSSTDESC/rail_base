@@ -27,13 +27,13 @@ def old_evaluator(**kwargs) -> Any:
         data: qp.Ensemble - The sample to evaluate
         truth: Any - Table with the truth information
     zmin : float, optional
-        min z for grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        max z for grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
-        # of bins in zgrid
+        The number of gridpoints in the z grid
         Default: 301
     pit_metrics : str, optional
         PIT-based metrics to include
@@ -42,7 +42,7 @@ def old_evaluator(**kwargs) -> Any:
         Point-estimate metrics to include
         Default: all
     hdf5_groupname : str, optional
-        Name of group in hdf5 where redshift data is located
+        name of hdf5 group for data, if None, then set to ''
         Default:
     do_cde : bool, optional
         Evaluate CDE Metric
