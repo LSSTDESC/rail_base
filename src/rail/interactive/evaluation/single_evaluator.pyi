@@ -38,9 +38,10 @@ def single_evaluator(**kwargs) -> Any:
         configuration of individual_metrics
         Default: {}
     chunk_size : int, optional
-        The default number of PDFs to evaluate per loop.
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
-    _random_state : float, optional
+    seed : float, optional
         Random seed value to use for reproducible results.
         Default: None
     point_estimates : list, optional
@@ -50,7 +51,7 @@ def single_evaluator(**kwargs) -> Any:
         List of true point values to use
         Default: []
     hdf5_groupname : str, optional
-        HDF5 Groupname for truth table.
+        name of hdf5 group for data, if None, then set to ''
         Default: photometry
 
     Returns

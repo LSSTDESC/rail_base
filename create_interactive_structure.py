@@ -79,13 +79,23 @@ def check_rail_packages() -> list[str]:
         "rail.som": "pz-rail-som",
         "rail.sompz": "pz-rail-sompz",
         "rail.rail_tpz": "pz-rail-tpz",
-        "rail.yaw_rail": "pz-rail-yaw",  # needs to be manually imported?
+        "rail.yaw_rail": "pz-rail-yaw",
     }
     package_info = RailEnv.list_rail_packages()
-    del package_info["rail.hub"]
-    del package_info["rail._pipelines"]
-    rail_base_path = package_info["rail.core"][0].path
 
+    # remove the rail.X submodules from the list of packages, that don't represent their
+    # own independent PyPI packages
+    # if, in the future, the `module_to_package[name]` line in this function's return
+    # statement throws a KeyError one of two things needs to happen:
+    # 1. this is a new pz-rail- package that should be added to the above
+    #    `module_to_package` dict
+    # 2. this is a new unaccounted for module, that should be added to the below list of
+    #    items that get deleted
+    for non_rail_package in ["rail.hub", "rail._pipelines"]:
+        if non_rail_package in package_info:
+            del package_info[non_rail_package]
+
+    rail_base_path = package_info["rail.core"][0].path
     return ["pz-rail"] + [
         module_to_package[name]
         for name, info in package_info.items()

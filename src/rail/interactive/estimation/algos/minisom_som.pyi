@@ -71,10 +71,10 @@ def mini_som_informer(**kwargs) -> Any:
         value to be replaced with magnitude limit for non detects
         Default: 99.0
     mag_limits : dict, optional
-        Limiting magnitdues by filter
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     bands : list, optional
-        Names of columns for magnitgude by filter band
+        Names of columns for magnitude by filter band
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     ref_band : str, optional
         band to use in addition to colors
@@ -176,13 +176,14 @@ def mini_som_summarizer(**kwargs) -> Any:
         with it
         spec_data: np.ndarray - Spectroscopic data
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -191,7 +192,7 @@ def mini_som_summarizer(**kwargs) -> Any:
         value to be replaced with magnitude limit for non detects
         Default: 99.0
     mag_limits : dict, optional
-        Limiting magnitdues by filter
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''

@@ -34,7 +34,8 @@ def point_est_hist_informer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
 
     Returns
@@ -64,13 +65,14 @@ def point_est_hist_masked_summarizer(**kwargs) -> Any:
     tomo_bins : TableLike | None, optional
         Tomographic bins file, by default None
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -78,10 +80,10 @@ def point_est_hist_masked_summarizer(**kwargs) -> Any:
     seed : int, optional
         random seed
         Default: 87
-    point_estimate : str, optional
+    point_estimate_key : str, optional
         Which point estimate to use
         Default: zmode
-    nsamples : int, optional
+    n_samples : int, optional
         Number of sample distributions to return
         Default: 1000
     selected_bin : int, optional
@@ -124,13 +126,14 @@ def point_est_hist_summarizer(**kwargs) -> Any:
     input : qp.Ensemble
         Per-galaxy p(z), and any ancillary data associated with it
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -138,10 +141,10 @@ def point_est_hist_summarizer(**kwargs) -> Any:
     seed : int, optional
         random seed
         Default: 87
-    point_estimate : str, optional
+    point_estimate_key : str, optional
         Which point estimate to use
         Default: zmode
-    nsamples : int, optional
+    n_samples : int, optional
         Number of sample distributions to return
         Default: 1000
 

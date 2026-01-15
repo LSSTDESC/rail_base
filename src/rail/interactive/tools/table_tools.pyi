@@ -8,7 +8,7 @@ def column_mapper(**kwargs) -> Any:
 
     2. In short, this does:
     `output_data = input_data.rename(columns=self.config.columns,
-    inplace=self.config.inplace)`
+    in_place=self.config.in_place)`
 
     ---
 
@@ -25,7 +25,7 @@ def column_mapper(**kwargs) -> Any:
         The data to be renamed
     columns : dict
         Map of columns to rename
-    inplace : bool, optional
+    in_place : bool, optional
         Update file in place
         Default: False
 
@@ -42,7 +42,7 @@ def row_selector(**kwargs) -> Any:
     1. This operates on pandas dataframs in parquet files.
 
     2. In short, this does:
-    `output_data = input_data[self.config.start:self.config.stop]`
+    `output_data = input_data[self.config.start_row:self.config.stop_row]`
 
     ---
 
@@ -57,9 +57,9 @@ def row_selector(**kwargs) -> Any:
     ----------
     input : TableLike
         The data to be renamed
-    start : int
-        Starting row number
-    stop : int
+    start_row : int
+        starting row number
+    stop_row : int
         Stoppig row number
 
     Returns

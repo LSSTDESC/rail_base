@@ -52,7 +52,7 @@ def unrec_bl_model(**kwargs) -> Any:
         linking_lengths for FoF matching
         Default: 1.0
     bands : list, optional
-        Names of columns for magnitgude by filter band
+        Names of columns for magnitude by filter band
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     zp_dict : dict, optional
         magnitude zeropoints dictionary

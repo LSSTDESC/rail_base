@@ -28,16 +28,17 @@ def train_z_estimator(**kwargs) -> Any:
     input : TableLike
         A dictionary of all input data
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -97,10 +98,10 @@ def train_z_informer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid

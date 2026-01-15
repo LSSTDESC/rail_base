@@ -11,8 +11,8 @@ import qp
 from ceci.config import StageParameter as Param
 from scipy.stats import norm
 
-from rail.core.data import ModelHandle, TableHandle, TableLike
 from rail.core.common_params import SharedParams
+from rail.core.data import ModelHandle, TableHandle, TableLike
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
 
@@ -64,11 +64,9 @@ class RandomGaussEstimator(CatEstimator):
         # allow for either format for now
         numzs = len(data[self.config.column_name])
         rng = np.random.default_rng(seed=self.config.seed + start)
-        zmode = np.round(rng.uniform(0.0, self.config.rand_zmax, numzs), 3)
+        zmode = np.round(rng.uniform(0.0, self.config.zmax, numzs), 3)
         widths = self.config.rand_width * (1.0 + zmode)
-        self.zgrid = np.linspace(
-            self.config.rand_zmin, self.config.rand_zmax, self.config.nzbins
-        )
+        self.zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
         for i in range(numzs):
             pdf.append(norm.pdf(self.zgrid, zmode[i], widths[i]))
         qp_d = qp.Ensemble(

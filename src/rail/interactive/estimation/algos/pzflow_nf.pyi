@@ -28,7 +28,8 @@ def pz_flow_estimator(**kwargs) -> Any:
     input : TableLike
         A dictionary of all input data
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''

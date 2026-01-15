@@ -21,16 +21,17 @@ def sompz_estimator(**kwargs) -> Any:
         balrog_data: Any - description
         wide_data: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -163,16 +164,17 @@ def sompz_estimator_base(**kwargs) -> Any:
     input : Any
         description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -251,16 +253,17 @@ def sompz_estimator_deep(**kwargs) -> Any:
     input : Any
         description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -339,16 +342,17 @@ def sompz_estimator_wide(**kwargs) -> Any:
     input : Any
         description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -496,16 +500,17 @@ def sompz_p_c_chat(**kwargs) -> Any:
         cell_deep_balrog_data: Any - description
         cell_wide_balrog_data: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -555,16 +560,17 @@ def sompz_pzc(**kwargs) -> Any:
         spec_data: Any - description
         cell_deep_spec_data: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -633,16 +639,17 @@ def sompz_pzchat(**kwargs) -> Any:
         pz_c: Any - description
         pc_chat: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -706,16 +713,17 @@ def sompz_tomobin(**kwargs) -> Any:
         cell_deep_spec_data: Any - description
         cell_wide_spec_data: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -781,16 +789,17 @@ def sompz_nz(**kwargs) -> Any:
         tomo_bins_wide: Any - description
         pc_chat: Any - description
     chunk_size : int, optional
-        Number of object per chunk for parallel processing
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
