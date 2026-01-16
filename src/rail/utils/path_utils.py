@@ -32,7 +32,13 @@ def unfind_rail_file(abspath: str) -> str:
             )
             return os.path.normpath(abspath.removeprefix(rail_package_directory + "/"))
 
-    # cache locations
-    if abspath.startswith("/home/"):
+    # cache locations, which would be in user directory:
+
+    user_home_directory = os.path.expanduser("~")
+
+    if abspath.startswith(user_home_directory):
         return abspath.replace(os.path.expanduser("~"), "~")
+
+    # Return error if not caught
+
     raise ValueError(f"Could not find the originating source of {abspath}")
