@@ -632,14 +632,12 @@ class RailStage(PipelineStage):
             assert handle.path is not None
             if not os.path.exists(handle.path) or not handle.partial:
                 handle.write()
-            final_name = PipelineStage._finalize_tag(self, tag)
-            handle.path = final_name
-            return final_name
+
         elif self.config.output_mode == "return":
             # TODO: or should this be a test, i.e. assert handle.path == None
             handle.path = None
-
             return
+
         final_name = PipelineStage._finalize_tag(self, tag)
         handle.path = final_name
         return final_name
