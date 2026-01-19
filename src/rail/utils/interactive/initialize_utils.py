@@ -311,7 +311,7 @@ def _write_stubs(
             stub_directory, virtual_module_name=virtual_module_name
         )
         stub_files[stub_path].append(
-            f"def {function_name}{signature.format()}:\n{docstring}"
+            f"def {function_name}{str(signature)}:\n{docstring}"
         )
 
     # merge lists to strings

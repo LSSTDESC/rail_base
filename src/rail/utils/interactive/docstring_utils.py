@@ -293,7 +293,15 @@ def _split_docstring(docstring: str) -> defaultdict[str, str]:
     # merge list items together
     joined_result = defaultdict(str)
     for title, lines in result.items():
-        joined_result[title] = "\n".join(lines).replace("\n\n\n", "\n\n").strip()
+        # add an indent for the first line of the summary, in case it starts on the same
+        # line as the quotations
+        if title == "Summary" and lines[0] == lines[0].strip():
+            lines[0] = " " * 4 + lines[0]
+
+        # unify and simplify whitespace
+        joined_result[title] = textwrap.dedent(
+            "\n".join(lines).replace("\n\n\n", "\n\n")
+        ).strip()
     return joined_result
 
 
@@ -316,6 +324,7 @@ def _parse_annotation_string(
         The information contained in the docstring, but reformatted as
         InteractiveParameter objects.
     """
+
     lines = text.replace("\n\n", "\n").splitlines()
     annotation_linenos = []
     for i, line in enumerate(lines):
@@ -372,8 +381,6 @@ def _create_parameters_section(
     ----------
     stage_definition : type[RailStage]
         Class definition for the stage
-    stage_name : str
-        Name of the stage
     epf_parameter_string : str
         Portion of the entrypoint function's docstring pertaining to parameters
 
@@ -410,6 +417,7 @@ def _create_parameters_section(
         for i, param in enumerate(epf_parameters)
         if param.name in input_parameter_names
     ]
+
     if len(input_parameters_indices) == 1:
         input_parameter = epf_parameters.pop(input_parameters_indices[0])
         input_parameter.name = "input"
@@ -596,6 +604,9 @@ def create_interactive_docstring(stage_name: str) -> str:
     epf_docstring = getattr(
         stage_definition, stage_definition.entrypoint_function
     ).__doc__
+    epf_docstring = textwrap.dedent(
+        "    " + epf_docstring
+    )  # need to handle the first line lacking indent
 
     # do some pre-processing
     class_sections = _split_docstring(class_docstring)
