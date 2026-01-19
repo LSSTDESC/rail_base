@@ -640,6 +640,9 @@ class RailStage(PipelineStage):
             handle.path = None
 
             return
+        final_name = PipelineStage._finalize_tag(self, tag)
+        handle.path = final_name
+        return final_name
 
     def _check_column_names(
         self, data: Any, columns_to_check: list[str], **kwargs: Any
