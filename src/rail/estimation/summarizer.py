@@ -104,7 +104,16 @@ class PZSummarizer(RailStage):
         self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            results = self.get_handle("output")
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
+        return results
+
+        # return self.get_handle("output")
 
     def _broadcast_bootstrap_matrix(self) -> np.ndarray | None:
         rng = np.random.default_rng(seed=self.config.seed)
