@@ -86,7 +86,7 @@ def tpz_lite_informer(**kwargs) -> Any:
     data to train up a set of decision trees that are then stored
     as a pickled model file for use by the Estimator stage.
 
-    ntrees controls how many bootstrap realizations are created from a
+    n_trees controls how many bootstrap realizations are created from a
     single catalog realization to train one tree.
     nransom controls how many catalog realizations are created. Each
     random catalog consists of adding Gaussian scatter to each attribute
@@ -94,8 +94,8 @@ def tpz_lite_informer(**kwargs) -> Any:
     -1 then a small error of 0.00005 is hardcoded into TPZ. The key
     attribute is not included in this random catalog creation.
 
-    So, a total of nrandom*ntrees trees are trained and stored in the
-    final model i.e. if nrandom=3 and ntrees=5 then 15 total trees
+    So, a total of n_random*n_trees trees are trained and stored in the
+    final model i.e. if n_random=3 and n_trees=5 then 15 total trees
     are trained and stored.
 
     ---
@@ -157,16 +157,16 @@ def tpz_lite_informer(**kwargs) -> Any:
         the errors associated with that column as the values.If a column does not havea
         an associated error its value shoule be `None`
         Default: {'mag_u_lsst': 'mag_err_u_lsst', 'mag_g_lsst': 'mag_err_g_lsst',...}
-    nrandom : int, optional
+    n_random : int, optional
         number of random bootstrap samples of training data to create
         Default: 8
-    ntrees : int, optional
+    n_trees : int, optional
         number of trees to create
         Default: 5
-    minleaf : int, optional
+    min_leaf : int, optional
         minimum number in terminal leaf
         Default: 5
-    natt : int, optional
+    n_att : int, optional
         number of attributes to split for TPZ
         Default: 3
     sigmafactor : float, optional

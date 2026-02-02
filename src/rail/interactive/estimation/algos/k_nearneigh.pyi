@@ -1,6 +1,6 @@
 from typing import Any
 
-def k_near_neig_estimator(**kwargs) -> Any:
+def k_near_neigh_estimator(**kwargs) -> Any:
     """
     KNN-based estimator
 
@@ -78,7 +78,7 @@ def k_near_neig_estimator(**kwargs) -> Any:
         Handle providing access to QP ensemble with output data
     """
 
-def k_near_neig_informer(**kwargs) -> Any:
+def k_near_neigh_informer(**kwargs) -> Any:
     """
     Train a KNN-based estimator
 
