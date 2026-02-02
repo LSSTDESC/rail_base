@@ -20,6 +20,7 @@ from rail.utils.interactive.base_utils import (
     _get_stage_definition,
     _get_stage_module,
     _get_virtual_submodule_names,
+    _write_formatted_file
 )
 from rail.utils.interactive.docstring_utils import (
     DOCSTRING_INDENTATION,
@@ -273,12 +274,6 @@ def _write_stubs(
     virtual_modules : dict[str, VirtualModule]
         The code-created namespaces that the interactive functions live in
     """
-    # formatters used for the stub files, imported here since these are only required
-    # for developers
-    # pylint: disable=import-outside-toplevel
-    import black
-    import isort
-
     stub_files = collections.defaultdict(list)
     stub_directory = Path(module.__path__[0])
 
@@ -324,16 +319,7 @@ def _write_stubs(
 
     # write and format the file
     for path, content in stub_files_strings.items():
-        path.write_text(content)
-        black.format_file_in_place(
-            path,
-            fast=False,
-            mode=black.Mode(is_pyi=True),
-            write_back=black.WriteBack.YES,
-        )
-        isort.api.sort_file(path, quiet=True, profile="black")
-
-        print(f"Created {str(path)}")
+        _write_formatted_file(path, content)
 
 
 def _initialize_interactive_module(

@@ -20,6 +20,7 @@ import pytest
 from rail.core.introspection import RailEnv
 from rail.estimation.algos.cc_yaw import *  # workaround for yaw not otherwise showing up
 from rail.utils.interactive.initialize_utils import _initialize_interactive_module
+from rail.utils.interactive.base_utils import _write_formatted_file
 
 interactive_modules = [
     "calib",
@@ -138,18 +139,9 @@ def write_modules() -> None:
 
     for module in all_modules.values():
         module.path.parent.mkdir(parents=True, exist_ok=True)
-        module.path.write_text(str(module))
 
-        # INTERACTIVE-DO: Make this a utility since it's used here and in stubs
-        black.format_file_in_place(
-            module.path,
-            fast=False,
-            mode=black.Mode(is_pyi=True),
-            write_back=black.WriteBack.YES,
-        )
-        isort.api.sort_file(module.path, quiet=True, profile="black")
+        _write_formatted_file(module.path, str(module))
 
-        print(f"Created {str(module.path)}")
 
 
 def write_stubs() -> None:

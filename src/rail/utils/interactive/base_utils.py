@@ -1,6 +1,7 @@
 """Low-level utility functions used by the rest of the interactive utils"""
 
 from types import ModuleType
+from pathlib import Path
 
 import rail.stages
 from rail.core import RailEnv
@@ -93,3 +94,31 @@ def _get_virtual_submodule_names(
                 recursive_module_names.append(module.__name__ + "." + relative_name)
 
     return sorted(list(set(recursive_module_names)))
+
+
+def _write_formatted_file(path:Path, content:str) -> None:
+    """
+    Writes a file, then formats it with black and isort. Intended for use on the
+    pyi stub files for interactive
+
+    Parameters
+    ----------
+    path : Path
+        Where to write the file
+    content : str
+        The text to write into the file
+    """
+    # formatters used for the stub files, imported here since these are only required
+    # for developers
+    # pylint: disable=import-outside-toplevel
+    import black
+    import isort
+    path.write_text(content)
+    black.format_file_in_place(
+        path,
+        fast=False,
+        mode=black.Mode(is_pyi=True),
+        write_back=black.WriteBack.YES,
+    )
+    isort.api.sort_file(path, quiet=True, profile="black")
+    print(f"Created {str(path)}")
