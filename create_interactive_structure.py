@@ -1,11 +1,22 @@
 """
-When running this you may also want to run:
+When running this you may also want to run python wumpydoc.py, which runs a subset of
+the numpydoc tests against the docstrings of RAILStages.
 
-python wumpydoc.py
-pytest tests/interactive
-[this file]
+The script deletes all the stub files in the interactive folder, then re-creates them.
+It returns an exit code based on the comparison of the re-generated and original stub
+files.
+0 indicates no change
+1 is an error somewhere in the script
+2 indicates files have changed
 
-python examples/interactive/interactive.py
+Note that this script does update the files, so if you run it once (resulting in exit
+code 2), running it again immediately will show an exit code of 0.
+Consider using `git diff` or `git diff --name-status` if you need to see a summary of
+changes to stub files since the last commit.
+
+Before it deletes the current, or creates the new stub files, it does run the
+interactive tests, which run against the .py (NOT .pyi) files. This is to ensure the .py
+files are well-formatted such that the .pyi generation will succeed.
 """
 
 import importlib
@@ -13,14 +24,11 @@ import sys
 from dataclasses import dataclass, field
 from pathlib import Path
 
-import black
-import isort
 import pytest
 
 from rail.core.introspection import RailEnv
-from rail.estimation.algos.cc_yaw import *  # workaround for yaw not otherwise showing up
-from rail.utils.interactive.initialize_utils import _initialize_interactive_module
 from rail.utils.interactive.base_utils import _write_formatted_file
+from rail.utils.interactive.initialize_utils import _initialize_interactive_module
 
 interactive_modules = [
     "calib",
@@ -31,7 +39,8 @@ interactive_modules = [
     "evaluation.metrics",
     "tools",
 ]
-interactive_path = Path("src/rail/interactive")
+rail_base = Path(__file__).parent
+interactive_path = rail_base / "src/rail/interactive"
 
 
 @dataclass
@@ -139,9 +148,7 @@ def write_modules() -> None:
 
     for module in all_modules.values():
         module.path.parent.mkdir(parents=True, exist_ok=True)
-
         _write_formatted_file(module.path, str(module))
-
 
 
 def write_stubs() -> None:
@@ -151,11 +158,49 @@ def write_stubs() -> None:
         _initialize_interactive_module(module, write_stubs=True)
 
 
-if __name__ == "__main__":
-    print("Running for rail packages:\n\t" + "\n\t".join(check_rail_packages()))
+def store_pyi(delete: bool) -> dict[Path, str | None]:
+    stubs: dict[Path, str | None] = {}
+    for path in interactive_path.glob("**/*.pyi"):
+        stubs[path] = path.read_text()
+        if delete:
+            path.unlink()
+    return stubs
 
-    if pytest.main(["tests/interactive"]) != 0:
-        sys.exit()
-    # add function to delete everything in interactive?
+
+def compare_pyi(old_stubs: dict[Path, str | None]) -> int:
+    new_stubs = store_pyi(delete=False)
+    stub_paths = set([*old_stubs, *new_stubs])
+
+    changes = []
+    for path in stub_paths:
+        # if not path.exists(): # equivalent to being a key in old, but not in new
+        if (path not in new_stubs) and (path in old_stubs):
+            changes.append((path, "deleted"))
+            continue
+        if (path in new_stubs) and (not path in old_stubs):
+            changes.append((path, "added"))
+            continue
+        if old_stubs[path] != new_stubs[path]:
+            changes.append((path, "modified"))
+
+    if len(changes) > 0:
+        print()
+        for path, change in changes:
+            print(f"{str(path)} was {change}")
+        return 2
+    return 0
+
+
+if __name__ == "__main__":
+    print("\nRunning for rail packages:\n\t" + "\n\t".join(check_rail_packages()))
+
+    pytest_exit = pytest.main(["tests/interactive"])
+    if pytest_exit != 0:
+        sys.exit(pytest_exit)
+
+    old_stubs = store_pyi(delete=True)
+
     write_modules()
     write_stubs()
+
+    sys.exit(compare_pyi(old_stubs))
