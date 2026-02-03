@@ -219,8 +219,7 @@ def test_fits_handle() -> None:
 
 
 def test_model_handle() -> None:
-    # DS = RailStage.data_store
-    # DS.clear()
+
     model_path = os.path.join(
         RAILDIR,
         "rail",
@@ -257,8 +256,10 @@ def test_model_handle() -> None:
 
     _model4 = mh4.read()
 
-    assert model1 is model2
-    assert model2 is model3
+    np.testing.assert_equal(model1, model2) #use this function so it can compare the numpy arrays
+    np.testing.assert_equal(model2, model3)
+    # assert model1 is model2
+    # assert model2 is model3
 
     mh3 = ModelHandle("model3", path=model_path_copy, data=model1)
     with mh3.open(mode="w") as fout:

@@ -809,34 +809,38 @@ class ModelHandle(DataHandle):
     suffix = "pkl"
     interactive_type = "numpy.ndarray"
 
-    model_factory = ModelDict()
+    # model_factory = ModelDict()
 
     @classmethod
     def _open(cls, path: str, **kwargs: Any) -> FileLike:
         """Open and return the associated file"""
         kwcopy = kwargs.copy()
         if kwcopy.pop("mode", "r") == "w":
-            return cls.model_factory.open(path, mode="wb", **kwcopy)
+            return open(path, mode="wb", **kwcopy)
+            # return cls.model_factory.open(path, mode="wb", **kwcopy)
         force = kwargs.pop("force", False)
-        reader = kwargs.pop("reader", None)
+        reader = kwargs.pop("reader", default_model_read)
         assert isinstance(force, bool)
-        return cls.model_factory.read(path, force=force, reader=reader, **kwargs)
+        return reader(path)
+        # return cls.model_factory.read(path, force=force, reader=reader, **kwargs)
 
     @classmethod
     def _read(cls, path: str, **kwargs: Any) -> ModelLike:
         """Read and return the data from the associated file"""
         force = kwargs.pop("force", False)
-        reader = kwargs.pop("reader", None)
+        reader = kwargs.pop("reader", default_model_read)
         assert isinstance(force, bool)
-        return cls.model_factory.read(path, force=force, reader=reader, **kwargs)
+        return reader(path)
+        # return cls.model_factory.read(path, force=force, reader=reader, **kwargs)
 
     @classmethod
     def _write(cls, data: ModelLike, path: str, **kwargs: Any) -> None:
         """Write the data to the associated file"""
         force = kwargs.pop("force", False)
-        writer = kwargs.pop("writer", None)
+        writer = kwargs.pop("writer", default_model_write)
         assert isinstance(force, bool)
-        return cls.model_factory.write(data, path, force=force, writer=writer, **kwargs)
+        return writer(model=data, path=path)
+        # return cls.model_factory.write(data, path, force=force, writer=writer, **kwargs)
 
 
 class DataStore(dict):
