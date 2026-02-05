@@ -1,6 +1,7 @@
 """Utility functions to generate the docstrings attatched to the interactive versions of
 RailStages"""
 
+import copy
 import inspect
 import textwrap
 from collections import defaultdict
@@ -398,7 +399,7 @@ def _create_parameters_section(
     epf_inspected_parameters = inspect.signature(
         getattr(stage_definition, stage_definition.entrypoint_function)
     ).parameters.values()
-    epf_parameters = _parse_annotation_string(
+    raw_epf_parameters = _parse_annotation_string(
         epf_parameter_string, epf_inspected_parameters
     )
 
@@ -414,20 +415,23 @@ def _create_parameters_section(
     ]
     input_parameters_indices = [
         i
-        for i, param in enumerate(epf_parameters)
+        for i, param in enumerate(raw_epf_parameters)
         if param.name in input_parameter_names
     ]
 
+    wrapped_epf_parameters = copy.deepcopy(raw_epf_parameters)  # deep copy the list
     if len(input_parameters_indices) == 1:
-        input_parameter = epf_parameters.pop(input_parameters_indices[0])
+        input_parameter = wrapped_epf_parameters.pop(input_parameters_indices[0])
         input_parameter.name = "input"
-        epf_parameters.insert(0, input_parameter)
+        wrapped_epf_parameters.insert(0, input_parameter)
     elif len(input_parameters_indices) > 1:
         input_is_wrapped = True
         annotation_entries = []
         description_entries = ["Dictionary of input data with the following keys:"]
         for i, index in enumerate(input_parameters_indices):
-            param = epf_parameters.pop(index - i)  # adjust index as we shorten the list
+            param = wrapped_epf_parameters.pop(
+                index - i
+            )  # adjust index as we shorten the list
             annotation_entries.append(f'"{param.name}": {param.annotation}')
             description_entries.append(
                 f"{param.name}: {param.annotation} - {param.description.replace('\n',' ')}"
@@ -438,34 +442,35 @@ def _create_parameters_section(
             annotation=annotation,
             description="\n".join(description_entries),
         )
-        epf_parameters.insert(0, input_parameter)
+        wrapped_epf_parameters.insert(0, input_parameter)
     else:
         requires_input = False
 
     # Class parameters
+    combined_parameters = copy.deepcopy(wrapped_epf_parameters)
     for parameter in class_parameters:
         matching_parameter_indices = [
-            i for (i, p) in enumerate(epf_parameters) if p.name == parameter.name
+            i for (i, p) in enumerate(combined_parameters) if p.name == parameter.name
         ]
         if len(matching_parameter_indices) > 0:
             # don't add it to the list, since it'll be a duplicate, but check if this is
             # a make_stage required, entrypoint_function optional parameter
             i = matching_parameter_indices[0]
-            if (not epf_parameters[i].is_required) and (parameter.is_required):
-                epf_parameters[i].is_required = True
-                epf_parameters[i].annotation = epf_parameters[
+            if (not combined_parameters[i].is_required) and (parameter.is_required):
+                combined_parameters[i].is_required = True
+                combined_parameters[i].annotation = combined_parameters[
                     i
                 ].annotation.removesuffix(", optional")
         else:
-            epf_parameters.append(parameter)
+            combined_parameters.append(parameter)
 
     # remove the parameters that we force the values of
-    epf_parameters = [
-        p for p in epf_parameters if p.name not in GLOBAL_INTERACTIVE_PARAMETERS
+    force_set_parameters = [
+        p for p in combined_parameters if p.name not in GLOBAL_INTERACTIVE_PARAMETERS
     ]
 
     return (
-        "\n".join([str(i) for i in _sort_parameters(epf_parameters)]),
+        "\n".join([str(i) for i in _sort_parameters(force_set_parameters)]),
         input_is_wrapped,
         requires_input,
     )
