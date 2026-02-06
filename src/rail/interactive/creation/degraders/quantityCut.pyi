@@ -31,9 +31,9 @@ def quantity_cut(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
-    cuts : dict
+    cuts : dict, required
         Cuts to apply
     drop_rows : bool, optional
         Drop selected rows from output table

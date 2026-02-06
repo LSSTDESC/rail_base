@@ -20,7 +20,7 @@ from rail.utils.interactive.base_utils import (
     _get_stage_definition,
     _get_stage_module,
     _get_virtual_submodule_names,
-    _write_formatted_file
+    _write_formatted_file,
 )
 from rail.utils.interactive.docstring_utils import (
     DOCSTRING_INDENTATION,
@@ -40,8 +40,7 @@ class VirtualModule:
 
 def _interactive_factory(
     rail_stage: type[RailStage],
-    function_input_is_wrapped: bool,
-    function_requires_input: bool,
+    required_parameters: list[str],
     **kwargs,
 ) -> Any:
     """Create the actual interactive function for a RAIL stage
@@ -63,38 +62,23 @@ def _interactive_factory(
         This function returns the result of calling the stage's entrypoint function
         (after calling make_stage)
     """
-    entrypoint_function_name = rail_stage.entrypoint_function
 
-    # extract the input kwarg, and turn it into the appropriate DataHandle
-    stage_has_input = "input" in kwargs
-    if stage_has_input:
-        entrypoint_inputs = kwargs.pop("input")
-    elif function_requires_input:
-        raise ValueError(f"{entrypoint_function_name} requires an `input` kwarg")
-
+    # Check that the right set of parameters has been passed
+    for name in required_parameters:
+        if name not in kwargs:
+            raise ValueError(
+                f"{rail_stage.interactive_function} requires a `{name}` kwarg"
+            )
     for key, value in GLOBAL_INTERACTIVE_PARAMETERS.items():
         if key in kwargs:
-            raise ValueError(f"In rail.interactive, {key} is set to {value}")
-
-    instance = rail_stage.make_stage(**kwargs, **GLOBAL_INTERACTIVE_PARAMETERS)
-    entrypoint_function: Callable = getattr(instance, entrypoint_function_name)
-
-    if function_input_is_wrapped:
-        if (
-            not stage_has_input
-        ):  # INTERACTIVE-DO: probably redundant with function_requires_input check above
-            raise ValueError(f"{entrypoint_function_name} requires an `input` kwarg")
-        if not isinstance(
-            entrypoint_inputs, dict  # pylint: disable=possibly-used-before-assignment
-        ):
             raise ValueError(
-                f"input parameter for {entrypoint_function_name} must be a dictionary"
+                f"In rail.interactive, {key} is forcibly set to {value} and should not be manually changed"
             )
-        output = entrypoint_function(**entrypoint_inputs, **kwargs)
-    elif stage_has_input:
-        output = entrypoint_function(entrypoint_inputs, **kwargs)
-    else:
-        output = entrypoint_function(**kwargs)
+
+    # initialize the stage and run the entrypoint function
+    instance = rail_stage.make_stage(**kwargs, **GLOBAL_INTERACTIVE_PARAMETERS)
+    entrypoint_function: Callable = getattr(instance, rail_stage.entrypoint_function)
+    output = entrypoint_function(**kwargs)
 
     # convert output FROM a DataHandle into pure data
     output_info = rail_stage.outputs  # list of (tag, class)
@@ -104,7 +88,7 @@ def _interactive_factory(
         tag, class_ = output_info[0]
         return {tag: _unpack_output_handle(class_, output)}
 
-    # multiple ceci outputs, but only one actual output
+    # multiple ceci outputs, but only one item is returned by the epf
     if isinstance(output, DataHandle):
         return {"output": _unpack_output_handle(DataHandle, output)}
 
@@ -214,14 +198,11 @@ def _attatch_interactive_function(
     virtual_module = stage_module_dict[virtual_module_name]
 
     # create the function
-    docstring, function_input_is_wrapped, function_requires_input = (
-        create_interactive_docstring(stage_name)
-    )
+    docstring, required_parameters = create_interactive_docstring(stage_name)
     created_function: Callable = functools.partial(
         _interactive_factory,
         stage_definition,
-        function_input_is_wrapped,
-        function_requires_input,
+        required_parameters,
     )
     created_function.__doc__ = docstring
     created_function.__module__ = virtual_module.module

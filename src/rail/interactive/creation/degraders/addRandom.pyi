@@ -33,9 +33,11 @@ def add_column_of_random(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
     col_name : str, optional
         Name of the column with random numbers

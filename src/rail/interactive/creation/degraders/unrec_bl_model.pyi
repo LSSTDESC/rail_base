@@ -38,9 +38,11 @@ def unrec_bl_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : table-like
+    sample : table-like, required
         The sample to be degraded
-    seed : int, default=None
+    seed : int, optional
+        Random number seed
+        Default: 12345
         An integer to set the numpy random seed
     ra_label : str, optional
         ra column name

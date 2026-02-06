@@ -30,7 +30,7 @@ def fsps_sed_modeler(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : Hdf5Handle
+    input_data : dict, required
         This is the input catalog in the form of an Hdf5Handle.
     chunk_size : unknown type, optional
         Default: 10000

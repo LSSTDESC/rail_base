@@ -20,12 +20,12 @@ def yaw_auto_correlate(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : YawCache
+    sample : YawCache, required
         Input cache which must have randoms attached and redshifts for both
         data set and randoms.
-    rmin : float
+    rmin : float, required
         Single or sequence of lower scale limits in given 'unit'.
-    rmax : float
+    rmax : float, required
         Single or sequence of upper scale limits in given 'unit'.
     unit : str, optional
         The unit of the lower and upper scale limits.
@@ -104,15 +104,15 @@ def yaw_cache_create(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : DataFrame
+    data : DataFrame, required
         The data set to split into patches and cache.
-    path : str
+    path : str, required
         path to cache directory, must not exist
-    rand : DataFrame, optional
+    rand : DataFrame, required
         The randoms to split into patches and cache, positions used to
         automatically generate patch centers if provided and stage is
         configured with `patch_num`.
-    patch_source : YawCache, optional
+    patch_source : YawCache, required
         An existing cache instance that provides the patch centers. Use to
         ensure consistent patch centers when running cross-correlations.
         Takes precedence over the any configuration parameters.
@@ -182,15 +182,15 @@ def yaw_cross_correlate(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["reference": YawCache, "unknown": YawCache]
-        Dictionary of input data with the following keys:
-        reference: YawCache - Cache for the reference data, must have redshifts. If no
-        randoms are attached, the unknown data cache must provide them.
-        unknown: YawCache - Cache for the unknown data. If no randoms are attached, the
+    reference : YawCache, required
+        Cache for the reference data, must have redshifts. If no randoms are
+        attached, the unknown data cache must provide them.
+    unknown : YawCache, required
+        Cache for the unknown data. If no randoms are attached, the
         reference data cache must provide them.
-    rmin : float
+    rmin : float, required
         Single or sequence of lower scale limits in given 'unit'.
-    rmax : float
+    rmax : float, required
         Single or sequence of upper scale limits in given 'unit'.
     unit : str, optional
         The unit of the lower and upper scale limits.
@@ -257,13 +257,13 @@ def yaw_summarize(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : CorrFunc
+    cross_corr : CorrFunc, required
         Pair counts from the cross-correlation measurement, basis for the
         clustering redshift estimate.
-    auto_corr_ref : CorrFunc, optional
+    auto_corr_ref : CorrFunc, required
         Pair counts from the reference sample autocorrelation measurement,
         used to correct for the reference sample galaxy bias.
-    auto_corr_unk : CorrFunc, optional
+    auto_corr_unk : CorrFunc, required
         Pair counts from the unknown sample autocorrelation measurement,
         used to correct for the reference sample galaxy bias. Typically only
         availble when using simulated data sets.

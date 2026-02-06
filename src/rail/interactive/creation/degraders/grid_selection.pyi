@@ -78,7 +78,7 @@ def grid_selection(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table

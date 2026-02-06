@@ -29,10 +29,11 @@ def true_nz_histogrammer(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["catalog": TableLike, "tomo_bins": TableLike]
-        Dictionary of input data with the following keys:
-        catalog: TableLike - The sample with the true NZ column
-        tomo_bins: TableLike - Tomographic bin assignemnets
+    catalog : TableLike, required
+        The sample with the true NZ column
+    tomo_bins : TableLike, required
+        Tomographic bin assignemnets
+    tomography_bins : A tablesio-compatible table, required
     zmin : float, optional
         The minimum redshift of the z grid or sample
         Default: 0.0

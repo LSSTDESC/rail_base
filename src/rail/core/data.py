@@ -30,7 +30,7 @@ class DataHandle:  # pylint: disable=too-many-instance-attributes
     """
 
     suffix: str | None = ""
-    interactive_type = None
+    interactive_type = "Data for RAIL"
 
     # This is to keep track of all the sub-types
     _data_handle_type_dict: dict[str, type[DataHandle]] = {}

@@ -28,21 +28,22 @@ def dsps_photometry_creator(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : str
+    input_data : str, required
         Filepath to the hdf5 table containing the galaxy rest-frame SEDs.
-    seed : int
+    model : dict, required
+    seed : int, optional
         The random seed to control sampling
-    Om0 : float
+    Om0 : float, optional
         Omega matter: density of non-relativistic matter in units of the critical
         density at z=0.
-    w0 : float
+    w0 : float, optional
         Dark energy equation of state at z=0 (a=1). This is pressure/density for dark
         energy in units where c=1.
-    wa : float
+    wa : float, optional
         Negative derivative of the dark energy equation of state with respect to the
         scale factor.
         A cosmological constant has w0=-1.0 and wa=0.0.
-    h : float
+    h : float, optional
         dimensionless Hubble constant at z=0.
     redshift_key : str, optional
         Redshift keyword name of the hdf5 dataset containing rest-frame SEDs

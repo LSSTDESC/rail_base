@@ -15,6 +15,7 @@ from rail.utils.interactive.docstring_utils import (
     InteractiveParameter,
     _parse_annotation_string,
     _split_docstring,
+    _stringify_type_annotation,
 )
 from rail.utils.interactive.initialize_utils import STAGE_NAMES, _get_stage_definition
 
@@ -230,9 +231,11 @@ def validate_return_annotation(
 
     # grab the different return types
     from_docstring = [r.annotation for r in return_elements]
-    from_inspect = inspect.signature(
-        getattr(stage_definition, stage_definition.entrypoint_function)
-    ).return_annotation
+    from_inspect = _stringify_type_annotation(
+        inspect.signature(
+            getattr(stage_definition, stage_definition.entrypoint_function)
+        ).return_annotation
+    )
     from_ceci = [i[1] for i in stage_definition.outputs]
 
     warning_start = "Return type annotation for entrypoint function"
@@ -300,7 +303,9 @@ def test_return_annotations() -> None:
             stage_definition, stage_definition.entrypoint_function
         ).__doc__
         epf_sections = _split_docstring(epf_docstring)
-        return_elements = _parse_annotation_string(epf_sections["Returns"])
+        return_elements = _parse_annotation_string(
+            epf_sections["Returns"], return_annotations=True
+        )
 
         validate_return_annotation(stage_name, stage_definition, return_elements)
         check_returned_datahandle(stage_name, return_elements)

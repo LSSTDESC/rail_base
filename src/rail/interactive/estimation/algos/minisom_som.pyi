@@ -62,7 +62,7 @@ def mini_som_informer(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    training_data : TableLike, required
         dictionary of all input data, or a `TableHandle` providing access to it
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
@@ -170,11 +170,11 @@ def mini_som_summarizer(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["input_data": qp.Ensemble, "spec_data": np.ndarray]
-        Dictionary of input data with the following keys:
-        input_data: qp.Ensemble - Per-galaxy p(z), and any ancillary data associated
-        with it
-        spec_data: np.ndarray - Spectroscopic data
+    input_data : qp.Ensemble, required
+        Per-galaxy p(z), and any ancillary data associated with it
+    spec_data : np.ndarray, required
+        Spectroscopic data
+    model : numpy.ndarray, required
     chunk_size : int, optional
         Number of objects per chunk for parallel processing or to evalute per loop in
         single node processing

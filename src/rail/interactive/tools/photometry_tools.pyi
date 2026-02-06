@@ -15,9 +15,9 @@ def dereddener(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : table-like
+    data : table-like, required
         The data to be converted
-    dustmap_dir : str
+    dustmap_dir : str, required
         Directory with dustmaps
     ra_name : str, optional
         Name of the RA column
@@ -65,9 +65,9 @@ def dust_map_base(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : table-like
+    data : table-like, required
         The data to be converted
-    dustmap_dir : str
+    dustmap_dir : str, required
         Directory with dustmaps
     ra_name : str, optional
         Name of the RA column
@@ -117,12 +117,12 @@ def hyperbolic_magnitudes(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["data": `PqHandle`, "parameters": `PqHandle`]
-        Dictionary of input data with the following keys:
-        data: `PqHandle` - Input table with photometry (magnitudes or flux columns and
-        their respective uncertainties) as defined by the configuration.
-        parameters: `PqHandle` - Table witdh smoothing parameters per photometric band,
-        determined by `HyperbolicSmoothing`.
+    data : `PqHandle`, required
+        Input table with photometry (magnitudes or flux columns and their respective
+        uncertainties) as defined by the configuration.
+    parameters : `PqHandle`, required
+        Table witdh smoothing parameters per photometric band, determined by
+        `HyperbolicSmoothing`.
     value_columns : list, optional
         list of columns that prove photometric measurements (fluxes or magnitudes)
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
@@ -172,7 +172,7 @@ def hyperbolic_smoothing(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : `PqHandle`
+    data : `PqHandle`, required
         Input table with magnitude and magnitude error columns as defined in the
         configuration.
     value_columns : list, optional
@@ -214,7 +214,7 @@ def lsst_flux_to_mag_converter(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : table-like
+    data : table-like, required
         The data to be converted
     bands : list, optional
         Names of the bands
@@ -259,9 +259,9 @@ def reddener(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : table-like
+    data : table-like, required
         The data to be converted
-    dustmap_dir : str
+    dustmap_dir : str, required
         Directory with dustmaps
     ra_name : str, optional
         Name of the RA column

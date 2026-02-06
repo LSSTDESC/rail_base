@@ -34,9 +34,11 @@ def euclid_deep_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -78,9 +80,11 @@ def euclid_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -123,9 +127,11 @@ def euclid_wide_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -167,9 +173,11 @@ def lsst_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -214,9 +222,11 @@ def photo_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -259,9 +269,11 @@ def roman_deep_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -303,9 +315,11 @@ def roman_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -348,9 +362,11 @@ def roman_medium_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -393,9 +409,11 @@ def roman_ultra_deep_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns
@@ -438,9 +456,11 @@ def roman_wide_error_model(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns

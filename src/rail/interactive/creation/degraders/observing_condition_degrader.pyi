@@ -71,9 +71,11 @@ def obs_condition(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
     nside : int, optional
         nside for the input maps in HEALPIX format.

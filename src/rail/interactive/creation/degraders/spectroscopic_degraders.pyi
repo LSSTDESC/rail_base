@@ -33,9 +33,9 @@ def inv_redshift_incompleteness(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
-    pivot_redshift : float
+    pivot_redshift : float, required
         redshift at which the incompleteness begins
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -98,15 +98,17 @@ def line_confusion(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be degraded.
-    true_wavelen : float
+    true_wavelen : float, required
         wavelength of the true emission line
-    wrong_wavelen : float
+    wrong_wavelen : float, required
         wavelength of the wrong emission line
-    frac_wrong : float
+    frac_wrong : float, required
         fraction of galaxies with confused emission lines
     seed : int, optional
+        Set to an `int` to force reproducible results.
+        Default: None
         An integer to set the numpy random seed, by default None.
 
     Returns

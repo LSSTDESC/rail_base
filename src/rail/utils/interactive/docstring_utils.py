@@ -1,7 +1,6 @@
 """Utility functions to generate the docstrings attatched to the interactive versions of
 RailStages"""
 
-import copy
 import inspect
 import textwrap
 from collections import defaultdict
@@ -9,7 +8,7 @@ from collections.abc import Callable
 from dataclasses import dataclass
 from functools import partial
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 from ceci.config import StageConfig, StageParameter
 
@@ -66,15 +65,26 @@ class InteractiveParameter:
     """
 
     name: str | None
-    annotation: str
+    annotation: str | type
     description: str
-    is_required: bool = True
+    parameter_usage: Literal["required"] | Literal["optional"] | Literal["return"]
+
+    def __post_init__(self) -> None:
+        self.annotation = _stringify_type_annotation(self.annotation)
+
+        # append optional/required to the annotation
+        if (self.parameter_usage != "return") and (
+            not self.annotation.endswith(self.parameter_usage)
+        ):
+            self.annotation = f"{self.annotation}, {self.parameter_usage}"
 
     def __str__(self) -> str:
         description = textwrap.indent(self.description, " " * DOCSTRING_INDENTATION)
+        if len(description) > 0:
+            description = f"\n{description}"
         if self.name is None:
-            return f"{self.annotation}\n{description}"
-        return f"{self.name} : {self.annotation}\n{description}"
+            return f"{self.annotation}{description}"
+        return f"{self.name} : {self.annotation}{description}"
 
     @classmethod
     def from_ceci(cls, name: str, ceci_param: Any) -> "InteractiveParameter":
@@ -90,7 +100,7 @@ class InteractiveParameter:
             name=name,
             annotation="unknown type, optional",
             description=f"Default: {ceci_param}",
-            is_required=False,
+            parameter_usage="optional",
         )
 
     @classmethod
@@ -111,7 +121,6 @@ class InteractiveParameter:
         annotation = dtype_name
 
         if not ceci_param.required:
-            annotation += ", optional"
             default_value = ceci_param.default
             max_default_length = (
                 DOCSTRING_LINE_LENGTH - DOCSTRING_INDENTATION * 2 - len("Default: ")
@@ -138,14 +147,103 @@ class InteractiveParameter:
         return InteractiveParameter(
             name=name,
             annotation=annotation,
-            description=description.strip(),  # don't start with newline if cece msg=""
-            is_required=ceci_param.required,
+            description=description.strip(),  # don't start with newline if ceci msg=""
+            parameter_usage="required" if ceci_param.required else "optional",
+            # is_required=ceci_param.required,
+        )
+
+    def merge(self, other: "InteractiveParameter") -> "InteractiveParameter":
+        """Combine two InteractiveParameters to create a new one.
+
+        Parameters
+        ----------
+        other : InteractiveParameter
+            The object to merge in
+
+        Returns
+        -------
+        InteractiveParameter
+            A merger ofthe two objects
+        """
+
+        # build the new description
+        if self.description == other.description:
+            new_description = self.description
+        else:
+            new_description = f"{self.description}\n{other.description}".strip()
+
+        # build the new annotation, this depends on the format of the current annotations
+        annotations = [self.annotation, other.annotation]
+        n_str_annotations = sum(isinstance(t, str) for t in annotations)
+        if n_str_annotations == 1:
+            # one string annotation and one class annotation, take the string
+            new_annotation = (
+                [t for t in annotations if isinstance(t, str)][0]
+                .strip()
+                .removesuffix(", optional")
+            )
+        else:
+            if n_str_annotations == 0:
+                # two classes, convert to strings
+                annotations = [str(t) for t in annotations]
+
+            # simplify annotations, take the first viable one
+            annotations = [
+                t.strip().removesuffix(", optional").replace("unknown type", "")
+                for t in annotations
+            ]
+            annotations = [t for t in annotations if len(t) > 0]
+
+            new_annotation = annotations[0]
+
+        # build the new parameter usage
+        if any(u == "return" for u in [self.parameter_usage, other.parameter_usage]):
+            raise ValueError("Can't combine return parameters")
+        parameter_usage = (
+            "required"
+            if any(
+                u == "required" for u in [self.parameter_usage, other.parameter_usage]
+            )
+            else "optional"
+        )
+
+        return InteractiveParameter(
+            name=self.name,
+            annotation=new_annotation,
+            description=new_description,
+            parameter_usage=parameter_usage,
         )
 
 
 ################################
 # Minor utility functions
 ################################
+
+
+def _stringify_type_annotation(annotation: str | type) -> str:
+    """Try to convert a type annotation into a an interactive-friendly form.
+
+    Parameters
+    ----------
+    annotation : str | type
+        The original version
+
+    Returns
+    -------
+    str
+        A friendlier version of the type annotation
+    """
+    # change classes to strings
+    if isinstance(annotation, type):
+        annotation = annotation.__name__
+
+    # handle annotations that are DataHandles
+    if isinstance(annotation, str) and hasattr(rail.core.data, annotation):
+        return_type = getattr(rail.core.data, annotation)
+        if issubclass(return_type, rail.core.data.DataHandle):
+            annotation = return_type.interactive_type
+
+    return annotation
 
 
 def _handle_default_path(path: str | Path) -> str:
@@ -196,34 +294,6 @@ def _handle_dictionary_paths(dictionary: dict[str, Any]) -> dict[str, Any]:
     return dictionary
 
 
-def _sort_parameters(
-    parameters: list[InteractiveParameter],
-) -> list[InteractiveParameter]:
-    """Sort the parameter list of a docstring to put required parameters first
-
-    Parameters
-    ----------
-    parameters : list[InteractiveParameter]
-        The unsorted list of parameters
-
-    Returns
-    -------
-    list[InteractiveParameter]
-        Parameters, beginning with "input", then any required parameters, then optional
-        ones.
-    """
-    input_parameter = None
-    if parameters[0].name == "input":
-        input_parameter = parameters.pop(0)
-
-    remaining = sorted(parameters, key=lambda p: not p.is_required)
-
-    if input_parameter is not None:
-        remaining.insert(0, input_parameter)
-
-    return remaining
-
-
 def _is_section_header(line_no: int, docstring_lines: list[str]) -> bool:
     """Check whether a given line is the start (text line) of a header.
 
@@ -251,6 +321,57 @@ def _is_section_header(line_no: int, docstring_lines: list[str]) -> bool:
         next_line = docstring_lines[line_no + 1].strip()
         return next_line == ("-" * len(current_line))
     return False
+
+
+def _map_ceci_to_param(input_name: str, parameter_names: list[str]) -> str:
+    """Check a ceci input tag against a set of parameter names for the entrypoint
+    function, and determine if the tag matches up to any of them, and if so, which.
+
+    The idea here is that a stage may have inputs `data` and `model`, and expect that
+    `model` is passed to `make_stage`, and `data` is passed to the entrypoints function.
+    This has the side effect that while `data` appears in the entrypoint function that
+    we analyze, `model` does not.
+    Since `model` is still a required element to run the stage, we need to make sure it
+    is added to the docstring of the interactive version. However, we don't want to
+    duplicate `data` in that docstring.
+    Finally, we have the added complication that often tag names don't line up with the
+    parameter names used for the same piece of information. So the stage may have the
+    ceci input `data`, which corresponds to the parameter `input_data`.
+
+    Parameters
+    ----------
+    input_name : str
+        The tag name for the ceci input to a RailStage
+    parameter_names : list[str]
+        A list of names to check against, that would disqualify the ceci tag from being
+        added to the docstring as an independent item
+
+    Returns
+    -------
+    str
+        The name of the parameter corresponding to this tag, or the original tag name if
+        none were found
+    """
+    if input_name in parameter_names:
+        return input_name
+
+    if f"{input_name}_data" in parameter_names:
+        # `input` and `input_data`, sometimes `truth` and `truth_data`
+        return f"{input_name}_data"
+
+    if input_name == "input":
+        for name in ["data", "training_data", "catalog", "sample"]:
+            # `input` often corresponds to one of these
+            if name in parameter_names:
+                return name
+
+    if input_name.endswith("_input") and (
+        input_name.replace("_input", "_data") in parameter_names
+    ):
+        # `spec_input` and `spec_data`
+        return input_name.replace("_input", "_data")
+
+    return input_name
 
 
 ################################
@@ -307,7 +428,9 @@ def _split_docstring(docstring: str) -> defaultdict[str, str]:
 
 
 def _parse_annotation_string(
-    text: str, inspected_parameters: list[inspect.Parameter] | None = None
+    text: str,
+    inspected_parameters: list[inspect.Parameter] | None = None,
+    return_annotations: bool = False,
 ) -> list[InteractiveParameter]:
     """Parse through an numpy-style Parameters section, and convert the information into
     InteractiveParameters. Also used for Returns.
@@ -318,6 +441,8 @@ def _parse_annotation_string(
         The numpy-style string
     inspected_parameters : list[inspect.Parameter] | None, optional
         Parameters found by using the inspect module, if any, by default None
+    return_annotations : bool, optional
+        Whether return the InterativeParameters with `parameter_usage="return"`
 
     Returns
     -------
@@ -351,20 +476,24 @@ def _parse_annotation_string(
         else:
             description_lines = lines[lineno + 1 :]
 
-        # check if there is a default
-        is_required = False
-        if inspected_parameters is not None:
-            inspect_parameter = [
-                p for p in inspected_parameters if p.name == param_name
-            ][0]
-            is_required = inspect_parameter.default == inspect.Parameter.empty
+        if return_annotations:
+            parameter_usage = "return"
+        else:
+            # check if there is a default
+            parameter_usage = "optional"
+            if inspected_parameters is not None:
+                inspect_parameter = [
+                    p for p in inspected_parameters if p.name == param_name
+                ][0]
+                if inspect_parameter.default == inspect.Parameter.empty:
+                    parameter_usage = "required"
 
         parameters.append(
             InteractiveParameter(
                 name=param_name,
                 annotation=param_type,
                 description="\n".join([j.strip() for j in description_lines]),
-                is_required=is_required,
+                parameter_usage=parameter_usage,
             )
         )
 
@@ -373,10 +502,17 @@ def _parse_annotation_string(
 
 def _create_parameters_section(
     stage_definition: type[RailStage], epf_parameter_string: str
-) -> str:
+) -> tuple[str, list[str]]:
     """Create the parameters section of the docstring for the interactive section.
     Abstracted into a dedicated function because of the volume of parsing required in
-    managing both the class and entrypoint function parameters
+    managing the class and entrypoint function parameters, along with the ceci inputs
+
+    The interactive function will take only kwargs, some of which are required.
+    Required parameters come from:
+    - positional parameters declared in the entrypoint function
+    - required stage config options
+    - ceci inputs that aren't already noted elsewhere (e.g., the `model` input for most
+      estimators)
 
     Parameters
     ----------
@@ -389,9 +525,11 @@ def _create_parameters_section(
     -------
     str
         A string to use in the docstring of the interactive function
+    list[str]
+        List of kwargs that are required in the interactive function
     """
 
-    # Read in parameters to both the class and EPF
+    # collect parameters from the entrypoint function, stage config, and ceci inputs
     class_parameters = [
         InteractiveParameter.from_ceci(name, ceci_param)
         for name, ceci_param in stage_definition.config_options.items()
@@ -399,81 +537,86 @@ def _create_parameters_section(
     epf_inspected_parameters = inspect.signature(
         getattr(stage_definition, stage_definition.entrypoint_function)
     ).parameters.values()
-    raw_epf_parameters = _parse_annotation_string(
+    epf_parameters = _parse_annotation_string(
         epf_parameter_string, epf_inspected_parameters
     )
+    ceci_inputs = getattr(stage_definition, "inputs", [])
 
-    # Handle positional parameters to EPF
-    input_is_wrapped = (
-        False  # flag for the interactive function, indicating whether "input" is a dict
+    # separate parameters into required and optional
+    epf_req, epf_opt = (
+        [p for p in epf_parameters if p.parameter_usage == "required"],
+        [p for p in epf_parameters if p.parameter_usage == "optional"],
     )
-    requires_input = True  # flag for the interactive function, indicating whether "input" should exist
-    input_parameter_names = [
-        i.name
-        for i in epf_inspected_parameters
-        if i.name not in ["self", "kwargs"] and i.default == inspect.Parameter.empty
-    ]
-    input_parameters_indices = [
-        i
-        for i, param in enumerate(raw_epf_parameters)
-        if param.name in input_parameter_names
-    ]
-
-    wrapped_epf_parameters = copy.deepcopy(raw_epf_parameters)  # deep copy the list
-    if len(input_parameters_indices) == 1:
-        input_parameter = wrapped_epf_parameters.pop(input_parameters_indices[0])
-        input_parameter.name = "input"
-        wrapped_epf_parameters.insert(0, input_parameter)
-    elif len(input_parameters_indices) > 1:
-        input_is_wrapped = True
-        annotation_entries = []
-        description_entries = ["Dictionary of input data with the following keys:"]
-        for i, index in enumerate(input_parameters_indices):
-            param = wrapped_epf_parameters.pop(
-                index - i
-            )  # adjust index as we shorten the list
-            annotation_entries.append(f'"{param.name}": {param.annotation}')
-            description_entries.append(
-                f"{param.name}: {param.annotation} - {param.description.replace('\n',' ')}"
-            )
-        annotation = f"dict[{', '.join(annotation_entries)}]"
-        input_parameter = InteractiveParameter(
-            name="input",
-            annotation=annotation,
-            description="\n".join(description_entries),
+    class_req, class_opt = (
+        [p for p in class_parameters if p.parameter_usage == "required"],
+        [p for p in class_parameters if p.parameter_usage == "optional"],
+    )
+    ceci_req = [
+        InteractiveParameter(
+            # rename the ceci inputs to match the names of epf parameters, if matching
+            # entries appear to exist
+            # if we have the ceci input "spec_input", and the epf parameter "spec_data",
+            # this section will create an InteractiveParameter with name "spec_data"
+            name=_map_ceci_to_param(i[0], [p.name for p in epf_parameters]),
+            annotation=i[1],
+            description="",
+            parameter_usage="required",
         )
-        wrapped_epf_parameters.insert(0, input_parameter)
-    else:
-        requires_input = False
-
-    # Class parameters
-    combined_parameters = copy.deepcopy(wrapped_epf_parameters)
-    for parameter in class_parameters:
-        matching_parameter_indices = [
-            i for (i, p) in enumerate(combined_parameters) if p.name == parameter.name
-        ]
-        if len(matching_parameter_indices) > 0:
-            # don't add it to the list, since it'll be a duplicate, but check if this is
-            # a make_stage required, entrypoint_function optional parameter
-            i = matching_parameter_indices[0]
-            if (not combined_parameters[i].is_required) and (parameter.is_required):
-                combined_parameters[i].is_required = True
-                combined_parameters[i].annotation = combined_parameters[
-                    i
-                ].annotation.removesuffix(", optional")
-        else:
-            combined_parameters.append(parameter)
-
-    # remove the parameters that we force the values of
-    force_set_parameters = [
-        p for p in combined_parameters if p.name not in GLOBAL_INTERACTIVE_PARAMETERS
+        for i in ceci_inputs
     ]
 
-    return (
-        "\n".join([str(i) for i in _sort_parameters(force_set_parameters)]),
-        input_is_wrapped,
-        requires_input,
-    )
+    # create and populate the parameter lists for the interactive function
+
+    # this section builds the list of required parameters, ensuring no duplicates
+    ri_required = [*epf_req]
+    for p in class_req:
+        # store the required config_options, unless they've already been duplicated in
+        # the positional epf parameters (doesn't seem to actually happen in any rail
+        # stages)
+        match = [(i, g) for i, g in enumerate(ri_required) if p.name == g.name]
+        if len(match) == 0:
+            ri_required.append(p)
+        else:
+            ri_required[match[0][0]] = p.merge(match[0][1])
+    for p in ceci_req:
+        # store the ceci inputs, unless they've already been duplicated in the
+        # positional epf parameters
+        if p.name not in [g.name for g in ri_required]:
+            ri_required.append(p)
+
+    # this section builds the list of optional parameters, and has some additional
+    # complexity as it needs to be unique within itself, and also not duplicate any
+    # items that already made it into the list of required parameters
+    ri_optional: list[InteractiveParameter] = []
+    for p in epf_opt:
+        # store the epf kwargs, as optional, unless they show up in the required
+        # parameters likely from being ceci inputs or config_options (e.g. flow_creator
+        # n_samples)
+        # for yaw stages this makes more things required than is actually necessary
+        match = [(i, g) for i, g in enumerate(ri_required) if p.name == g.name]
+        if len(match) == 0:
+            ri_optional.append(p)
+        else:
+            ri_required[match[0][0]] = p.merge(match[0][1])
+    for p in class_opt:
+        req_match = [(i, g) for i, g in enumerate(ri_required) if p.name == g.name]
+        opt_match = [(i, g) for i, g in enumerate(ri_optional) if p.name == g.name]
+        if len(req_match) > 0:
+            # a required ceci input or epf positional is duplicated as an optional
+            # config opt (doesn't seem to actually happen in any rail stages)
+            ri_required[req_match[0][0]] = p.merge(req_match[0][1])
+        elif len(opt_match) > 0:
+            # an optional config_opt is a duplicate of a epf kwarg - this happens for
+            # `seed` in lots of places (e.g., add_column_of_random)
+            ri_optional[opt_match[0][0]] = p.merge(opt_match[0][1])
+        else:
+            ri_optional.append(p)
+
+    ri_optional = [
+        p for p in ri_optional if p.name not in GLOBAL_INTERACTIVE_PARAMETERS
+    ]
+    docstring = "\n".join([str(i) for i in [*ri_required, *ri_optional]])
+    return (docstring, [p.name for p in ri_required])
 
 
 def _wrap_docstring(
@@ -621,17 +764,14 @@ def create_interactive_docstring(stage_name: str) -> str:
     )
 
     # handle the parameters
-    parameters_content, input_is_wrapped, requires_input = _create_parameters_section(
+    parameters_content, required_parameters = _create_parameters_section(
         stage_definition, epf_sections["Parameters"]
     )
 
     # handle the return elements
-    return_elements = _parse_annotation_string(epf_sections["Returns"])
-    for item in return_elements:
-        # Handle return annotations that are DataHandles
-        if hasattr(rail.core.data, item.annotation):
-            return_type = getattr(rail.core.data, item.annotation)
-            item.annotation = return_type.interactive_type
+    return_elements = _parse_annotation_string(
+        epf_sections["Returns"], return_annotations=True
+    )
     if len(return_elements) == 0:
         return_elements = ["None"]
     returns_content = "\n".join([str(i) for i in return_elements])
@@ -683,4 +823,4 @@ def create_interactive_docstring(stage_name: str) -> str:
         line_filter=param_annotation_filter,
     )
 
-    return docstring, input_is_wrapped, requires_input
+    return docstring, required_parameters

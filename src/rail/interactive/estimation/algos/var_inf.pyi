@@ -26,9 +26,9 @@ def var_inf_stack_informer(**kwargs) -> Any:
 
     Parameters
     ----------
-    training_data : qp.Ensemble | str, optional
+    training_data : qp.Ensemble | str, required
         Per-galaxy p(z), and any ancilary data associated with it, by default "None"
-    truth_data : TableLike | str, optional
+    truth_data : TableLike | str, required
         Table with the true redshifts, by default "None"
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
@@ -61,7 +61,7 @@ def var_inf_stack_summarizer(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : qp.Ensemble
+    input_data : qp.Ensemble, required
         Per-galaxy p(z), and any ancillary data associated with it
     chunk_size : int, optional
         Number of objects per chunk for parallel processing or to evalute per loop in

@@ -28,7 +28,7 @@ def spec_selection(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -104,7 +104,7 @@ def spec_selection_BOSS(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -177,7 +177,7 @@ def spec_selection_DEEP2(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -259,7 +259,7 @@ def spec_selection_DEEP2_LSST(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -331,7 +331,7 @@ def spec_selection_DESI_BGS(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -408,7 +408,7 @@ def spec_selection_ELG_LOP(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -485,7 +485,7 @@ def spec_selection_DESI_LRG(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -556,7 +556,7 @@ def spec_selection_GAMA(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -625,7 +625,7 @@ def spec_selection_HSC(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -696,7 +696,7 @@ def spec_selection_VVDSf02(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table
@@ -767,7 +767,7 @@ def spec_selection_zCOSMOS(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    sample : TableLike, required
         The sample to be selected
     drop_rows : bool, optional
         Drop selected rows from output table

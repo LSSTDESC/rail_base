@@ -37,10 +37,10 @@ def som_spec_selector(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["input_data": TableLike, "spec_data": TableLike]
-        Dictionary of input data with the following keys:
-        input_data: TableLike - The sample to be selected
-        spec_data: TableLike - A reference/spectroscopic data set
+    input_data : TableLike, required
+        The sample to be selected
+    spec_data : TableLike, required
+        A reference/spectroscopic data set
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True

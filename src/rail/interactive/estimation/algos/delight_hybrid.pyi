@@ -27,7 +27,7 @@ def delight_estimator(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    input_data : TableLike, required
         A dictionary of all input data
     chunk_size : int, optional
         Number of objects per chunk for parallel processing or to evalute per loop in
@@ -223,7 +223,7 @@ def delight_informer(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : `dict` or `TableHandle`
+    training_data : `dict` or `TableHandle`, required
         dictionary of all input data, or a `TableHandle` providing access to it
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''

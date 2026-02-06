@@ -21,9 +21,9 @@ def column_mapper(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    data : TableLike, required
         The data to be renamed
-    columns : dict
+    columns : dict, required
         Map of columns to rename
     in_place : bool, optional
         Update file in place
@@ -55,11 +55,11 @@ def row_selector(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    data : TableLike, required
         The data to be renamed
-    start_row : int
+    start_row : int, required
         starting row number
-    stop_row : int
+    stop_row : int, required
         Stoppig row number
 
     Returns
@@ -86,9 +86,9 @@ def table_converter(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    data : TableLike, required
         The data to be converted
-    output_format : str
+    output_format : str, required
         Format of output table
 
     Returns

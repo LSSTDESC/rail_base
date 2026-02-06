@@ -22,10 +22,10 @@ def old_evaluator(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : dict["data": qp.Ensemble, "truth": Any]
-        Dictionary of input data with the following keys:
-        data: qp.Ensemble - The sample to evaluate
-        truth: Any - Table with the truth information
+    data : qp.Ensemble, required
+        The sample to evaluate
+    truth : Any, required
+        Table with the truth information
     zmin : float, optional
         The minimum redshift of the z grid or sample
         Default: 0.0

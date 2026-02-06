@@ -23,8 +23,9 @@ def fsps_photometry_creator(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : Hdf5Handle
+    input_data : dict, required
         Hdf5Handle containing the rest-frame SED models.
+    model : dict, required
     seed : int | None, optional
         The random seed to control sampling, by default None
     redshift_key : str, optional

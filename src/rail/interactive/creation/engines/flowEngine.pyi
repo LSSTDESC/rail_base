@@ -18,9 +18,13 @@ def flow_creator(**kwargs) -> Any:
 
     Parameters
     ----------
-    n_samples : int
+    n_samples : int, required
         The number of samples to draw, by default None
+        Number of samples to create
+    model : FlowHandle, required
     seed : int, optional
+        Random number seed
+        Default: 12345
         The random seed to control sampling, by default None
 
     Returns
@@ -57,7 +61,7 @@ def flow_modeler(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : DataHandle
+    input_data : Data for RAIL, required
         ???
     seed : int, optional
         The random seed for training.
@@ -157,10 +161,11 @@ def flow_posterior(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : TableLike
+    input_data : TableLike, required
         A table of the galaxies for which posteriors are calculated
-    column : str
+    column : str, required
         Column to compute posterior for
+    model : FlowHandle, required
     grid : list, optional
         Grid over which the posterior is calculated
         Default: []

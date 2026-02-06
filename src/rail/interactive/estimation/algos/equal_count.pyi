@@ -34,7 +34,7 @@ def equal_count_classifier(**kwargs) -> Any:
 
     Parameters
     ----------
-    input : qp.Ensemble
+    input_data : qp.Ensemble, required
         Per-galaxy p(z), and any ancilary data associated with it
     chunk_size : int, optional
         Number of objects per chunk for parallel processing or to evalute per loop in
