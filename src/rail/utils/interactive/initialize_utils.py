@@ -66,6 +66,11 @@ def _interactive_factory(
     # Check that the right set of parameters has been passed
     for name in required_parameters:
         if name not in kwargs:
+            # Developer note: if you encounter "optional" ceci inputs to a stage (which
+            # are then considered "required" by rail.interactive), you should be able to
+            # call the interactive function with `ceci_input_tag_name="none"`. Make sure
+            # to document this in the RailStage itself. See `auto_corr_unk` in
+            # YawSummarize for an example
             raise ValueError(
                 f"{rail_stage.interactive_function} requires a `{name}` kwarg"
             )

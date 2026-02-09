@@ -112,10 +112,12 @@ def yaw_cache_create(**kwargs) -> Any:
         The randoms to split into patches and cache, positions used to
         automatically generate patch centers if provided and stage is
         configured with `patch_num`.
+        For interactive mode RAIL, set to the string "none" if not desired.
     patch_source : YawCache, required
         An existing cache instance that provides the patch centers. Use to
         ensure consistent patch centers when running cross-correlations.
         Takes precedence over the any configuration parameters.
+        For interactive mode RAIL, set to the string "none" if not desired.
     overwrite : bool, optional
         overwrite the path if it is an existing cache directory
         Default: None
@@ -267,6 +269,7 @@ def yaw_summarize(**kwargs) -> Any:
         Pair counts from the unknown sample autocorrelation measurement,
         used to correct for the reference sample galaxy bias. Typically only
         availble when using simulated data sets.
+        For interactive mode RAIL, set to the string "none" if not desired.
     verbose : str, optional
         lowest log level emitted by *yet_another_wizz*
         Default: info
