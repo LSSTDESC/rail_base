@@ -28,9 +28,8 @@ def dsps_photometry_creator(**kwargs) -> Any:
 
     Parameters
     ----------
-    input_data : str, required
+    model : str, required
         Filepath to the hdf5 table containing the galaxy rest-frame SEDs.
-    model : dict, required
     seed : int, optional
         The random seed to control sampling
     Om0 : float, optional
