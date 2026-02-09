@@ -240,7 +240,9 @@ def _stringify_type_annotation(annotation: str | type) -> str:
     # handle annotations that are DataHandles
     if isinstance(annotation, str) and hasattr(rail.core.data, annotation):
         return_type = getattr(rail.core.data, annotation)
-        if issubclass(return_type, rail.core.data.DataHandle):
+        if isinstance(return_type, type) and issubclass(
+            return_type, rail.core.data.DataHandle
+        ):
             annotation = return_type.interactive_type
 
     return annotation
