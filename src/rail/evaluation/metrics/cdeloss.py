@@ -29,7 +29,7 @@ class CDELoss(MetricEvaluator):
         """
 
         # Calculate first term E[\int f*(z | X)^2 dz]
-        term1 = np.mean(np.trapz(self._pdfs**2, x=self._xvals))
+        term1 = np.mean(np.trapezoid(self._pdfs**2, x=self._xvals))
         # z bin closest to ztrue
         nns = [np.argmin(np.abs(self._xvals - z)) for z in self._ztrue]
         # Calculate second term E[f*(Z | X)]
