@@ -1,10 +1,10 @@
 [project]
 name = "pz-rail-base"
 requires-python = ">=3.10"
-license = {file = "LICENSE"}
+license = { file = "LICENSE" }
 readme = "README.md"
 authors = [
-    { name = "LSST Dark Energy Science Collaboration (DESC)", email = "later@later.com" }
+    { name = "LSST Dark Energy Science Collaboration (DESC)", email = "later@later.com" },
 ]
 classifiers = [
     "Development Status :: 4 - Beta",
@@ -30,12 +30,15 @@ dependencies = [
 # On a mac, install optional dependencies with `pip install '.[dev]'` (include the single quotes)
 [project.optional-dependencies]
 dev = [
-    "qp-prob[full]", 
+    "qp-prob[full]",
     "pytest",
-    "pytest-cov", # Used to report total code coverage
-    "pre-commit", # Used to run checks before finalizing a git commit
-    "pylint", # Used for static linting of files
-    "jupyter", # Used to render simple test notebook
+    "pytest-cov",    # Used to report total code coverage
+    "pre-commit",    # Used to run checks before finalizing a git commit
+    "pylint",        # Used for static linting of files
+    "jupyter",       # Used to render simple test notebook
+    "numpydoc",
+    "black",         # Currently imported in interactive whether or not we're on dev
+    "isort",         # as above
 ]
 
 [project.scripts]
@@ -43,7 +46,7 @@ rail = "rail.cli.rail.commands:cli"
 
 [build-system]
 requires = [
-    "setuptools>=62", # Used to build and package the Python project
+    "setuptools>=62",      # Used to build and package the Python project
     "setuptools_scm>=6.2", # Gets release version from git. Makes it available programmatically
 ]
 build-backend = "setuptools.build_meta"
@@ -52,27 +55,26 @@ build-backend = "setuptools.build_meta"
 write_to = "src/rail/core/_version.py"
 
 [tool.pytest.ini_options]
-testpaths = [
-    "tests",
-]
-addopts = [
-    "--cov=rail",
-    "--cov-report=html"
-]
+testpaths = ["tests"]
+addopts   = ["--cov=rail", "--cov-report=html"]
 
 [tool.pylint]
 disable = [
     "abstract-method",
+    "arguments-differ",               # let child classes override methods with extra args
+    "attribute-defined-outside-init",
+    "broad-exception-caught",
+    "duplicate-code",
     "invalid-name",
-    "too-many-statements",
-    "too-many-arguments",
-    "missing-module-docstring",
     "missing-class-docstring",
     "missing-function-docstring",
+    "missing-module-docstring",
     "too-few-public-methods",
-    "duplicate-code",
+    "too-many-arguments",
+    "too-many-positional-arguments",
+    "too-many-statements",
+    "unused-argument",                # need extra **kwargs in some places
     "use-dict-literal",
-    "broad-exception-caught",
 ]
 max-line-length = 110
 max-locals = 50
@@ -80,22 +82,20 @@ max-branches = 25
 max-public-methods = 50
 
 [tool.mypy]
-disallow_untyped_defs = true
+disallow_untyped_defs    = true
 disallow_incomplete_defs = true
-ignore_missing_imports = true
-local_partial_types = true
-no_implicit_reexport = true
-show_error_codes = true
-strict_equality = true
-warn_redundant_casts = true
-warn_unreachable = true
-warn_unused_ignores = true
+ignore_missing_imports   = true
+local_partial_types      = true
+no_implicit_reexport     = true
+show_error_codes         = true
+strict_equality          = true
+warn_redundant_casts     = true
+warn_unreachable         = true
+warn_unused_ignores      = true
 
 
 [tool.coverage.run]
-omit = [
-     "*/_version.py",
-     ]
+omit = ["*/_version.py"]
 
 [tool.coverage.report]
 exclude_also = [
@@ -103,5 +103,8 @@ exclude_also = [
     "__repr__",
     "TYPE_CHECKING",
     "if cls._instance is None:",
-    "except KeyError as missing_key:",    
+    "except KeyError as missing_key:",
 ]
+
+[tool.isort]
+profile = "black"

@@ -115,7 +115,7 @@ def git_status(outdir: str, dry_run: bool, package_file: str) -> None:
     except:
         pass
     os.system(f"touch {logfile}")
-    
+
     currentpath = os.path.abspath(".")
     for key, _val in package_dict.items():
         abspath = os.path.abspath(f"{outdir}/{key}")
@@ -146,7 +146,7 @@ def git_diff(outdir: str, dry_run: bool, package_file: str) -> None:
     except:
         pass
     os.system(f"touch {logfile}")
-    
+
     currentpath = os.path.abspath(".")
     for key, _val in package_dict.items():
         abspath = os.path.abspath(f"{outdir}/{key}")
@@ -164,7 +164,7 @@ def git_diff(outdir: str, dry_run: bool, package_file: str) -> None:
             os.system(com_line)
 
     print(f"Wrote output to {logfile}")
-    
+
 
 def git_describe(outdir: str, dry_run: bool, package_file: str) -> None:
     with open(package_file, encoding="utf-8") as pfile:
@@ -175,9 +175,9 @@ def git_describe(outdir: str, dry_run: bool, package_file: str) -> None:
     try:
         os.unlink(logfile)
     except:
-        pass    
+        pass
     os.system(f"touch {logfile}")
-    
+
     currentpath = os.path.abspath(".")
     for key, _val in package_dict.items():
         abspath = os.path.abspath(f"{outdir}/{key}")
@@ -187,7 +187,9 @@ def git_describe(outdir: str, dry_run: bool, package_file: str) -> None:
             continue
 
         os.system(f"echo '{key}' >> {logfile}")
-        com_line = f"cd {abspath} && git describe --tags >> {logfile} && cd {currentpath}"
+        com_line = (
+            f"cd {abspath} && git describe --tags >> {logfile} && cd {currentpath}"
+        )
 
         if dry_run:
             print(com_line)
@@ -195,8 +197,7 @@ def git_describe(outdir: str, dry_run: bool, package_file: str) -> None:
             os.system(com_line)
 
     print(f"Wrote output to {logfile}")
-    
-    
+
 
 def install(outdir: str, from_source: bool, dry_run: bool, package_file: str) -> None:
     with open(package_file, encoding="utf-8") as pfile:

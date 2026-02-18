@@ -1,7 +1,7 @@
 """Abstract base classes defining a Creator.
 
-A Creator will create synthetic photometric data and a PosteriorCalculator, 
-which can calculate posteriors for the data with respect to the distribution 
+A Creator will create synthetic photometric data and a PosteriorCalculator,
+which can calculate posteriors for the data with respect to the distribution
 defined by the Creator.
 """
 
@@ -9,8 +9,13 @@ from typing import Any
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import (DataHandle, ModelHandle, ModelLike, QPHandle,
-                            TableHandle, TableLike)
+from rail.core.data import (
+    DataHandle,
+    ModelHandle,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
 from rail.core.stage import RailStage
 
 
@@ -18,6 +23,7 @@ class Modeler(RailStage):  # pragma: no cover
     """Base class for creating a model of redshift and photometry."""
 
     name = "Modeler"
+    entrypoint_function = "fit_model"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
         seed=Param(int, default=12345, msg="Random number seed"),
@@ -30,17 +36,23 @@ class Modeler(RailStage):  # pragma: no cover
         super().__init__(args, **kwargs)
         self.model = None
 
-    def fit_model(self) -> ModelHandle:
+    def fit_model(self, input_data: DataHandle, **kwargs) -> ModelHandle:
         """Produce a creation model from which photometry and redshifts can be
         generated.
 
+        Parameters
+        ----------
+        input_data : DataHandle
+            ???
+
         Returns
         -------
-        ModelHandle:
+        ModelHandle
             This will definitely be a wrapper around a File,
             but the filetype and format depend entirely on the
             modeling approach
         """
+        self.set_data("input", input_data)
         self.validate()
         self.run()
         self.finalize()
@@ -56,6 +68,7 @@ class Creator(RailStage):  # pragma: no cover
     """
 
     name = "Creator"
+    entrypoint_function = "sample"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
         n_samples=Param(int, required=True, msg="Number of samples to create"),
@@ -73,8 +86,8 @@ class Creator(RailStage):  # pragma: no cover
         self.open_model(**args)
 
     def sample(
-        self, n_samples: int, seed: int | None = None, **kwargs: Any
-    ) -> DataHandle:
+        self, n_samples: int | None = None, seed: int | None = None, **kwargs: Any
+    ) -> TableHandle:
         """Draw samples from the model specified in the configuration.
 
         This is a method for running a Creator in interactive mode. In pipeline
@@ -82,19 +95,17 @@ class Creator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        n_samples
-            The number of samples to draw
-
-        seed
-            The random seed to control sampling
-
-        **kwargs:
+        n_samples : int, optional
+            The number of samples to draw, by default None
+        seed : int, optional
+            The random seed to control sampling, by default None
+        **kwargs : Any
             Used to update the configuration
 
         Returns
         -------
-        DataHandle
-            DataHandle wrapping the newly created samples
+        TableHandle
+            TableHandle wrapping the newly created samples
 
         Notes
         -----
@@ -103,7 +114,7 @@ class Creator(RailStage):  # pragma: no cover
 
         It then calls the ``run`` method, which must be defined by a subclass.
 
-        Finally, the ``DataHandle`` associated to the ``output`` tag is returned.
+        Finally, the ``TableHandle`` associated to the ``output`` tag is returned.
         """
         self.config["n_samples"] = n_samples
         self.config["seed"] = seed
@@ -121,6 +132,9 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
     """
 
     name = "PosteriorCalculator"
+    entrypoint_function = (
+        "get_posterior"  # the user-facing science function for this class
+    )
     config_options = RailStage.config_options.copy()
     config_options.update(
         column=Param(str, required=True, msg="Column to compute posterior for"),
@@ -139,7 +153,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
             args = vars(args)
         self.open_model(**args)
 
-    def get_posterior(self, input_data: TableLike, **kwargs: Any) -> DataHandle:
+    def get_posterior(self, input_data: TableLike, **kwargs: Any) -> QPHandle:
         """Return posteriors for the given column.
 
         This is a method for running a Creator in interactive mode. In pipeline
@@ -147,15 +161,15 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        data
+        input_data : TableLike
             A table of the galaxies for which posteriors are calculated
 
-        **kwargs
+        **kwargs : Any
             Used to update configuration
 
         Returns
         -------
-        DataHandle
+        QPHandle
             Posterior Estimate
 
         Notes
@@ -166,7 +180,7 @@ class PosteriorCalculator(RailStage):  # pragma: no cover
         This will put the additional functional arguments into this Stages
         configuration data.
 
-        It will then call ``self.run()`` and return the ``DataHandle``
+        It will then call ``self.run()`` and return the ``QPHandle``
         associated to the ``output`` tag.
         """
         self.set_data("input", input_data)

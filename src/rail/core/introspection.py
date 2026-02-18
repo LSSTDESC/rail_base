@@ -33,6 +33,7 @@ class RailEnv:
         "rail.plotting",
         "rail.cli.rail_plot",
         "rail.cli.rail_project",
+        "rail.interactive",  # custom api generation
     ]
 
     _base_packages: list[str] = [
@@ -45,6 +46,7 @@ class RailEnv:
         "CatClassifier",
         "PZClassifier",
         "CatEstimator",
+        "PzEstimator",
         "CatInformer",
         "PzInformer",
         "CatSummarizer",
@@ -446,14 +448,12 @@ class RailEnv:
             cls.build_rail_namespace_tree()
 
         apitoc = """
-
 *************
 Base Packages
 *************
 
 .. toctree::
    :maxdepth: 4
-   :caption: Base Packages
 
 {base_packages}
 
@@ -464,7 +464,6 @@ Namespaces
 
 .. toctree::
    :maxdepth: 4
-   :caption: Namespaces
 
 {namespaces}
 
@@ -475,7 +474,6 @@ Algorithm Packages
 
 .. toctree::
    :maxdepth: 4
-   :caption: Algorithm Packages
 
 {algorithm_packages}
 
@@ -503,7 +501,7 @@ Algorithm Packages
                 if nsname in cls._skip_packages:  # pragma: no cover
                     continue
                 if nsname in cls._base_packages:
-                    base_packages += f"    {nsfile}\n"
+                    base_packages += f"   {nsfile}\n"
                     cls.do_pkg_api_rst(
                         basedir,
                         key,
@@ -548,7 +546,7 @@ Algorithm Packages
                     print(f"Failed to import {pkg} because: {str(msg)}")
 
     @classmethod
-    def attach_stages(cls, to_module: ModuleType) -> None:
+    def attach_stages(cls, to_module: ModuleType, silent: bool = False) -> None:
         """Attach all the available stages to this module
 
         Parameters
@@ -566,8 +564,7 @@ Algorithm Packages
             from rail.stages import *
 
         """
-        from rail.core.stage import \
-            RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
 
         cls._stage_dict.clear()
         cls._stage_dict["RailStage"] = []
@@ -602,15 +599,15 @@ Algorithm Packages
                     break
             cls._stage_dict[baseclass].append(stage_name)
 
-        print(
-            f"Attached {n_base_classes} base classes and {n_stages} fully formed stages to rail.stages"
-        )
+        if not silent:
+            print(
+                f"Attached {n_base_classes} base classes and {n_stages} fully formed stages to rail.stages"
+            )
 
     @classmethod
     def print_rail_stage_dict(cls) -> None:
         """Print an dict of all the RailSages organized by their base class"""
-        from rail.core.stage import \
-            RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
 
         for key, val in cls._stage_dict.items():
             print(f"BaseClass {key}")
@@ -621,8 +618,7 @@ Algorithm Packages
     @classmethod
     def do_stage_type_api_rst(cls, basedir: str = ".") -> None:
         """Genarate the rst files for the stage tpye documentation"""
-        from rail.core.stage import \
-            RailStage  # pylint: disable=import-outside-toplevel
+        from rail.core.stage import RailStage  # pylint: disable=import-outside-toplevel
 
         os.makedirs(os.path.join(basedir, "api"), exist_ok=True)
 

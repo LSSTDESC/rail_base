@@ -1,23 +1,23 @@
 import numpy as np
-from scipy import stats
 from ceci.config import StageParameter as Param
+from scipy import stats
 
-from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import TableLike, DataHandle, Hdf5Handle, TableHandle
+from rail.core.common_params import SHARED_PARAMS, SharedParams
+from rail.core.data import Hdf5Handle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 
 class KDEBinOverlap(RailStage):
     name = "KDEBinOverlap"
+    entrypoint_function = "evaluate"  # the user-facing science function for this class
+    interactive_function = "kde_bin_overlap"
     inputs = [("truth", TableHandle), ("bin_index", Hdf5Handle)]
     outputs = [("output", Hdf5Handle)]
 
     config_options = RailStage.config_options.copy()
     config_options.update(
-        hdf5_groupname=Param(
-            str, "", required=False, msg="HDF5 Groupname for truth table."
-        ),
-        redshift_col=SHARED_PARAMS,
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),  # for truth table
+        redshift_col=SharedParams.copy_param("redshift_col"),
         bin_name=Param(
             str,
             "class_id",
@@ -27,7 +27,21 @@ class KDEBinOverlap(RailStage):
     )
     # metric_base_class = Evaluator
 
-    def evaluate(self, bin_index: TableLike, truth: TableLike) -> DataHandle:
+    def evaluate(self, bin_index: TableLike, truth: TableLike, **kwargs) -> Hdf5Handle:
+        """Evaluate function for KDEBinOverlap
+
+        Parameters
+        ----------
+        bin_index : TableLike
+            bin_index
+        truth : TableLike
+            truth
+
+        Returns
+        -------
+        Hdf5Handle
+            Output data
+        """
         self.set_data("bin_index", bin_index)
         self.set_data("truth", truth)
 
@@ -35,11 +49,11 @@ class KDEBinOverlap(RailStage):
         return self.get_handle("output")
 
     def run(self) -> None:
-        if self.config.hdf5_groupname is None: # pragma: no cover
+        if self.config.hdf5_groupname is None:  # pragma: no cover
             true_redshifts = self.get_handle("truth").data[
                 self.config.redshift_col
             ]  # 1D array of redshifts
-        else: 
+        else:
             true_redshifts = self.get_handle("truth").data[self.config.hdf5_groupname][
                 self.config.redshift_col
             ]  # 1D array of redshifts

@@ -132,7 +132,8 @@ class PZFactory:
         data_handle: DataHandle
             Object that can give access to the data
         """
-        RailStage.data_store.clear()
+        # RailStage.data_store.clear()
+        stage_obj.data_store.clear()  # clear the data store of previous handles
         handle = stage_obj.get_handle("input", path=data_path, allow_missing=True)
         return stage_obj.estimate(handle)
 
@@ -160,7 +161,8 @@ class PZFactory:
         pz : qp.Ensemble
             Output pz
         """
-        RailStage.data_store.clear()
+        # RailStage.data_store.clear()
+        stage_obj.data_store.clear()  # clear the data store of previous handles
         if stage_obj.model is None:
             stage_obj.open_model(**stage_obj.config)
         stage_obj._input_length = input_size

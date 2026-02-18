@@ -5,13 +5,15 @@ from numpy.typing import NDArray
 from scipy.integrate import simpson
 from scipy.optimize import minimize_scalar
 
-from rail.core.common_params import SHARED_PARAMS
+from rail.core.common_params import SHARED_PARAMS, SharedParams
 
 
 class PointEstimationMixin:
     config_options = dict(
-        calculated_point_estimates=SHARED_PARAMS,
-        recompute_point_estimates=SHARED_PARAMS,
+        calculated_point_estimates=SharedParams.copy_param(
+            "calculated_point_estimates"
+        ),
+        recompute_point_estimates=SharedParams.copy_param("recompute_point_estimates"),
     )
 
     @property
@@ -208,7 +210,7 @@ class PointEstimationMixin:
                 integrand = pz * loss(zx, grid)
                 return simpson(integrand, grid)
 
-            def loss(zx: NDArray, grid: NDArray, gamma: float=0.15) -> np.ndarray:
+            def loss(zx: NDArray, grid: NDArray, gamma: float = 0.15) -> np.ndarray:
                 dz = (zx - grid) / (1 + grid)
                 return 1 - 1 / (1 + (dz / gamma) ** 2)
 

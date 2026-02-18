@@ -1,4 +1,4 @@
-"""Tuples that capture standard statistical quantities """
+"""Tuples that capture standard statistical quantities"""
 
 from collections import namedtuple
 

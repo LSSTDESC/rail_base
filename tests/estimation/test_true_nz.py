@@ -6,17 +6,19 @@ from rail.core.data import TableHandle
 from rail.core.stage import RailStage
 from rail.estimation.algos.true_nz import TrueNZHistogrammer
 
-DS = RailStage.data_store
-DS.__class__.allow_overwrite = True
+# DS = RailStage.data_store
+# DS.__class__.allow_overwrite = True
 
 true_nz_file = "src/rail/examples_data/testdata/validation_10gal.hdf5"
 tomo_file = "src/rail/examples_data/testdata/output_tomo.hdf5"
 
 
 def test_true_nz() -> None:
-    DS.clear()
-    true_nz = DS.read_file("true_nz", path=true_nz_file, handle_class=TableHandle)
-    tomo_bins = DS.read_file("tomo_bins", path=tomo_file, handle_class=TableHandle)
+    # DS.clear()
+    # true_nz = DS.read_file("true_nz", path=true_nz_file, handle_class=TableHandle)
+    # tomo_bins = DS.read_file("tomo_bins", path=tomo_file, handle_class=TableHandle)
+    true_nz = TableHandle("true_nz", path=true_nz_file)
+    tomo_bins = TableHandle("tomo_bins", path=tomo_file)
 
     nz_hist = TrueNZHistogrammer.make_stage(
         name="true_nz",

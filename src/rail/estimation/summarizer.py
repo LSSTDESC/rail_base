@@ -7,9 +7,8 @@ from typing import Any
 import numpy as np
 import qp
 
-from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import (DataHandle, ModelHandle, QPHandle, TableHandle,
-                            TableLike)
+from rail.core.common_params import SHARED_PARAMS, SharedParams
+from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, TableLike
 from rail.core.stage import RailStage
 
 # for backwards compatibility
@@ -26,12 +25,13 @@ class CatSummarizer(RailStage):  # pragma: no cover
     """
 
     name = "CatSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=SHARED_PARAMS)
+    config_options.update(chunk_size=SharedParams.copy_param("chunk_size"))
     inputs = [("input", TableHandle)]
     outputs = [("output", QPHandle)]
 
-    def summarize(self, input_data: TableLike) -> DataHandle:
+    def summarize(self, input_data: TableLike) -> QPHandle:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 
@@ -48,13 +48,13 @@ class CatSummarizer(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        input_data
+        input_data : TableLike
             Either a dictionary of all input data or a `TableHandle` providing access to the same
 
         Returns
         -------
-        DataHandle
-            Ensemble with n(z), and any ancilary data
+        QPHandle
+            Ensemble with n(z), and any ancillary data
         """
         self.set_data("input", input_data)
         self.run()
@@ -70,12 +70,13 @@ class PZSummarizer(RailStage):
     """
 
     name = "PZtoNZSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=SHARED_PARAMS)
+    config_options.update(chunk_size=SharedParams.copy_param("chunk_size"))
     inputs = [("model", ModelHandle), ("input", QPHandle)]
     outputs = [("output", QPHandle)]
 
-    def summarize(self, input_data: qp.Ensemble) -> qp.Ensemble:
+    def summarize(self, input_data: qp.Ensemble, **kwargs) -> QPHandle:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 
@@ -92,18 +93,27 @@ class PZSummarizer(RailStage):
 
         Parameters
         ----------
-        input_data
-            Per-galaxy p(z), and any ancilary data associated with it
+        input_data : qp.Ensemble
+            Per-galaxy p(z), and any ancillary data associated with it
 
         Returns
         -------
-        qp.Ensemble
-            Ensemble with n(z), and any ancilary data
+        QPHandle
+            Ensemble with n(z), and any ancillary data
         """
         self.set_data("input", input_data)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            results = self.get_handle("output")
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
+        return results
+
+        # return self.get_handle("output")
 
     def _broadcast_bootstrap_matrix(self) -> np.ndarray | None:
         rng = np.random.default_rng(seed=self.config.seed)
@@ -111,7 +121,7 @@ class PZSummarizer(RailStage):
         ngal = self._input_length
         if self.rank == 0:
             bootstrap_matrix = rng.integers(
-                low=0, high=ngal, size=(ngal, self.config.nsamples)
+                low=0, high=ngal, size=(ngal, self.config.n_samples)
             )
         else:  # pragma: no cover
             bootstrap_matrix = None
@@ -135,8 +145,9 @@ class SZPZSummarizer(RailStage):  # pragma: no cover
     """
 
     name = "SZPZtoNZSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
-    config_options.update(chunk_size=SHARED_PARAMS)
+    config_options.update(chunk_size=SharedParams.copy_param("chunk_size"))
     inputs = [
         ("input", TableHandle),
         ("spec_input", TableHandle),
@@ -152,7 +163,9 @@ class SZPZSummarizer(RailStage):  # pragma: no cover
         # `open_model` call explicitly in the run method for
         # each summarizer.
 
-    def summarize(self, input_data: qp.Ensemble, spec_data: np.ndarray) -> qp.Ensemble:
+    def summarize(
+        self, input_data: qp.Ensemble, spec_data: np.ndarray, **kwargs
+    ) -> qp.Ensemble:
         """The main run method for the summarization, should be implemented
         in the specific subclass.
 
@@ -169,19 +182,25 @@ class SZPZSummarizer(RailStage):  # pragma: no cover
 
         Parameters
         ----------
-        input_data
-            Per-galaxy p(z), and any ancilary data associated with it
-
-        spec_data
+        input_data : qp.Ensemble
+            Per-galaxy p(z), and any ancillary data associated with it
+        spec_data : np.ndarray
             Spectroscopic data
 
         Returns
         -------
         qp.Ensemble
-            Ensemble with n(z), and any ancilary data
+            Ensemble with n(z), and any ancillary data
         """
         self.set_data("input", input_data)
         self.set_data("spec_input", spec_data)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            return self.get_handle("output")
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
+            return results

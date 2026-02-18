@@ -1,4 +1,4 @@
-""" Base class for PipelineStages in Rail """
+"""Base class for PipelineStages in Rail"""
 
 from __future__ import annotations
 
@@ -11,7 +11,7 @@ from ceci.config import StageParameter as Param
 from ceci.pipeline import MiniPipeline
 from ceci.stage import PipelineStage
 
-from .data import DATA_STORE, DataHandle, DataLike, ModelHandle
+from .data import DataHandle, DataLike, DataStore, ModelHandle, ModelLike
 
 T = TypeVar("T", bound="RailPipeline")
 S = TypeVar("S", bound="RailStage")
@@ -186,23 +186,23 @@ class RailPipeline(MiniPipeline):
         )
 
         # make sure stage_config_dict is a dict of stages_config
-        if isinstance(stages_config, str): # pragma: no cover
+        if isinstance(stages_config, str):  # pragma: no cover
             with open(stages_config, "r") as f:
                 stages_config_dict = yaml.safe_load(f) or {}
         else:
             stages_config_dict = stages_config or {}
-        
+
         # loop through stages
         for key, exec_cfg in pipe.stage_execution_config.items():
-            stage_cfg = (stages_config_dict.get(key) or {})
+            stage_cfg = stages_config_dict.get(key) or {}
             nprocess = stage_cfg.get("nprocess")
-        
+
             if nprocess is None:
                 continue
-            else: # pragma: no cover
-        
+            else:  # pragma: no cover
+
                 exec_cfg.nprocess = nprocess
-            
+
                 # bump max_threads if needed
                 site_cfg = exec_cfg.site.config
                 if nprocess > site_cfg.get("max_threads", 0):
@@ -264,11 +264,22 @@ class RailStage(PipelineStage):
     `self.set_data(inputTag, other.get_handle(outputTag, allow_missing=True), do_read=False)`
     """
 
-    config_options = dict(
-        output_mode=Param(str, "default", msg="What to do with the outputs")
-    )
+    # disable the message for setting self.attribute outside of the init. This occurs in
+    # (for ex) RailStage.open_model() with self.model, but I can't be sure that setting
+    # `self.model = None` in the __init__ wouldn't have unintended consequences
+    # pylint: disable=attribute-defined-outside-init
 
-    data_store = DATA_STORE()
+    entrypoint_function: str | None = None
+    interactive_function: str | None = None
+    extra_interactive_documentation: str | None = None
+
+    config_options = dict(
+        output_mode=Param(
+            str,
+            "default",
+            msg="What to do with the outputs. The options are 'default', where outputs will be written to files and some returned, and 'return', where outputs will only be returned and not written.",
+        )
+    )
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
         """Constructor:
@@ -277,6 +288,7 @@ class RailStage(PipelineStage):
         self._input_length: int | None = None
         self.io = StageIO(self)
         self.stage_columns: list[str] | None = None
+        self.data_store = DataStore()
 
     @classmethod
     def make_and_connect(cls: type[S], **kwargs: Any) -> S:
@@ -328,6 +340,7 @@ class RailStage(PipelineStage):
             The handle that give access to the associated data
         """
         aliased_tag = self.get_aliased_tag(tag)
+
         handle = self.data_store.get(aliased_tag)
         if handle is None:
             if not allow_missing:
@@ -359,7 +372,7 @@ class RailStage(PipelineStage):
             The handle that gives access to the associated data
         """
         aliased_tag = self.get_aliased_tag(tag)
-        if aliased_tag in self._inputs:
+        if tag in self._inputs or aliased_tag in self._inputs:
             if path is None:
                 path = self.get_input(aliased_tag)
             handle_type = self.get_input_type(tag)
@@ -432,16 +445,27 @@ class RailStage(PipelineStage):
         Returns
         -------
         DataLike
-            The data accesed by the handle assocated to the tag
+            The data accessed by the handle associated to the tag
         """
         # First we grab the handle that we will be using
-        handle = self.get_handle(tag, path=path, allow_missing=True)
+        # handle = self.get_handle(tag, path=path, allow_missing=True)
 
         if isinstance(data, DataHandle):
             # If we were passed a DataHandle, we use that
-            aliased_tag = data.tag
+            if tag in self._aliases:
+                # use this alias instead of the Data handle tag
+                aliased_tag = self.get_aliased_tag(tag)
+            else:
+                aliased_tag = data.tag
             if tag in self.input_tags():
-                self._aliases[tag] = aliased_tag
+                if aliased_tag != "output":
+                    self._aliases[tag] = aliased_tag
+
+                    # make sure the aliased tag exists in the inputs dictionary
+                    if not aliased_tag in self._inputs:
+                        self._inputs[aliased_tag] = self._inputs[tag]
+
+                handle = self.get_handle(tag, path=path, allow_missing=True)
                 if data.has_path:
                     self._inputs[tag] = data.path
                     handle.path = data.path
@@ -451,13 +475,15 @@ class RailStage(PipelineStage):
                     handle.read()
         elif not isinstance(data, (type(None), str)):
             # If we were passed data, we use that and reset the path
+            handle = self.get_handle(tag, path=path, allow_missing=True)
             handle.data = data
-            if path in ['None', 'none', None]:
-                handle.path = 'None'
+            if path in ["None", "none", None]:
+                handle.path = "None"
         else:
             # Data is None, we use the path
-            if path not in ['None', 'none', None]:
-                # Path exists, use that                
+            handle = self.get_handle(tag, path=path, allow_missing=True)
+            if path not in ["None", "none", None]:
+                # Path exists, use that
                 if not os.path.isfile(path):
                     raise FileNotFoundError(f"Unable to find file: {path}")
                 handle.path = path
@@ -512,13 +538,13 @@ class RailStage(PipelineStage):
 
         chunk_size = kwargs.get("chunk_size", self.config.chunk_size)
 
-        on_disk: bool= False
-        in_memory: bool= False
-        if handle.path not in [None, 'None', 'none']:
+        on_disk: bool = False
+        in_memory: bool = False
+        if handle.path not in [None, "None", "none"]:
             on_disk = True
         if handle.data is not None:
             in_memory = True
-        
+
         if on_disk:
             self._input_length = handle.size(groupname=groupname)
 
@@ -546,7 +572,7 @@ class RailStage(PipelineStage):
         # If data is in memory and not in a file, it means is small enough to process it
         # in a single chunk.
         elif in_memory:  # pragma: no cover
-            if self.config.hdf5_groupname:
+            if "hdf5_groupname" in self.config and self.config.hdf5_groupname:
                 test_data = self.get_data(tag)[self.config.hdf5_groupname]
                 self._input_length = self.get_handle(tag).data_size(
                     groupname=self.config.hdf5_groupname
@@ -555,13 +581,16 @@ class RailStage(PipelineStage):
                 test_data = self.get_data(tag)
                 self._input_length = self.get_handle(tag).data_size()
             s = 0
+            self.config.chunk_size = (
+                self._input_length
+            )  # set new chunk size so future functions know this has changed
+
             iterator = [[s, self._input_length, test_data]]
             return iterator
 
         # Data is neither on disk or in memory, return empty list
-        else:
-            return []
-        
+        return []
+
     def connect_input(
         self,
         other: PipelineStage,
@@ -603,6 +632,12 @@ class RailStage(PipelineStage):
             assert handle.path is not None
             if not os.path.exists(handle.path) or not handle.partial:
                 handle.write()
+
+        elif self.config.output_mode == "return":
+            # TODO: or should this be a test, i.e. assert handle.path == None
+            handle.path = None
+            return
+
         final_name = PipelineStage._finalize_tag(self, tag)
         handle.path = final_name
         return final_name
@@ -623,7 +658,7 @@ class RailStage(PipelineStage):
                 # data handle only has a path, read the columns from the path
                 path = data.path
                 assert path is not None
-                data._check_data_columns(
+                data._check_data_columns(  # pylint: disable=protected-access
                     path, columns_to_check, parent_groupname=groupname, **kwargs
                 )
             elif not data.has_path:  # pragma: no cover

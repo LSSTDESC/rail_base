@@ -11,6 +11,7 @@ import qp
 from ceci.config import StageParameter as Param
 from scipy.stats import norm
 
+from rail.core.common_params import SharedParams
 from rail.core.data import ModelHandle, TableHandle, TableLike
 from rail.estimation.estimator import CatEstimator
 from rail.estimation.informer import CatInformer
@@ -20,6 +21,8 @@ class RandomGaussInformer(CatInformer):
     """Placeholder Informer"""
 
     name = "RandomGaussInformer"
+    entrypoint_function = "inform"  # the user-facing science function for this class
+    interactive_function = "random_gauss_informer"
     config_options = CatInformer.config_options.copy()
 
     def run(self) -> None:
@@ -30,13 +33,15 @@ class RandomGaussEstimator(CatEstimator):
     """Random CatEstimator"""
 
     name = "RandomGaussEstimator"
+    entrypoint_function = "estimate"  # the user-facing science function for this class
+    interactive_function = "random_gauss_estimator"
     inputs = [("input", TableHandle), ("model", ModelHandle)]
     config_options = CatEstimator.config_options.copy()
     config_options.update(
-        rand_width=Param(float, 0.025, "ad hock width of PDF"),
-        rand_zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-        rand_zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
-        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        rand_width=Param(float, 0.025, msg="ad hock width of PDF"),
+        zmin=SharedParams.copy_param("zmin"),
+        zmax=SharedParams.copy_param("zmax"),
+        nzbins=SharedParams.copy_param("nzbins"),
         seed=Param(int, 87, msg="random seed"),
         column_name=Param(
             str,
@@ -59,11 +64,9 @@ class RandomGaussEstimator(CatEstimator):
         # allow for either format for now
         numzs = len(data[self.config.column_name])
         rng = np.random.default_rng(seed=self.config.seed + start)
-        zmode = np.round(rng.uniform(0.0, self.config.rand_zmax, numzs), 3)
+        zmode = np.round(rng.uniform(0.0, self.config.zmax, numzs), 3)
         widths = self.config.rand_width * (1.0 + zmode)
-        self.zgrid = np.linspace(
-            self.config.rand_zmin, self.config.rand_zmax, self.config.nzbins
-        )
+        self.zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
         for i in range(numzs):
             pdf.append(norm.pdf(self.zgrid, zmode[i], widths[i]))
         qp_d = qp.Ensemble(

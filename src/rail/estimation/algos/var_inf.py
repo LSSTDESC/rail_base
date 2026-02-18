@@ -11,6 +11,7 @@ from scipy.special import digamma
 from scipy.stats import dirichlet
 
 from rail.core.data import QPHandle
+from rail.core.common_params import SharedParams
 from rail.estimation.informer import PzInformer
 from rail.estimation.summarizer import PZSummarizer
 
@@ -21,6 +22,8 @@ class VarInfStackInformer(PzInformer):
     """Placeholder Informer"""
 
     name = "VarInfStackInformer"
+    entrypoint_function = "inform"  # the user-facing science function for this class
+    interactive_function = "var_inf_stack_informer"
     config_options = PzInformer.config_options.copy()
 
     def _finalize_run(self) -> None:
@@ -36,16 +39,18 @@ class VarInfStackSummarizer(PZSummarizer):
     """
 
     name = "VarInfStackSummarizer"
+    entrypoint_function = "summarize"  # the user-facing science function for this class
+    interactive_function = "var_inf_stack_summarizer"
     config_options = PZSummarizer.config_options.copy()
     config_options.update(
-        zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-        zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
-        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        zmin=SharedParams.copy_param("zmin"),
+        zmax=SharedParams.copy_param("zmax"),
+        nzbins=SharedParams.copy_param("nzbins"),
         seed=Param(int, 87, msg="random seed"),
-        niter=Param(
+        n_iter=Param(
             int, 100, msg="The number of iterations in the variational inference"
         ),
-        nsamples=Param(
+        n_samples=Param(
             int, 500, msg="The number of samples used in dirichlet uncertainty"
         ),
     )
@@ -55,6 +60,34 @@ class VarInfStackSummarizer(PZSummarizer):
     def __init__(self, args: Any, **kwargs: Any) -> None:
         super().__init__(args, **kwargs)
         self.zgrid: np.ndarray | None = None
+
+    def summarize(
+        self, input_data: qp.Ensemble, **kwargs
+    ) -> QPHandle | dict[str, QPHandle]:
+        """Summarizer for VarInfStack which returns multiple items
+
+        Parameters
+        ----------
+        input_data : qp.Ensemble
+            Per-galaxy p(z), and any ancillary data associated with it
+
+        Returns
+        -------
+        QPHandle | dict[str, QPHandle]
+            Ensemble with n(z), and any ancillary data
+            Return type depends on `output_mode`
+        """
+        self.set_data("input", input_data)
+        self.run()
+        self.finalize()
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            results = self.get_handle("output")
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
+        return results
 
     def _setup_iterator(self) -> Iterable:
         input_handle = self.get_handle("input", allow_missing=True)
@@ -86,7 +119,7 @@ class VarInfStackSummarizer(PZSummarizer):
             # instead, sample and save the samples
             rng = np.random.default_rng(seed=self.config.seed)
             sample_pz = dirichlet.rvs(
-                alpha_trace, size=self.config.nsamples, random_state=rng
+                alpha_trace, size=self.config.n_samples, random_state=rng
             )
             qp_d = qp.Ensemble(
                 qp.interp, data=dict(xvals=self.zgrid, yvals=alpha_trace)
@@ -112,7 +145,7 @@ class VarInfStackSummarizer(PZSummarizer):
         init_trace = np.ones(len(self.zgrid))
         pdf_vals = test_data.pdf(self.zgrid)
         log_pdf_vals = np.log(np.array(pdf_vals) + TEENY)
-        for _ in range(self.config.niter):
+        for _ in range(self.config.n_iter):
             dig = np.array(
                 [digamma(kk) - digamma(np.sum(alpha_trace)) for kk in alpha_trace]
             )

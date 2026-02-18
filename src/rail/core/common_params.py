@@ -1,4 +1,4 @@
-""" Parameters that are shared between stages """
+"""Parameters that are shared between stages"""
 
 from typing import Any
 
@@ -8,7 +8,7 @@ from ceci.config import StageParameter as Param
 lsst_bands = "ugrizy"
 lsst_mag_cols = [f"mag_{band}_lsst" for band in lsst_bands]
 lsst_mag_err_cols = [f"mag_err_{band}_lsst" for band in lsst_bands]
-lsst_def_err_dict: dict[str, str|None] = dict(zip(lsst_mag_cols, lsst_mag_err_cols))
+lsst_def_err_dict: dict[str, str | None] = dict(zip(lsst_mag_cols, lsst_mag_err_cols))
 lsst_def_err_dict["redshift"] = None
 
 lsst_def_maglims = dict(
@@ -45,25 +45,26 @@ SHARED_PARAMS = StageConfig(
         str, "photometry", msg="name of hdf5 group for data, if None, then set to ''"
     ),
     chunk_size=Param(
-        int, 10000, msg="Number of object per chunk for parallel processing"
+        int,
+        10000,
+        msg="Number of objects per chunk for parallel processing "
+        "or to evalute per loop in single node processing",
     ),
-    zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-    zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
+    zmin=Param(float, 0.0, msg="The minimum redshift of the z grid or sample"),
+    zmax=Param(float, 3.0, msg="The maximum redshift of the z grid or sample"),
     nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
     dz=Param(float, 0.01, msg="delta z in grid"),
     nondetect_val=Param(
         float, 99.0, msg="value to be replaced with magnitude limit for non detects"
     ),
-    nonobserved_val=Param(
-        float, -99.0, msg="guard value for non-observations"
-    ),
+    nonobserved_val=Param(float, -99.0, msg="guard value for non-observations"),
     bands=Param(
-        list, lsst_mag_cols, msg="Names of columns for magnitgude by filter band"
+        list, lsst_mag_cols, msg="Names of columns for magnitude by filter band"
     ),
     err_bands=Param(
         list,
         lsst_mag_err_cols,
-        msg="Names of columns for magnitgude errors by filter band",
+        msg="Names of columns for magnitude errors by filter band",
     ),
     err_dict=Param(
         dict,
@@ -72,8 +73,8 @@ SHARED_PARAMS = StageConfig(
         "predict as the keys and the errors associated with that column as the values."
         "If a column does not havea an associated error its value shoule be `None`",
     ),
-    mag_limits=Param(dict, lsst_def_maglims, msg="Limiting magnitdues by filter"),
-    band_a_env=Param(dict, lsst_def_a_env, msg="Redenning parameters"),
+    mag_limits=Param(dict, lsst_def_maglims, msg="Limiting magnitudes by filter"),
+    band_a_env=Param(dict, lsst_def_a_env, msg="Reddening parameters"),
     ref_band=Param(str, "mag_i_lsst", msg="band to use in addition to colors"),
     redshift_col=Param(str, "redshift", msg="name of redshift column"),
     id_col=Param(str, "object_id", msg="name of the object ID column"),
@@ -109,6 +110,18 @@ SHARED_PARAMS = StageConfig(
         default=lsst_filter_list,
         msg="list of filter files names (with no '.sed' suffix). Filters must be"
         "in FILTER dir.  MUST BE IN SAME ORDER as 'bands'",
+    ),
+    leaf_size=Param(dtype=int, default=15, msg="The leaf size for tree algorithms."),
+    max_wavelength=Param(
+        dtype=float, default=12000, msg="The maximum rest-frame wavelength"
+    ),
+    min_wavelength=Param(
+        dtype=float, default=250, msg="The minimum rest-frame wavelength."
+    ),
+    redshift_key=Param(
+        dtype=str,
+        default="redshifts",
+        msg="The keyword of the redshift group in the hdf5 dataset.",
     ),
 )
 

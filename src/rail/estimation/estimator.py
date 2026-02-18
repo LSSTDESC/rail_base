@@ -8,17 +8,25 @@ from typing import Any, Optional
 
 import numpy as np
 import qp
+import tables_io
 
-from rail.core.common_params import SHARED_PARAMS
-from rail.core.data import (DataHandle, ModelHandle, ModelLike, QPHandle,
-                            TableHandle, TableLike)
+from rail.core.common_params import SHARED_PARAMS, SharedParams
+from rail.core.data import (
+    DataHandle,
+    ModelHandle,
+    ModelLike,
+    QPHandle,
+    TableHandle,
+    TableLike,
+)
+from rail.core.enums import DistributionType
 from rail.core.point_estimation import PointEstimationMixin
 from rail.core.stage import RailStage
-from rail.core.enums import DistributionType
 
 # for backwards compatibility, to avoid break stuff that imports it from here
-from .informer import CatInformer  # pylint: disable=unused-import
-import tables_io
+from .informer import (  # pylint: disable=unused-import, relative-beyond-top-level
+    CatInformer,
+)
 
 
 class CatEstimator(RailStage, PointEstimationMixin):
@@ -33,17 +41,19 @@ class CatEstimator(RailStage, PointEstimationMixin):
     """
 
     name = "CatEstimator"
+    entrypoint_function = "estimate"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
-        chunk_size=SHARED_PARAMS,
-        hdf5_groupname=SHARED_PARAMS,
-        zmin=SHARED_PARAMS,
-        zmax=SHARED_PARAMS,
-        nzbins=SHARED_PARAMS,
-        id_col=SHARED_PARAMS,
-        redshift_col=SHARED_PARAMS,
-        calc_summary_stats=SHARED_PARAMS,
+        chunk_size=SharedParams.copy_param("chunk_size"),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),
+        zmin=SharedParams.copy_param("zmin"),
+        zmax=SharedParams.copy_param("zmax"),
+        nzbins=SharedParams.copy_param("nzbins"),
+        id_col=SharedParams.copy_param("id_col"),
+        redshift_col=SharedParams.copy_param("redshift_col"),
+        calc_summary_stats=SharedParams.copy_param("calc_summary_stats"),
     )
+
     config_options.update(
         **PointEstimationMixin.config_options.copy(),
     )
@@ -55,8 +65,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
         super().__init__(args, **kwargs)
         self._output_handle: QPHandle | None = None
         self.model = None
+        self._partial_output = {}  # TODO: make this an ordered dict?
 
-    def estimate(self, input_data: TableLike) -> DataHandle:
+    def estimate(self, input_data: TableLike, **kwargs) -> QPHandle:
         """The main interface method for the photo-z estimation
 
         This will attach the input data (defined in ``inputs`` as "input") to this
@@ -71,20 +82,28 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
         Parameters
         ----------
-        input_data
+        input_data : TableLike
             A dictionary of all input data
 
         Returns
         -------
-        DataHandle
+        QPHandle
             Handle providing access to QP ensemble with output data
         """
         self.set_data("input", input_data)
         self.validate()
         self.run()
         self.finalize()
-        results = self.get_handle("output")
-        results.read(force=True)
+        if len(self.outputs) == 1 or self.config.output_mode != "return":
+            results = self.get_handle("output")
+            if self.config.output_mode != "return":
+                # only read from file if it wrote to a file
+                results.read(force=True)
+        # if there is more than one output and output_mode = return, return them all as a dictionary
+        elif len(self.outputs) > 1 and self.config.output_mode == "return":
+            results = {}
+            for output in self.outputs:
+                results[output[0]] = self.get_handle(output[0])
         return results
 
     def run(self) -> None:
@@ -108,7 +127,28 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
     def _finalize_run(self) -> None:
         assert self._output_handle is not None
-        self._output_handle.finalize_write()
+        if self.config.output_mode != "return":
+            self._output_handle.finalize_write()
+        elif self.config.output_mode == "return":
+            # turn this into an ordered list by sorting the keys and then appending the
+            # data into a sorted list
+            # TODO: should we skip this bit and create a list from the start
+            gathered_data = []
+            start = 0
+            for key in sorted(self._partial_output.keys()):
+                gathered_data.append(self._partial_output[key])
+
+            # set the output data handle path to None
+            self._output_handle.path = None
+            if len(gathered_data) <= 1:
+                # if there is only one entry in the dictionary skip the concatenation
+                self._output_handle.set_data(gathered_data[0])
+            else:
+                # concatenate all the chunks together
+                gathered_ensembles = qp.concatenate(gathered_data)
+                self._output_handle.set_data(gathered_ensembles)
+
+            self._partial_output = {}  # clear the variable once we've used it
 
     def _process_chunk(
         self, start: int, end: int, data: TableLike, first: bool
@@ -119,11 +159,11 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
     @classmethod
     def default_distribution_type(cls) -> DistributionType:
-        """Return the type of distribtuion that this estimator creates
+        """Return the type of distribution that this estimator creates
 
         By default this is DistributionType.ad_hoc
-        But this can be overrided by sub-classes to return
-        DistributionType.posetrior or DistributionType.likelihood if appropriate
+        But this can be overridden by sub-classes to return
+        DistributionType.posterior or DistributionType.likelihood if appropriate
         """
         return DistributionType.ad_hoc
 
@@ -137,7 +177,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
             qp_dstn.set_ancil(ancil_dict)
 
         quantiles = [0.025, 0.16, 0.5, 0.85, 0.975]
-        quant_names = ['q2p5', 'q16', 'median', 'q84', '97p5']
+        quant_names = ["q2p5", "q16", "median", "q84", "97p5"]
 
         locs = qp_dstn.ppf(quantiles)
         for name_, vals_ in zip(quant_names, locs.T):
@@ -145,13 +185,13 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
         grid: np.ndarray | None = None
 
-        if 'z_mode' not in qp_dstn.ancil:
+        if "z_mode" not in qp_dstn.ancil:
             grid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
-            qp_dstn.ancil['z_mode'] = qp_dstn.mode(grid)
+            qp_dstn.ancil["z_mode"] = qp_dstn.mode(grid)
 
         try:
-            qp_dstn.ancil['z_mean'] = qp_dstn.mean()
-            qp_dstn.ancil['z_std'] = qp_dstn.std()
+            qp_dstn.ancil["z_mean"] = qp_dstn.mean()
+            qp_dstn.ancil["z_std"] = qp_dstn.std()
         except IndexError:  # pragma: no cover
             # this is needed b/c qp.MixMod pdf sometimes fails to compute moments
             grid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
@@ -160,9 +200,9 @@ class CatEstimator(RailStage, PointEstimationMixin):
             means = np.sum(pdfs * grid, axis=1) / norms
             diffs = (np.expand_dims(grid, -1) - means).T
             wt_diffs = diffs * diffs * pdfs
-            stds = np.sqrt((wt_diffs).sum(axis=1)/norms)
-            qp_dstn.ancil['z_mean'] = np.expand_dims(means, -1)
-            qp_dstn.ancil['z_std'] = np.expand_dims(stds, -1)
+            stds = np.sqrt((wt_diffs).sum(axis=1) / norms)
+            qp_dstn.ancil["z_mean"] = np.expand_dims(means, -1)
+            qp_dstn.ancil["z_std"] = np.expand_dims(stds, -1)
 
         return qp_dstn
 
@@ -192,8 +232,12 @@ class CatEstimator(RailStage, PointEstimationMixin):
             if self.config.redshift_col in data.keys():  # pragma: no cover
                 qp_dstn.ancil.update(redshift=data[self.config.redshift_col])
 
-            if 'distribution_type' not in qp_dstn.ancil:
-                qp_dstn.ancil.update(distribution_type=np.repeat(self.default_distribution_type().value, end-start))
+            if "distribution_type" not in qp_dstn.ancil:
+                qp_dstn.ancil.update(
+                    distribution_type=np.repeat(
+                        self.default_distribution_type().value, end - start
+                    )
+                )
 
         if first:
             the_handle = self.add_handle("output", data=qp_dstn)
@@ -207,17 +251,20 @@ class CatEstimator(RailStage, PointEstimationMixin):
         self._output_handle.set_data(qp_dstn, partial=True)
         if self.config.output_mode != "return":
             self._output_handle.write_chunk(start, end)
+        elif self.config.output_mode == "return":
+            self._partial_output[(start, end)] = qp_dstn
         return qp_dstn
 
-
-    def _convert_table_format(self, data: TableLike, out_fmt_str: str="numpyDict") -> TableLike: # pragma: no cover
+    def _convert_table_format(
+        self, data: TableLike, out_fmt_str: str = "numpyDict"
+    ) -> TableLike:  # pragma: no cover
         """
         Utility function to convert existing Tabular data to a numpy dictionary,
         ingestable for most informer and estimators.
         To be called in _process_chunk().
         """
         # required format for informer/estimator
-        out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[out_fmt_str] 
+        out_fmt = tables_io.types.TABULAR_FORMAT_NAMES[out_fmt_str]
         out_data = tables_io.convert(data, out_fmt)
         # overwrite set_data
         return out_data
@@ -234,10 +281,11 @@ class PzEstimator(RailStage, PointEstimationMixin):
     """
 
     name = "PzEstimator"
+    entrypoint_function = "estimate"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
-        chunk_size=SHARED_PARAMS,
-        hdf5_groupname=SHARED_PARAMS,
+        chunk_size=SharedParams.copy_param("chunk_size"),
+        hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),
     )
     config_options.update(
         **PointEstimationMixin.config_options.copy(),
@@ -251,7 +299,7 @@ class PzEstimator(RailStage, PointEstimationMixin):
         self._output_handle: QPHandle | None = None
         self.model = None
 
-    def estimate(self, input_data: QPHandle) -> DataHandle:
+    def estimate(self, input_data: QPHandle, **kwargs) -> QPHandle:
         """The main interface method for the photo-z estimation
 
         This will attach the input data (defined in ``inputs`` as "input") to this
@@ -266,12 +314,12 @@ class PzEstimator(RailStage, PointEstimationMixin):
 
         Parameters
         ----------
-        input_data
+        input_data : QPHandle
             A dictionary of all input data
 
         Returns
         -------
-        DataHandle
+        QPHandle
             Handle providing access to QP ensemble with output data
         """
         self.set_data("input", input_data)
@@ -304,7 +352,8 @@ class PzEstimator(RailStage, PointEstimationMixin):
 
     def _finalize_run(self) -> None:
         assert self._output_handle is not None
-        self._output_handle.finalize_write()
+        if self.config.output_mode != "return":
+            self._output_handle.finalize_write()
 
     def _process_chunk(
         self, start: int, end: int, data: qp.Ensemble, first: bool

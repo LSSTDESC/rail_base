@@ -1,13 +1,13 @@
 """Abstract base class defining a selector.
 
-The key feature here is make selection to either the photometric or spectroscopic catalog. 
-Intended subclasses spectroscopic selection, probability selection on a grid for the photometry, 
-or pure photometric selection. 
+The key feature here is make selection to either the photometric or spectroscopic catalog.
+Intended subclasses spectroscopic selection, probability selection on a grid for the photometry,
+or pure photometric selection.
 """
 
 from ceci.config import StageParameter as Param
 
-from rail.core.data import DataHandle, PqHandle, TableLike
+from rail.core.data import PqHandle, TableLike
 from rail.core.stage import RailStage
 
 
@@ -20,6 +20,7 @@ class Selector(RailStage):
     """
 
     name = "Selector"
+    entrypoint_function = "__call__"  # the user-facing science function for this class
     config_options = RailStage.config_options.copy()
     config_options.update(
         drop_rows=Param(bool, True, msg="Drop selected rows from output table"),
@@ -32,7 +33,7 @@ class Selector(RailStage):
     inputs = [("input", PqHandle)]
     outputs = [("output", PqHandle)]
 
-    def __call__(self, sample: TableLike) -> DataHandle:
+    def __call__(self, sample: TableLike, **kwargs) -> PqHandle:
         """The main interface method for ``Selector``.
 
         Adds noise to the input catalog
@@ -50,12 +51,12 @@ class Selector(RailStage):
 
         Parameters
         ----------
-        sample:
+        sample : TableLike
             The sample to be selected
 
         Returns
         -------
-        DataHandle
+        PqHandle
             A handle giving access to a table with selected sample
         """
         self.set_data("input", sample)
