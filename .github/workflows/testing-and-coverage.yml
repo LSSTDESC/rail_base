@@ -36,3 +36,9 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
+
+    # runs the create interactive structure test to see if the interactive structure needs to be changed
+    # returns a 1 if something went wrong with the script, or a 2 if the files need to be changed
+    - name: Run create_interactive_structure.py 
+      run: | 
+        python create_interactive_structure.py 
