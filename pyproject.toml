@@ -1,5 +1,6 @@
 [project]
 name = "pz-rail-base"
+version = "v2.0.0"
 requires-python = ">=3.10"
 license = { file = "LICENSE" }
 readme = "README.md"
