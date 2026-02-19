@@ -266,8 +266,8 @@ def _handle_default_path(path: str | Path) -> str:
     if isinstance(path, Path):
         path = str(path)
 
-    if path.startswith(RAILDIR):
-        return path.replace(RAILDIR, "rail.utils.path_utils.RAILDIR")
+    # if path.startswith(RAILDIR):
+    #     return path.replace(RAILDIR, "rail.utils.path_utils.RAILDIR")
     if path.startswith("/"):
         return unfind_rail_file(path)
 
