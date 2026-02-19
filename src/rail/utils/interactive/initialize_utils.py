@@ -245,6 +245,7 @@ def _write_stubs(
     module: types.ModuleType,
     stage_names: list[str],
     virtual_modules: dict[str, VirtualModule],
+    stub_directory: Path,
 ) -> None:
     """Write stub (type hint) files for interactive functions.
 
@@ -259,9 +260,10 @@ def _write_stubs(
         Names of RAIL stages that have interactive functions
     virtual_modules : dict[str, VirtualModule]
         The code-created namespaces that the interactive functions live in
+    stub_directory : Path
+        The location to write stub files to
     """
     stub_files = collections.defaultdict(list)
-    stub_directory = Path(module.__path__[0])
 
     # import top level virtual modules
     stub = stub_files[_get_stub_path(stub_directory)]
@@ -309,7 +311,9 @@ def _write_stubs(
 
 
 def _initialize_interactive_module(
-    calling_module_name: str, write_stubs: bool = False
+    calling_module_name: str,
+    write_stubs: bool = False,
+    stub_directory: Path | None = None,
 ) -> None:
     """Create wrappers for RAIL stages as single-call functions for interactive use.
 
@@ -321,6 +325,8 @@ def _initialize_interactive_module(
         The __name__ attribute of the module calling this function.
     write_stubs : bool, optional
         Whether to write stub files, by default False
+    stub_directory : Path, optional
+        The location to write the stubs to. Required if write_stubs, otherwise should not be given.
     """
 
     calling_module = sys.modules[calling_module_name]
@@ -338,4 +344,6 @@ def _initialize_interactive_module(
         _attatch_interactive_function(virtual_module_dict, stage_name)
 
     if write_stubs:
-        _write_stubs(calling_module, relevant_stages, virtual_module_dict)
+        _write_stubs(
+            calling_module, relevant_stages, virtual_module_dict, stub_directory
+        )
