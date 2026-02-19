@@ -58,7 +58,6 @@ algos = [
     "pz-rail-tpz",
     "pz-rail-delight",
     "pz-rail-pipelines",
-    "DESC_BPZ @ git+https://github.com/LSSTDESC/DESC_BPZ",
 ]
 
 [project.scripts]

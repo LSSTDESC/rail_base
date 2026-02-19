@@ -54,5 +54,6 @@ jobs:
       run: | 
         python create_interactive_structure.py
     - name: Run git diff
+      if: always()
       run: | 
         git diff 
