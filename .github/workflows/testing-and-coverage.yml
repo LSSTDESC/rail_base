@@ -26,8 +26,14 @@ jobs:
         python-version: ${{ matrix.python-version }}
     - name: Install dependencies
       run: |
-        sudo apt-get update
+        # sudo apt-get update
+        # python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install "numpy<2" cython
+        python -m pip install --upgrade --no-binary=mpi4py mpi4py
+        python -m pip install --no-build-isolation somoclu
         python -m pip install --upgrade pip
+        pip install wheel numpy
         pip install .
         pip install .[dev]
         pip install .[algos]
