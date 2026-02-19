@@ -30,8 +30,9 @@ jobs:
         python -m pip install --upgrade pip
         pip install .
         pip install .[dev]
-        pip install .[algos] --no-deps
+        pip install .[algos]
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+        pip list
     - name: Run unit tests with pytest
       run: |
         python -m pytest tests --cov=rail --cov-report=xml
