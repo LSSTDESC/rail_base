@@ -153,9 +153,14 @@ def write_modules() -> None:
 
 def write_stubs() -> None:
     for module in interactive_modules:
-        module = "rail.interactive." + module
-        importlib.import_module(module)
-        _initialize_interactive_module(module, write_stubs=True)
+        stub_directory = InteractiveModule(
+            subfolder=module.replace(".", "/")
+        ).path.parent
+        full_module = "rail.interactive." + module
+        importlib.import_module(full_module)
+        _initialize_interactive_module(
+            full_module, write_stubs=True, stub_directory=stub_directory
+        )
 
 
 def store_pyi(delete: bool) -> dict[Path, str | None]:
