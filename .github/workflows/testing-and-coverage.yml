@@ -52,4 +52,7 @@ jobs:
     # returns a 1 if something went wrong with the script, or a 2 if the files need to be changed
     - name: Run create_interactive_structure.py 
       run: | 
-        python create_interactive_structure.py 
+        python create_interactive_structure.py
+    - name: Run git diff
+      run: | 
+        git diff 
