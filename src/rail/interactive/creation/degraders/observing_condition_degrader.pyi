@@ -82,12 +82,12 @@ def obs_condition(**kwargs) -> Any:
         Default: 128
     mask : str, optional
         mask for the input maps in HEALPIX format.
-        Default: rail_astro_tools/src/rail/examples_data/creation_data/data/survey_condi
-        tions/DC2-mask-neg-nside-128.fits
+        Default: rail/examples_data/creation_data/data/survey_conditions/DC2-mask-neg-
+        nside-128.fits
     weight : str, optional
         weight for assigning pixels to galaxies in HEALPIX format.
-        Default: rail_astro_tools/src/rail/examples_data/creation_data/data/survey_condi
-        tions/DC2-dr6-galcounts-i20-i25.3-nside-128.fits
+        Default: rail/examples_data/creation_data/data/survey_conditions/DC2-dr6-
+        galcounts-i20-i25.3-nside-128.fits
     tot_nVis_flag : bool, optional
         flag indicating whether nVisYr is the total or average per year if supplied.
         Default: True

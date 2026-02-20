@@ -97,12 +97,10 @@ def grid_selection(**kwargs) -> Any:
         Default: 100.0
     ratio_file : str, optional
         path to ratio file
-        Default: rail_astro_tools/src/rail/examples_data/creation_data/data/hsc_ratios_a
-        nd_specz.hdf5
+        Default: rail/examples_data/creation_data/data/hsc_ratios_and_specz.hdf5
     settings_file : str, optional
         path to pickled parameters file
-        Default:
-        rail_astro_tools/src/rail/examples_data/creation_data/data/HSC_grid_settings.pkl
+        Default: rail/examples_data/creation_data/data/HSC_grid_settings.pkl
     random_seed : int, optional
         random seed for reproducibility
         Default: 12345

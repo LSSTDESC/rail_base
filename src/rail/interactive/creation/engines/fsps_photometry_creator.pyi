@@ -43,8 +43,7 @@ def fsps_photometry_creator(**kwargs) -> Any:
         Default: apparent_mags
     filter_folder : str, optional
         Folder containing filter transmissions
-        Default:
-        rail_fsps/src/rail/examples_data/creation_data/data/fsps_default_data/filters
+        Default: rail/examples_data/creation_data/data/fsps_default_data/filters
     instrument_name : str, optional
         Instrument name as prefix to filter transmission files
         Default: lsst

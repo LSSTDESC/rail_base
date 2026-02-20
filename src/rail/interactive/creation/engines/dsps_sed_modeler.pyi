@@ -52,8 +52,8 @@ def dsps_population_sed_modeler(**kwargs) -> Any:
         dimensionless Hubble constant at z=0.
     ssp_templates_file : str, optional
         hdf5 file storing the SSP libraries used to create SEDs
-        Default: rail_dsps/src/rail/examples_data/creation_data/data/dsps_default_data/s
-        sp_data_fsps_v3.2_lgmet_age.h5
+        Default: rail/examples_data/creation_data/data/dsps_default_data/ssp_data_fsps_v
+        3.2_lgmet_age.h5
     redshift_key : str, optional
         Redshift keyword name of the hdf5 dataset
         Default: redshift
@@ -142,8 +142,8 @@ def dsps_single_sed_modeler(**kwargs) -> Any:
         dimensionless Hubble constant at z=0.
     ssp_templates_file : str, optional
         hdf5 file storing the SSP libraries used to create SEDs
-        Default: rail_dsps/src/rail/examples_data/creation_data/data/dsps_default_data/s
-        sp_data_fsps_v3.2_lgmet_age.h5
+        Default: rail/examples_data/creation_data/data/dsps_default_data/ssp_data_fsps_v
+        3.2_lgmet_age.h5
     redshift_key : str, optional
         Redshift keyword name of the hdf5 dataset
         Default: redshifts

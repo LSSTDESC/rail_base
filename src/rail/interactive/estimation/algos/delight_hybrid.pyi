@@ -81,7 +81,7 @@ def delight_estimator(**kwargs) -> Any:
         Default: DC2LSST_u DC2LSST_g DC2LSST_r DC2LSST_i DC2LSST_z DC2LSST_y
     bands_path : str, optional
         string specifying path to filter directory
-        Default: rail_base/src/rail/examples_data/estimation_data/data/FILTER
+        Default: rail/examples_data/estimation_data/data/FILTER
     bands_fmt : str, optional
         string giving the file extension of the filters, not including the '.'
         Default: res
@@ -105,7 +105,7 @@ def delight_estimator(**kwargs) -> Any:
         Default: rail/examples_data/estimation_data/tmp/delight_data
     sed_path : str, optional
         path to SED dir
-        Default: rail_base/src/rail/examples_data/estimation_data/data/SED
+        Default: rail/examples_data/estimation_data/data/SED
     sed_name_list : str, optional
         String with list of all SED names, with no file extension
         Default: El_B2004a Sbc_B2004a Scd_B2004a SB3_B2004a SB2_B2004a Im_B2004a
@@ -172,7 +172,7 @@ def delight_estimator(**kwargs) -> Any:
         Default: 3
     dlght_inputdata : str, optional
         input data directory for ascii data
-        Default: rail_base/src/rail/examples_data/estimation_data/tmp/delight_indata
+        Default: rail/examples_data/estimation_data/tmp/delight_indata
     zPriorSigma : float, optional
         sigma for redshift prior
         Default: 0.2
@@ -248,7 +248,7 @@ def delight_informer(**kwargs) -> Any:
         Default: DC2LSST_u DC2LSST_g DC2LSST_r DC2LSST_i DC2LSST_z DC2LSST_y
     bands_path : str, optional
         string specifying path to filter directory
-        Default: rail_base/src/rail/examples_data/estimation_data/data/FILTER
+        Default: rail/examples_data/estimation_data/data/FILTER
     bands_fmt : str, optional
         string giving the file extension of the filters, not including the '.'
         Default: res
@@ -272,7 +272,7 @@ def delight_informer(**kwargs) -> Any:
         Default: rail/examples_data/estimation_data/tmp/delight_data
     sed_path : str, optional
         path to SED dir
-        Default: rail_base/src/rail/examples_data/estimation_data/data/SED
+        Default: rail/examples_data/estimation_data/data/SED
     sed_name_list : str, optional
         String with list of all SED names, with no file extension
         Default: El_B2004a Sbc_B2004a Scd_B2004a SB3_B2004a SB2_B2004a Im_B2004a
@@ -339,7 +339,7 @@ def delight_informer(**kwargs) -> Any:
         Default: 3
     dlght_inputdata : str, optional
         input data directory for ascii data
-        Default: rail_base/src/rail/examples_data/estimation_data/tmp/delight_indata
+        Default: rail/examples_data/estimation_data/tmp/delight_indata
     zPriorSigma : float, optional
         sigma for redshift prior
         Default: 0.2
