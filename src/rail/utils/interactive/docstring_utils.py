@@ -2,6 +2,7 @@
 RailStages"""
 
 import inspect
+import sysconfig
 import textwrap
 from collections import defaultdict
 from collections.abc import Callable
@@ -53,6 +54,10 @@ SECTION_HEADERS = [
     "Returns",
     "Notes",
 ]
+
+# Paths for _handle_default_path
+SITE_PACKAGES = sysconfig.get_path("purelib")
+RAIL_STORAGE = RAILDIR + "/src/rail"
 
 
 @dataclass
@@ -248,10 +253,39 @@ def _stringify_type_annotation(annotation: str | type) -> str:
     return annotation
 
 
+def _resolve_relative_directories(path: str) -> str:
+    """Resolves relative directory (parent/../child) moves in paths, without converting
+    them to absolute paths.
+
+    Parameters
+    ----------
+    path : str
+        The string (which may or may not contain "/../")
+
+    Returns
+    -------
+    str
+        The original string, but with any relative directory moves resolved
+    """
+    while "/../" in path:
+        index = path.index("/../")
+        prior = path[:index]  # before the relative move (gets shortened)
+        parent = prior[: prior.rindex("/")]  # new parent directory (keep)
+        post = path[index + len("/..") :]  # after the relative move (keep)
+
+        path = parent + post
+    return path
+
+
 def _handle_default_path(path: str | Path) -> str:
     """Replace absolute paths with relative ones for RailStage config items that have
     default values that are paths. Items that don't appear to be paths are passed
     through unchanged.
+
+    The purpose of this function is to make sure that regardless of the installation
+    method for various RAIL packages, the paths that show up in the docstrings are
+    consistent. Because of this, we have to do some checking for the different places
+    files could be depending on the install method.
 
     Parameters
     ----------
@@ -266,12 +300,30 @@ def _handle_default_path(path: str | Path) -> str:
     if isinstance(path, Path):
         path = str(path)
 
-    if path.startswith(RAILDIR):
-        return path.replace(RAILDIR, "rail.utils.path_utils.RAILDIR")
-    if path.startswith("/"):
-        return unfind_rail_file(path)
+    if not path.startswith("/"):
+        return path
 
-    return path
+    if path.startswith(RAIL_STORAGE):
+        # some files are raildir no matter what the install method
+        path = path.removeprefix(RAIL_STORAGE)
+
+    # some files are sitepack if pypi; or git path if manual
+    # in these cases, if you've installed via pypi it is impossible to backsolve to
+    # indicate which package actually installed them therefore, for consistency, never
+    # try to show the user the originating package of a file, just indicate that it came
+    # from "rail"
+    elif path.startswith(SITE_PACKAGES):
+        # file is site_packages/rail/...
+        path = path.removeprefix(SITE_PACKAGES + "/")
+    else:
+        # path is (probably?) absolute path to location in git clone
+        path_in_rail_package = unfind_rail_file(path)
+        if "/src/rail/" in path_in_rail_package:
+            # remove up to/including "/src/" so the path starts with "rail/"
+            index = path_in_rail_package.index("/src/rail/") + len("/src/")
+            path = path_in_rail_package[index:]
+
+    return _resolve_relative_directories(path)
 
 
 def _handle_dictionary_paths(dictionary: dict[str, Any]) -> dict[str, Any]:

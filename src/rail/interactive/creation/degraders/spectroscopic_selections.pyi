@@ -47,8 +47,7 @@ def spec_selection(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -123,8 +122,7 @@ def spec_selection_BOSS(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -196,8 +194,7 @@ def spec_selection_DEEP2(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -278,8 +275,7 @@ def spec_selection_DEEP2_LSST(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -350,8 +346,7 @@ def spec_selection_DESI_BGS(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -427,8 +422,7 @@ def spec_selection_ELG_LOP(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -504,8 +498,7 @@ def spec_selection_DESI_LRG(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -575,8 +568,7 @@ def spec_selection_GAMA(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -644,8 +636,7 @@ def spec_selection_HSC(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -715,8 +706,7 @@ def spec_selection_VVDSf02(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
@@ -786,8 +776,7 @@ def spec_selection_zCOSMOS(**kwargs) -> Any:
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
-        Default: rail.utils.path_utils.RAILDIR/rail/examples_data/creation_data/data/suc
-        cess_rate_data
+        Default: rail/examples_data/creation_data/data/success_rate_data
     percentile_cut : int, optional
         cut redshifts above this percentile
         Default: 100
