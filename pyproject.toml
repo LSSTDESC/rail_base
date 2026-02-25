@@ -46,7 +46,7 @@ algos = [
     "pz-rail-bpz",
     "pz-rail-cmnn",
     "pz-rail-dnf",
-    # "pz-rail-dsps",
+    "pz-rail-dsps",
     "pz-rail-flexzboost",
     "pz-rail-fsps",
     "pz-rail-gpz-v1",
