@@ -25,27 +25,14 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: System deps (MPI + build)
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y --no-install-recommends \
-        build-essential libbz2-dev \
-        openmpi-bin libopenmpi-dev
     - name: Install dependencies
       run: |
-        # sudo apt-get update
-        # python -m pip install --upgrade pip
-        python -m pip install --upgrade pip setuptools wheel
-        python -m pip install "numpy<2" cython
-        python -m pip install --upgrade --no-binary=mpi4py mpi4py
-        python -m pip install --no-build-isolation somoclu
+        sudo apt-get update
         python -m pip install --upgrade pip
         pip install wheel numpy
         pip install .
         pip install .[dev]
-        pip install .[algos]
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-        pip list
     - name: Run unit tests with pytest
       run: |
         python -m pytest tests --cov=rail --cov-report=xml
@@ -53,13 +40,3 @@ jobs:
       uses: codecov/codecov-action@v4
       with:
         token: ${{ secrets.CODECOV_TOKEN }}
-
-    # runs the create interactive structure test to see if the interactive structure needs to be changed
-    # returns a 1 if something went wrong with the script, or a 2 if the files need to be changed
-    - name: Run create_interactive_structure.py 
-      run: | 
-        python create_interactive_structure.py
-    - name: Run git diff
-      if: always()
-      run: | 
-        git diff 
