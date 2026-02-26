@@ -4,6 +4,8 @@
 name: Unit test and code coverage
 
 on:
+  schedule:
+    - cron: 45 7 * * 1
   push:
     branches: [ main ]
   pull_request:
@@ -12,12 +14,15 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-tags: true
+        fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
@@ -26,6 +31,7 @@ jobs:
       run: |
         sudo apt-get update
         python -m pip install --upgrade pip
+        pip install wheel numpy
         pip install .
         pip install .[dev]
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi

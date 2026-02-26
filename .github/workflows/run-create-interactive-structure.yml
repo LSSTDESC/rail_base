@@ -1,14 +1,16 @@
-# This workflow will run daily at 06:45.
-# It will install Python dependencies and run tests with a variety of Python versions.
+# This workflow will install Python dependencies, the supported rail packages, and run the create_interactive_structure.py script
+# If it fails with exit code = 2, that means that there have been updates to any of the stages 
+# this usually means that you just need to create a new branch, run create_interactive_structure.py and do a PR with rail_base to update the .pyi 
+# stub files 
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-python-with-github-actions
 
-name: Unit test smoke test
+name: Running create_interactive_structure script
 
 on:
-  schedule:
-    - cron: 45 6 * * *
-
-  # Allows you to run this workflow manually from the Actions tab
-  workflow_dispatch:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
 
 jobs:
   build:
@@ -17,24 +19,41 @@ jobs:
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
-
     steps:
     - uses: actions/checkout@v3
+      with:
+        fetch-tags: true
+        fetch-depth: 0
     - name: Set up Python ${{ matrix.python-version }}
       uses: actions/setup-python@v4
       with:
         python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
+    - name: System deps (MPI + build)
       run: |
         sudo apt-get update
+        sudo apt-get install -y --no-install-recommends \
+        build-essential libbz2-dev \
+        openmpi-bin libopenmpi-dev
+    - name: Install dependencies
+      run: |
+        # sudo apt-get update
+        # python -m pip install --upgrade pip
+        python -m pip install --upgrade pip setuptools wheel
+        python -m pip install "numpy<2" cython
+        python -m pip install --upgrade --no-binary=mpi4py mpi4py
+        python -m pip install --no-build-isolation somoclu
         python -m pip install --upgrade pip
+        pip install wheel numpy
         pip install .
         pip install .[dev]
+        pip install .[algos]
         if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Run unit tests with pytest
-      run: |
-        python -m pytest tests
 
+    # runs the create interactive structure test to see if the interactive structure needs to be changed
+    # returns a 1 if something went wrong with the script, or a 2 if the files need to be changed
+    - name: Run create_interactive_structure.py 
+      run: | 
+        python create_interactive_structure.py
     - name: Send status to Slack app (RAIL CI Reporter)
       if: ${{ failure() && github.event_name != 'workflow_dispatch' }}
       id: slack
@@ -48,7 +67,7 @@ jobs:
                 "type": "header",
                 "text": {
                   "type": "plain_text",
-                  "text": "${{ github.repository }}"
+                  "text": "${{ github.repository }} create_interactive_structure workflow"
                 }
               },
               {

@@ -58,8 +58,7 @@ def dsps_photometry_creator(**kwargs) -> Any:
         Default: apparent_mags
     filter_folder : str, optional
         Folder containing filter transmissions
-        Default:
-        rail_dsps/src/rail/examples_data/creation_data/data/dsps_default_data/filters
+        Default: rail/examples_data/creation_data/data/dsps_default_data/filters
     instrument_name : str, optional
         Instrument name as prefix to filter transmission files
         Default: lsst
@@ -74,8 +73,8 @@ def dsps_photometry_creator(**kwargs) -> Any:
         Default: 12000
     ssp_templates_file : str, optional
         hdf5 file storing the SSP libraries used to create SEDs
-        Default: rail_dsps/src/rail/examples_data/creation_data/data/dsps_default_data/s
-        sp_data_fsps_v3.2_lgmet_age.h5
+        Default: rail/examples_data/creation_data/data/dsps_default_data/ssp_data_fsps_v
+        3.2_lgmet_age.h5
     default_cosmology : bool, optional
         True to use default DSPS cosmology. If False,Om0, w0, wa, h need to be supplied
         in the sample function

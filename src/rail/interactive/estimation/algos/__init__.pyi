@@ -2,7 +2,6 @@ from . import (
     bpz_lite,
     cc_yaw,
     cmnn,
-    delight_hybrid,
     dnf,
     equal_count,
     flexzboost,
