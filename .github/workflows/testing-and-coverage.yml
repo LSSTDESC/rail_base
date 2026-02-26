@@ -4,6 +4,8 @@
 name: Unit test and code coverage
 
 on:
+  schedule:
+    - cron: 45 7 * * 1
   push:
     branches: [ main ]
   pull_request:
@@ -12,7 +14,7 @@ on:
 jobs:
   build:
 
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-latest 
     strategy:
       matrix:
         python-version: ['3.10', '3.11', '3.12']
