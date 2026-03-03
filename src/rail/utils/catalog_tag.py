@@ -251,7 +251,6 @@ class CatalogTag(Configurable):
                 filter_name = self.config.filter_template.format(band=band_name)
             filter_list.append(filter_name)
             band_val = Band.get_band(filter_name)
-            band_a_env[band_name] = band_val.config.a_env
             if "mag_column_name" in band_info:
                 mag_column_name = band_info["mag_column_name"]
             else:
@@ -262,6 +261,7 @@ class CatalogTag(Configurable):
                 mag_err_column_name = self.config.mag_err_column_template.format(
                     band=band_name
                 )
+            band_a_env[mag_column_name] = band_val.config.a_env
             bands.append(mag_column_name)
             err_bands.append(mag_err_column_name)
             err_dict[mag_column_name] = mag_err_column_name
