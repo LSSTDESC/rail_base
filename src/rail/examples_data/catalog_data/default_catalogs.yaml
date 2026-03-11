@@ -555,3 +555,42 @@ CatalogTags:
           mag_limit: 23.1
         z:
           mag_limit: 21.7
+  - CatalogTag:
+      name: "flagship"
+      mag_column_template: "mag_{band}_lsst"
+      mag_err_column_template: "mag_{band}_lsst_err"
+      filter_template: "DC2LSST_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y', 'Y', 'J', 'H', 'vis']
+      bands:
+        u:
+          mag_limit: 26.4
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6
+        Y:
+          filter: euclid_Y
+          mag_column_name: "mag_y_euclid_nisp"
+          mag_err_column_name: "mag_y_euclid_nisp_err"
+          mag_limit: 26.0
+        J:
+          filter: euclid_J
+          mag_column_name: "mag_j_euclid_nisp"
+          mag_err_column_name: "mag_j_euclid_nisp_err"
+          mag_limit: 26.0
+        H:
+          filter: euclid_H
+          mag_column_name: "mag_h_euclid_nisp"
+          mag_err_column_name: "mag_h_euclid_nisp_err"
+          mag_limit: 26.0
+        vis:
+          filter: euclid_vis
+          mag_column_name: "mag_vis_euclid"
+          mag_err_column_name: "mag_vis_euclid_err"
+          mag_limit: 26.0
