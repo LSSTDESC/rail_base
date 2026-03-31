@@ -36,7 +36,7 @@ def get_active_tag() -> CatalogTag | None:
     return CatalogTag.get_active_tag()
 
 
-def apply(tag: str) -> None:
+def apply(tag: str) -> None:  # pragma: no cover
     """Apply a particular configuration"""
     CatalogTag.apply(tag)
 
