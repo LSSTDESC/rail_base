@@ -36,6 +36,11 @@ def get_active_tag() -> CatalogTag | None:
     return CatalogTag.get_active_tag()
 
 
+def apply(tag: str) -> None:
+    """Apply a particular configuration"""
+    CatalogTag.apply(tag)
+
+
 def apply_defaults(tag: str) -> None:
     """Apply a particular catalog configuraiton"""
     global LOADED_DEFAULTS
