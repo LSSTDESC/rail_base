@@ -36,10 +36,10 @@ def pz_flow_estimator(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -60,31 +60,28 @@ def pz_flow_estimator(**kwargs) -> Any:
     recompute_point_estimates : bool, optional
         Force recomputation of point estimates
         Default: False
-    flow_seed : int, optional
+    seed : int, optional
         seed for flow
         Default: 0
-    ref_column_name : str, optional
-        name for reference column
+    ref_band : str, optional
+        band to use in addition to colors
         Default: mag_i_lsst
     column_names : list, optional
         column names to be used in flow
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     mag_limits : dict, optional
-        1 sigma mag limits
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     include_mag_errors : bool, optional
         Boolean flag on whether to marginalizeover mag errors (NOTE: much slower on
         CPU!)
         Default: False
-    error_names_dict : dict, optional
+    err_names_dict : dict, optional
         dictionary to rename error columns
         Default: {'mag_err_u_lsst': 'mag_u_lsst_err', 'mag_err_g_lsst':...}
     n_error_samples : int, optional
         umber of error samples in marginalization
         Default: 1000
-    redshift_column_name : str, optional
-        name of redshift column
-        Default: redshift
 
     Returns
     -------
@@ -124,31 +121,31 @@ def pz_flow_informer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        min z
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        max_z
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
-        num z bins
+        The number of gridpoints in the z grid
         Default: 301
-    flow_seed : int, optional
+    seed : int, optional
         seed for flow
         Default: 0
-    ref_column_name : str, optional
-        name for reference column
+    ref_band : str, optional
+        band to use in addition to colors
         Default: mag_i_lsst
     column_names : list, optional
         column names to be used in flow
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     mag_limits : dict, optional
-        1 sigma mag limits
+        Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
     include_mag_errors : bool, optional
         Boolean flag on whether to marginalizeover mag errors (NOTE: much slower on
         CPU!)
         Default: False
-    error_names_dict : dict, optional
+    err_names_dict : dict, optional
         dictionary to rename error columns
         Default: {'mag_err_u_lsst': 'mag_u_lsst_err', 'mag_err_g_lsst':...}
     n_error_samples : int, optional
@@ -160,10 +157,10 @@ def pz_flow_informer(**kwargs) -> Any:
     soft_idx_col : int, optional
         index column for SoftPlus
         Default: 0
-    redshift_column_name : str, optional
+    redshift_col : str, optional
         name of redshift column
         Default: redshift
-    num_training_epochs : int, optional
+    n_training_epochs : int, optional
         number flow training epochs
         Default: 50
 

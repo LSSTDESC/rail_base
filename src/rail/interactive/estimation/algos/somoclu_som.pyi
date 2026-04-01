@@ -102,7 +102,7 @@ def somoclu_informer(**kwargs) -> Any:
     n_columns : int, optional
         number of cells in SOM x dimension
         Default: 31
-    gridtype : str, optional
+    grid_type : str, optional
         Optional parameter to specify the grid form of the nodes:* 'rectangular':
         rectangular neurons (default)* 'hexagonal': hexagonal neurons
         Default: rectangular
@@ -233,25 +233,22 @@ def somoclu_summarizer(**kwargs) -> Any:
         will not be clustered.
         Default: -1
     objid_name : str, optional
-        A parameter
+        name of ID column, if present will be written to cellid_output
         Default:
     seed : int, optional
         random seed
         Default: 12345
-    redshift_colname : str, optional
-        name of redshift column in specz file
-        Default: redshift
     phot_weightcol : str, optional
         name of photometry weight, if present
         Default:
     spec_weightcol : str, optional
         name of specz weight col, if present
         Default:
-    split : int, optional
+    som_split_size : int, optional
         the size of data chunks when calculating the distances between the codebook and
         data
         Default: 200
-    nsamples : int, optional
+    n_samples : int, optional
         number of bootstrap samples to generate
         Default: 20
     useful_clusters : list, optional

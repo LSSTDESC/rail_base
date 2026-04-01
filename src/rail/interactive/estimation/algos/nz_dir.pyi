@@ -50,7 +50,7 @@ def nz_dir_informer(**kwargs) -> Any:
     kmetric : str, optional
         Knn metric to use
         Default: euclidean
-    szname : str, optional
+    sz_name : str, optional
         name of specz column in sz_data
         Default: redshift
     szweightcol : str, optional
@@ -104,10 +104,10 @@ def nz_dir_summarizer(**kwargs) -> Any:
         name of hdf5 group for data, if None, then set to ''
         Default: photometry
     zmin : float, optional
-        The minimum redshift of the z grid
+        The minimum redshift of the z grid or sample
         Default: 0.0
     zmax : float, optional
-        The maximum redshift of the z grid
+        The maximum redshift of the z grid or sample
         Default: 3.0
     nzbins : int, optional
         The number of gridpoints in the z grid
@@ -132,7 +132,7 @@ def nz_dir_summarizer(**kwargs) -> Any:
         random seed
         Default: 87
     usecols : list, optional
-        columns from sz_date for Neighbor calculation
+        columns from sz_data for Neighbor calculation
         Default: ['mag_u_lsst', 'mag_g_lsst', 'mag_r_lsst', 'mag_i_lsst',...]
     leafsize : int, optional
         leaf size for testdata KDTree
@@ -140,7 +140,7 @@ def nz_dir_summarizer(**kwargs) -> Any:
     phot_weightcol : str, optional
         name of photometry weight, if present
         Default:
-    nsamples : int, optional
+    n_samples : int, optional
         number of bootstrap samples to generate
         Default: 20
 

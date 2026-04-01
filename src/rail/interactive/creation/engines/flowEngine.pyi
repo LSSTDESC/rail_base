@@ -82,7 +82,7 @@ def flow_modeler(**kwargs) -> Any:
     spline_knots : int, optional
         The number of spline knots in the normalizing flow.
         Default: 16
-    num_training_epochs : int, optional
+    n_training_epochs : int, optional
         The number of training epochs.
         Default: 30
 

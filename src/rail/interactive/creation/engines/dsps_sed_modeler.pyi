@@ -55,8 +55,8 @@ def dsps_population_sed_modeler(**kwargs) -> Any:
         Default: rail/examples_data/creation_data/data/dsps_default_data/ssp_data_fsps_v
         3.2_lgmet_age.h5
     redshift_key : str, optional
-        Redshift keyword name of the hdf5 dataset
-        Default: redshift
+        The keyword of the redshift group in the hdf5 dataset.
+        Default: redshifts
     cosmic_time_grid_key : str, optional
         Cosmic time grid keyword name of the hdf5 dataset, this is the grid of Universe
         age over which the stellar mass build-up takes place in units of Gyr
@@ -81,10 +81,10 @@ def dsps_population_sed_modeler(**kwargs) -> Any:
         in the fit_model function
         Default: True
     min_wavelength : float, optional
-        Minimum output rest-frame wavelength
+        The minimum rest-frame wavelength.
         Default: 250
     max_wavelength : float, optional
-        Maximum output rest-frame wavelength
+        The maximum rest-frame wavelength
         Default: 12000
 
     Returns
@@ -145,7 +145,7 @@ def dsps_single_sed_modeler(**kwargs) -> Any:
         Default: rail/examples_data/creation_data/data/dsps_default_data/ssp_data_fsps_v
         3.2_lgmet_age.h5
     redshift_key : str, optional
-        Redshift keyword name of the hdf5 dataset
+        The keyword of the redshift group in the hdf5 dataset.
         Default: redshifts
     cosmic_time_grid_key : str, optional
         Cosmic time grid keyword name of the hdf5 dataset, this is the grid of Universe
@@ -171,10 +171,10 @@ def dsps_single_sed_modeler(**kwargs) -> Any:
         in the fit_model function
         Default: True
     min_wavelength : float, optional
-        Minimum output rest-frame wavelength
+        The minimum rest-frame wavelength.
         Default: 250
     max_wavelength : float, optional
-        Maximum output rest-frame wavelength
+        The maximum rest-frame wavelength
         Default: 12000
 
     Returns

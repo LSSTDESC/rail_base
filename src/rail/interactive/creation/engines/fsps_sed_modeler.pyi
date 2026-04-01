@@ -32,10 +32,13 @@ def fsps_sed_modeler(**kwargs) -> Any:
     ----------
     input_data : dict, required
         This is the input catalog in the form of an Hdf5Handle.
-    chunk_size : unknown type, optional
+    chunk_size : int, optional
+        Number of objects per chunk for parallel processing or to evalute per loop in
+        single node processing
         Default: 10000
-    hdf5_groupname : unknown type, optional
-        Default: <class 'str'>
+    hdf5_groupname : str, optional
+        name of hdf5 group for data, if None, then set to ''
+        Default: photometry
     compute_vega_mags : bool, optional
         True uses Vega magnitudes versus AB magnitudes
         Default: False
@@ -112,7 +115,7 @@ def fsps_sed_modeler(**kwargs) -> Any:
     redshifts_key : str, optional
         galaxy redshift, dataset keyword name
         Default: redshifts
-    zmet_key : str, optional
+    Z_met_key : str, optional
         The metallicity is specified as an integer ranging between 1 and nz. If
         zcontinuous > 0 then this parameter is ignored, dataset keyword name
         Default: zmet
@@ -166,11 +169,11 @@ def fsps_sed_modeler(**kwargs) -> Any:
         stellar velocity dispersions (km/s), dataset keyword name
         Default: stellar_velocity_dispersion
     min_wavelength : float, optional
-        minimum rest-frame wavelength
-        Default: 3000
+        The minimum rest-frame wavelength.
+        Default: 250
     max_wavelength : float, optional
-        maximum rest-frame wavelength
-        Default: 10000
+        The maximum rest-frame wavelength
+        Default: 12000
     gas_ionizations_key : str, optional
         gas ionization values dataset keyword name
         Default: gas_ionization
@@ -297,10 +300,8 @@ def fsps_sed_modeler(**kwargs) -> Any:
         tabulated LSF dataset keyword name
         Default: tabulated_lsf
     physical_units : bool, optional
-        A parameter
+        False (True) for rest-frame spectra in units ofLsun/Hz (erg/s/Hz)
         Default: False
-    msg : unknown type, optional
-        Default: False (True) for rest-frame spectra in units ofLsun/Hz (erg/s/Hz)
     restframe_wave_key : str, optional
         Rest-frame wavelength keyword name of the output hdf5 dataset
         Default: restframe_wavelengths

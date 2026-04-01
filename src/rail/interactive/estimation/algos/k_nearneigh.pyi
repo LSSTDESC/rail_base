@@ -134,7 +134,7 @@ def k_near_neigh_informer(**kwargs) -> Any:
     redshift_col : str, optional
         name of redshift column
         Default: redshift
-    trainfrac : float, optional
+    train_frac : float, optional
         fraction of training data used to make tree, rest used to set best sigma
         Default: 0.75
     seed : int, optional

@@ -125,7 +125,7 @@ def gpz_informer(**kwargs) -> Any:
     mag_limits : dict, optional
         Limiting magnitudes by filter
         Default: {'mag_u_lsst': 27.79, 'mag_g_lsst': 29.04, 'mag_r_lsst': 29.06,...}
-    trainfrac : float, optional
+    train_frac : float, optional
         fraction of training data used to make tree, rest used to set best sigma
         Default: 0.75
     seed : int, optional

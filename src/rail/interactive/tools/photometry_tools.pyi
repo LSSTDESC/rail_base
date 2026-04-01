@@ -231,7 +231,7 @@ def lsst_flux_to_mag_converter(**kwargs) -> Any:
     mag_err_name : str, optional
         Template for magnitude error column names
         Default: mag_err_{band}_lsst
-    copy_cols : dict, optional
+    copy_col_dict : dict, optional
         Map of other columns to copy
         Default: {}
     mag_offset : float, optional
