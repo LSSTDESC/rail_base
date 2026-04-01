@@ -83,9 +83,9 @@ def grid_selection(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
+    seed : int, optional
+        random seed for reproducibility
+        Default: 12345
     color_redshift_cut : bool, optional
         using color-based redshift cut
         Default: True
@@ -101,9 +101,6 @@ def grid_selection(**kwargs) -> Any:
     settings_file : str, optional
         path to pickled parameters file
         Default: rail/examples_data/creation_data/data/HSC_grid_settings.pkl
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 12345
     scaling_factor : float, optional
         multiplicative factor for ratios to adjust number of galaxies kept
         Default: 1.588

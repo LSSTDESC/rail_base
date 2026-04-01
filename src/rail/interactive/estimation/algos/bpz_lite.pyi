@@ -90,9 +90,9 @@ def bpz_lite_estimator(**kwargs) -> Any:
         value to be replaced with zero flux and given large errors for non-observed
         filters
         Default: -99.0
-    data_path : str, optional
-        data_path (str): file path to the SED, FILTER, and AB directories.  If left to
-        default `None` it will use the install directory for rail +
+    bpz_ref_data_path : str, optional
+        bpz_ref_data_path (str): file path to the SED, FILTER, and AB directories.  If
+        left to default `None` it will use the install directory for rail +
         ../examples_data/estimation_data/data
         Default: None
     filter_list : list, optional
@@ -211,9 +211,9 @@ def bpz_lite_informer(**kwargs) -> Any:
     redshift_col : str, optional
         name of redshift column
         Default: redshift
-    data_path : str, optional
-        data_path (str): file path to the SED, FILTER, and AB directories.  If left to
-        default `None` it will use the install directory for rail +
+    bpz_ref_data_path : str, optional
+        bpz_ref_data_path (str): file path to the SED, FILTER, and AB directories.  If
+        left to default `None` it will use the install directory for rail +
         rail/examples_data/estimation_data/data
         Default: None
     spectra_file : str, optional

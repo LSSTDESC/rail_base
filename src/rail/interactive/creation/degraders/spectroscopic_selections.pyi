@@ -33,17 +33,17 @@ def spec_selection(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -56,9 +56,6 @@ def spec_selection(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -108,17 +105,17 @@ def spec_selection_BOSS(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -131,9 +128,6 @@ def spec_selection_BOSS(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -180,17 +174,17 @@ def spec_selection_DEEP2(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -203,9 +197,6 @@ def spec_selection_DEEP2(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -261,17 +252,17 @@ def spec_selection_DEEP2_LSST(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -284,9 +275,6 @@ def spec_selection_DEEP2_LSST(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -332,17 +320,17 @@ def spec_selection_DESI_BGS(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -355,9 +343,6 @@ def spec_selection_DESI_BGS(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -408,17 +393,17 @@ def spec_selection_ELG_LOP(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -431,9 +416,6 @@ def spec_selection_ELG_LOP(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -484,17 +466,17 @@ def spec_selection_DESI_LRG(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -507,9 +489,6 @@ def spec_selection_DESI_LRG(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -554,17 +533,17 @@ def spec_selection_GAMA(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -577,9 +556,6 @@ def spec_selection_GAMA(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -622,17 +598,17 @@ def spec_selection_HSC(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -645,9 +621,6 @@ def spec_selection_HSC(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -692,17 +665,17 @@ def spec_selection_VVDSf02(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -715,9 +688,6 @@ def spec_selection_VVDSf02(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------
@@ -762,17 +732,17 @@ def spec_selection_zCOSMOS(**kwargs) -> Any:
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
-    seed : unknown type, optional
-        Set to an `int` to force reproducible results.
-        Default: None
-    N_tot : int, optional
+    seed : int, optional
+        random seed for reproducibility
+        Default: 42
+    n_tot : int, optional
         Number of selected sources
         Default: 10000
     nondetect_val : float, optional
-        value to be removed for non detects
+        value to be replaced with magnitude limit for non detects
         Default: 99.0
     downsample : bool, optional
-        If true, downsample the selected sources into a total number of N_tot
+        If true, downsample the selected sources into a total number of n_tot
         Default: True
     success_rate_dir : str, optional
         The path to the directory containing success rate files.
@@ -785,9 +755,6 @@ def spec_selection_zCOSMOS(**kwargs) -> Any:
         for selection. For magnitudes, the keys are ugrizy; for colors, the keys are,
         for example, gr standing for g-r; for redshift, the key is 'redshift'
         Default: {'u': 'mag_u_lsst', 'g': 'mag_g_lsst', 'r': 'mag_r_lsst', 'i':...}
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
 
     Returns
     -------

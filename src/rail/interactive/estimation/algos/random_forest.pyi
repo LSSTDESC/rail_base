@@ -44,7 +44,7 @@ def random_forest_classifier(**kwargs) -> Any:
     class_bands : list, optional
         Which bands to use for classification
         Default: ['r', 'i', 'z']
-    bands : dict, optional
+    band_map : dict, optional
         column names for the the bands
         Default: {'r': 'mag_r_lsst', 'i': 'mag_i_lsst', 'z': 'mag_z_lsst'}
 
@@ -82,7 +82,7 @@ def random_forest_informer(**kwargs) -> Any:
     ----------
     training_data : TableLike, required
         dictionary of all input data, or a `TableHandle` providing access to it
-    random_seed : int, required
+    seed : int, required
         random seed
     hdf5_groupname : str, optional
         name of hdf5 group for data, if None, then set to ''
@@ -90,7 +90,7 @@ def random_forest_informer(**kwargs) -> Any:
     class_bands : list, optional
         Which bands to use for classification
         Default: ['r', 'i', 'z']
-    bands : dict, optional
+    band_map : dict, optional
         column names for the the bands
         Default: {'r': 'mag_r_lsst', 'i': 'mag_i_lsst', 'z': 'mag_z_lsst'}
     redshift_col : str, optional

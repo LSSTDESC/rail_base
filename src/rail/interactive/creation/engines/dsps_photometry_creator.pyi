@@ -45,7 +45,7 @@ def dsps_photometry_creator(**kwargs) -> Any:
     h : float, optional
         dimensionless Hubble constant at z=0.
     redshift_key : str, optional
-        Redshift keyword name of the hdf5 dataset containing rest-frame SEDs
+        The keyword of the redshift group in the hdf5 dataset.
         Default: redshifts
     restframe_sed_key : str, optional
         Rest-frame SED keyword name of the hdf5 dataset containing rest-frame SEDs
@@ -62,14 +62,14 @@ def dsps_photometry_creator(**kwargs) -> Any:
     instrument_name : str, optional
         Instrument name as prefix to filter transmission files
         Default: lsst
-    wavebands : str, optional
-        Comma-separated list of wavebands
-        Default: u,g,r,i,z,y
+    wavebands : list, optional
+        List of wavebands
+        Default: ['u', 'g', 'r', 'i', 'z', 'y']
     min_wavelength : float, optional
-        Minimum input rest-frame wavelength SEDs
+        The minimum rest-frame wavelength.
         Default: 250
     max_wavelength : float, optional
-        Maximum input rest-frame wavelength SEDs
+        The maximum rest-frame wavelength
         Default: 12000
     ssp_templates_file : str, optional
         hdf5 file storing the SSP libraries used to create SEDs

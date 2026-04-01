@@ -29,7 +29,7 @@ def fsps_photometry_creator(**kwargs) -> Any:
     seed : int | None, optional
         The random seed to control sampling, by default None
     redshift_key : str, optional
-        Redshift keyword name of the hdf5 dataset containing rest-frame SEDs
+        The keyword of the redshift group in the hdf5 dataset.
         Default: redshifts
     restframe_sed_key : str, optional
         Rest-frame SED keyword name of the hdf5 dataset containing rest-frame SEDs
@@ -47,9 +47,9 @@ def fsps_photometry_creator(**kwargs) -> Any:
     instrument_name : str, optional
         Instrument name as prefix to filter transmission files
         Default: lsst
-    wavebands : str, optional
+    wavebands : list, optional
         Comma-separated list of wavebands
-        Default: u,g,r,i,z,y
+        Default: ['u', 'g', 'r', 'i', 'z', 'y']
     filter_wave_key : str, optional
         Default: wave
     filter_transm_key : str, optional
@@ -73,10 +73,8 @@ def fsps_photometry_creator(**kwargs) -> Any:
         True to overwrite the cosmological parameters to their Planck2015 values
         Default: False
     physical_units : bool, optional
-        A parameter
+        False (True) for rest-frame spectra in units ofLsun/Hz (erg/s/Hz)
         Default: False
-    msg : unknown type, optional
-        Default: False (True) for rest-frame spectra in units ofLsun/Hz (erg/s/Hz)
 
     Returns
     -------

@@ -1,5 +1,6 @@
 from . import (
     addRandom,
+    desi_selector_phy,
     grid_selection,
     observing_condition_degrader,
     photometric_errors,

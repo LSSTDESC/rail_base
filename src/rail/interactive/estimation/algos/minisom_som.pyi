@@ -201,7 +201,7 @@ def mini_som_summarizer(**kwargs) -> Any:
         name of redshift column
         Default: redshift
     objid_name : str, optional
-        A parameter
+        name of ID column, if present will be written to cellid_output
         Default:
     spec_groupname : str, optional
         name of hdf5 group for spec data, if None, then set to ''
@@ -215,7 +215,7 @@ def mini_som_summarizer(**kwargs) -> Any:
     spec_weightcol : str, optional
         name of specz weight col, if present
         Default:
-    nsamples : int, optional
+    n_samples : int, optional
         number of bootstrap samples to generate
         Default: 20
 

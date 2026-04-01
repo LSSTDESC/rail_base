@@ -74,8 +74,8 @@ def obs_condition(**kwargs) -> Any:
     sample : TableLike, required
         The sample to be degraded.
     seed : int, optional
-        Set to an `int` to force reproducible results.
-        Default: None
+        random seed for reproducibility
+        Default: 42
         An integer to set the numpy random seed, by default None.
     nside : int, optional
         nside for the input maps in HEALPIX format.
@@ -91,9 +91,6 @@ def obs_condition(**kwargs) -> Any:
     tot_nVis_flag : bool, optional
         flag indicating whether nVisYr is the total or average per year if supplied.
         Default: True
-    random_seed : int, optional
-        random seed for reproducibility
-        Default: 42
     map_dict : dict, optional
         dictionary containing the paths to the survey condition maps and/or additional
         LSSTErrorModel parameters.
