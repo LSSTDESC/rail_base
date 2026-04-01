@@ -11,6 +11,8 @@ on:
     branches: [ main ]
   pull_request:
     branches: [ main ]
+  schedule:
+    - cron: 30 5 * * 2
 
 jobs:
   build:
@@ -74,7 +76,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}:"
+                  "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}: \nWhen exit code = 2, this means you need to run create_interactive_structure.py, <https://rail-hub.readthedocs.io/en/latest/source/development/contribute_to_rail.html#merge|see details here>"
                 }
               },
               {
