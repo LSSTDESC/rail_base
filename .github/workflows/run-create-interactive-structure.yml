@@ -74,7 +74,7 @@ jobs:
                 "type": "section",
                 "text": {
                   "type": "mrkdwn",
-                  "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}: <br> When exit code = 2, this means you need to run create_interactive_structure.py, [see here for details](https://rail-hub.readthedocs.io/en/latest/source/development/contribute_to_rail.html#merge)"
+                  "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}: \nWhen exit code = 2, this means you need to run create_interactive_structure.py, <https://rail-hub.readthedocs.io/en/latest/source/development/contribute_to_rail.html#merge|see details here>"
                 }
               },
               {
