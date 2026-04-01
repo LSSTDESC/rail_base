@@ -40,6 +40,11 @@ def spec_selection_desi_phy(**kwargs) -> Any:
     ----------
     sample : table-like or PqHandle, required
         Input simulation catalog.
+    threshold_table : table-like or TableHandle, required
+        Table with columns ``z`` and ``thresh``.
+    threshold_col : str, required
+        Column in the input catalog used for threshold-based selection (e.g.
+        'log_peak_sub_halo_mass' for bgs/lrg, 'log_sfr' for elg)
     drop_rows : bool, optional
         Drop selected rows from output table
         Default: True
@@ -49,16 +54,9 @@ def spec_selection_desi_phy(**kwargs) -> Any:
     desi_type : str, optional
         DESI tracer type: 'bgs', 'lrg', or 'elg'
         Default: lrg
-    threshold_col : str, optional
-        Column in the input catalog used for threshold-based selection (e.g.
-        'log_peak_sub_halo_mass' for bgs/lrg, 'log_sfr' for elg)
-        Default: None
     redshift_col : str, optional
         Column name for redshift in the input catalog
         Default: redshift
-    threshold_table : str, optional
-        Filename of the threshold file
-        Default: None
 
     Returns
     -------
