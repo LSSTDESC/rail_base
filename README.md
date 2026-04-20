@@ -20,7 +20,7 @@ RAIL is developed and maintained by a diverse team comprising DESC Pipeline Scie
 ## Installation
 
 Installation instructions are available under
-[Installation](https://rail-hub.readthedocs.io/en/latest/source/installation.html)
+[Installation](https://rail-hub.readthedocs.io/en/latest/source/user_guide/installation.html)
 on ReadTheDocs.
 
 ## Contributing
