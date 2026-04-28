@@ -151,7 +151,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     interactive_function = "naive_stack_masked_summarizer"
     config_options = NaiveStackSummarizer.config_options.copy()
     config_options.update(
-        selected_bin=Param(int, -1, msg="bin to use"),
+        selected_bin=Param(int, -1, msg="bin to use, or 'all' for all bins >=0 or 'none' for no masking"),
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
