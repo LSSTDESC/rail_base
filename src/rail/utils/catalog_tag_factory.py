@@ -100,7 +100,7 @@ class CatalogTagFactory(RailFactoryMixin):
 
       CatalogTags:
         - CatalogTag:
-            tag: "com_cam"
+            name: "com_cam"
             mag_column_template: "{band}_cModelMag"
             mag_err_column_template: "{band}_cModelMagErr"
             filter_temlpate: "comcam_{band}"

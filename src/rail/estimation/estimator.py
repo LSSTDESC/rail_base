@@ -152,7 +152,7 @@ class CatEstimator(RailStage, PointEstimationMixin):
 
     def _process_chunk(
         self, start: int, end: int, data: TableLike, first: bool
-    ) -> None:
+    ) -> qp.Ensemble:
         raise NotImplementedError(
             f"{self.name}._process_chunk is not implemented"
         )  # pragma: no cover

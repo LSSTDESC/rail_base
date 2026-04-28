@@ -5,7 +5,7 @@ from types import GeneratorType
 import numpy as np
 import pytest
 
-from rail.core.common_params import copy_param, set_param_default
+from rail.core.common_params import copy_param, set_param_default, CommonParamsFactory
 from rail.core.data import (
     DataHandle,
     DataStore,
@@ -345,6 +345,18 @@ def test_common_params() -> None:
     par = copy_param("zmin")
     assert par.default == 0.1
     assert par.value == 0.1
+    assert par.dtype == float
+
+
+def test_common_params_read_yaml() -> None:
+    datapath = os.path.join(
+        RAILDIR, "rail", "examples_data", "testdata", "common_params.yaml"
+    )
+    CommonParamsFactory.load_yaml(datapath)
+    defaults = CommonParamsFactory.get_common_param_set('default').apply()
+    par = copy_param("zmin")
+    assert par.default == 0.0
+    assert par.value == 0.0
     assert par.dtype == float
 
 

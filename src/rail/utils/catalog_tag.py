@@ -146,28 +146,6 @@ class CatalogTag(Configurable):
         replace_error_val_default=Param(float, 0.1, msg="Replacement error value"),
         bands=Param(dict, {}, msg="Band definitions"),
         band_list=Param(list, [], msg="Names of bands in order"),
-        zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
-        zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
-        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
-        chunk_size=Param(
-            int, 10000, msg="Number of object per chunk for parallel processing",
-        ),
-        calc_summary_stats=Param(
-            dtype=bool,
-            default=False,
-            msg="Compute summary statistics",
-        ),
-        calculated_point_estimates=Param(
-            dtype=list,
-            default=[],
-            msg="List of strings defining which point estimates to automatically calculate using `qp.Ensemble`."
-            "Options include, 'mean', 'mode', 'median'.",
-        ),
-        recompute_point_estimates=Param(
-            dtype=bool,
-            default=False,
-            msg="Force recomputation of point estimates",
-        ),
     )
 
     yaml_tag: str = "CatalogTag"
@@ -198,13 +176,6 @@ class CatalogTag(Configurable):
             "nondetect_val",
             "nonobserved_val",
             "hdf5_groupname",
-            "zmin",
-            "zmax",
-            "nzbins",
-            "chunk_size",
-            "calc_summary_stats",
-            "calculated_point_estimates",
-            "recompute_point_estimates",            
         ]
         base_dict: dict = {key: self.config[key] for key in set_params}
         shared_pars = self._build_shared_params()

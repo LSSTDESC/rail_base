@@ -1,0 +1,7 @@
+CommonParamSets:
+  - CommonParams:
+      name: default
+      zmin: 0.
+      zmax: 3.
+      nzbins: 301
+      chunk_size: 100000

@@ -1,9 +1,12 @@
 """Parameters that are shared between stages"""
+from __future__ import annotations
 
 from typing import Any
 
 from ceci.config import StageConfig
 from ceci.config import StageParameter as Param
+from rail.core.configurable import Configurable
+from rail.core.factory_mixin import RailFactoryMixin
 
 lsst_bands = "ugrizy"
 lsst_mag_cols = [f"mag_{band}_lsst" for band in lsst_bands]
@@ -181,6 +184,179 @@ class SharedParams:
         """
         for key, val in kwargs.items():
             set_param_default(key, val)
+
+
+copy_param = SharedParams.copy_param
+
+set_param_default = SharedParams.set_param_default
+
+set_param_defaults = SharedParams.set_param_defaults
+
+
+class CommonParams(Configurable):
+    """Helper class to set shared params via yaml.
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+      CommonParams:
+          name: default
+          zmin: 0.
+          zmax: 3.
+          nzbins: 301
+          chunk_size: 10000
+          calc_summary_stats: False
+          calculated_point_estimates: []
+          recompute_point_estimates: False
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+    Notes
+    -----
+    The files in the yaml file should match the class config_options.
+
+    """
+
+    config_options = dict(
+        name=Param(
+            str, None, required=True, msg="Tag to associate to this set of CommonParams"
+        ),
+        zmin=Param(float, 0.0, msg="The minimum redshift of the z grid"),
+        zmax=Param(float, 3.0, msg="The maximum redshift of the z grid"),
+        nzbins=Param(int, 301, msg="The number of gridpoints in the z grid"),
+        chunk_size=Param(
+            int, 10000, msg="Number of object per chunk for parallel processing",
+        ),
+        calc_summary_stats=Param(
+            dtype=bool,
+            default=False,
+            msg="Compute summary statistics",
+        ),
+        calculated_point_estimates=Param(
+            dtype=list,
+            default=[],
+            msg="List of strings defining which point estimates to automatically calculate using `qp.Ensemble`."
+            "Options include, 'mean', 'mode', 'median'.",
+        ),
+        recompute_point_estimates=Param(
+            dtype=bool,
+            default=False,
+            msg="Force recomputation of point estimates",
+        ),
+    )
+
+    yaml_tag: str = "CommonParams"
+
+    def __init__(self, **kwargs: Any) -> None:
+        """C'tor
+
+        Parameters
+        ----------
+        kwargs: Any
+            Configuration parameters for this Band, must match
+            class.config_options data members
+        """
+        Configurable.__init__(self, **kwargs)
+
+    def _build_base_dict(self) -> dict:
+        """Construct the dict of overrides for the shared paramters"""
+        set_params: list[str] = [
+            "zmin",
+            "zmax",
+            "nzbins",
+            "chunk_size",
+            "calc_summary_stats",
+            "calculated_point_estimates",
+            "recompute_point_estimates",
+        ]
+        base_dict: dict = {key: self.config[key] for key in set_params}
+        return base_dict
+
+    def apply(self) -> None:
+        """Apply this tag"""
+        self._base_dict = self._build_base_dict()
+        set_param_defaults(**self._base_dict)
+
+
+class CommonParamsFactory(RailFactoryMixin):
+    """Factory class to make CommonParams
+
+    Expected usage is that user will define a yaml file with the various
+    band that they wish to use with the following example syntax:
+
+    .. highlight:: yaml
+    .. code-block:: yaml
+
+      CommonParamSets:
+        - CommonParams:
+            name: default
+            zmin: 0.
+            zmax: 3.
+            nzbins: 301
+            chunk_size: 100000
+    """
+
+    yaml_tag: str = "CommonParamSets"
+
+    client_classes = [CommonParams]
+
+    _instance: CommonParamsFactory | None = None
+
+    def __init__(self) -> None:
+        """C'tor, build an empty BandFactor"""
+        RailFactoryMixin.__init__(self)
+        self._common_params = self.add_dict(CommonParams)
+
+    @classmethod
+    def get_common_params(cls) -> dict[str, CommonParams]:
+        """Return the dict of all the CommonParamss"""
+        return cls.instance().common_params
+
+    @classmethod
+    def get_common_params_names(cls) -> list[str]:
+        """Return the names of the CommonParams"""
+        return list(cls.instance().common_params.keys())
+
+    @classmethod
+    def get_common_param_set(cls, name: str) -> CommonParams:
+        """Get a CommonParams by it's assigned name
+
+        Parameters
+        ----------
+        name:
+            Name of the CommonParams to return
+
+        Returns
+        -------
+        CommonParams:
+            CommonParams in question
+        """
+        try:
+            return cls.instance().common_params[name]
+        except KeyError as msg:  # pragma: no cover
+            raise KeyError(
+                f"CommonParams named {name} not found in CommonParamsFactory "
+                f"{list(cls.instance().common_params.keys())}"
+            ) from msg
+
+    @classmethod
+    def add_common_params(cls, common_params: CommonParams) -> None:
+        """Add a particular CommonParams to the factory"""
+        cls.instance().add_to_dict(common_params)
+
+    @property
+    def common_params(self) -> dict[str, CommonParams]:
+        """Return the dictionary of CommonParams"""
+        return self._common_params
+
+    def print_instance_contents(self) -> None:
+        """Print the contents of the factory"""
+        print("----------------")
+        print("CommonParams:")
+        RailFactoryMixin.print_instance_contents(self)
+
+
 
 
 copy_param = SharedParams.copy_param
