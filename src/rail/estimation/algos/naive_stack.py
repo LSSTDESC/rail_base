@@ -179,7 +179,10 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    mask = d["class_id"] == self.config.selected_bin
+                    if selected_bin == "all":
+                        mask = d["class_id"] >= 0
+                    else:
+                        mask = d["class_id"] == self.config.selected_bin
             if mask is None:
                 mask = np.ones(
                     pz_data.npdf,  # pylint: disable=possibly-used-before-assignment
