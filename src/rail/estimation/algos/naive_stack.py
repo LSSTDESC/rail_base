@@ -9,7 +9,7 @@ import qp
 from ceci.config import StageParameter as Param
 
 from rail.core.data import QPHandle, TableHandle, TableLike
-from rail.core.common_params import SharedParams
+from rail.core.common_params import SharedParams, TOMOGRAPHY_ALL, TOMOGRAPHY_NONE
 from rail.estimation.informer import PzInformer
 from rail.estimation.summarizer import PZSummarizer
 
@@ -151,7 +151,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     interactive_function = "naive_stack_masked_summarizer"
     config_options = NaiveStackSummarizer.config_options.copy()
     config_options.update(
-        selected_bin=Param(int, -1, msg="bin to use, or 'all' for all bins >=0 or 'none' for no masking"),
+        selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking"),
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
@@ -159,9 +159,9 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     def _setup_iterator(self) -> Generator:
         selected_bin = self.config.selected_bin
         if self.config.tomography_bins in ["none", None]:
-            selected_bin = -1
+            selected_bin = TOMOGRAPHY_NONE
 
-        if selected_bin == -1:
+        if selected_bin == TOMOGRAPHY_NONE:
             itrs = [self.input_iterator("input")]
         else:
             itrs = [
@@ -179,7 +179,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    if selected_bin == "all":
+                    if selected_bin == TOMOGRAPHY_ALL:
                         mask = d["class_id"] >= 0
                     else:
                         mask = d["class_id"] == selected_bin

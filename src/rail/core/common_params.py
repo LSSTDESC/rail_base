@@ -188,3 +188,6 @@ copy_param = SharedParams.copy_param
 set_param_default = SharedParams.set_param_default
 
 set_param_defaults = SharedParams.set_param_defaults
+
+TOMOGRAPHY_NONE = -1
+TOMOGRAPHY_ALL = -2
