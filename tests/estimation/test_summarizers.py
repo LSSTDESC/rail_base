@@ -49,7 +49,8 @@ def one_mask_algo(
     # tomo_bins = DS.read_file("tomo_bins", TableHandle, tomobins)
     test_data = QPHandle("test_data", path=testdata)
     tomo_bins = TableHandle("tomo_bins", path=tomobins)
-    selected_bin = summary_kwargs.get("selected_bin", 1)
+    summary_kwargs = summary_kwargs.copy()
+    selected_bin = summary_kwargs.pop("selected_bin", 1)
 
     summarizer = summarizer_class.make_stage(name=key, selected_bin=selected_bin, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data, tomo_bins)
@@ -142,4 +143,6 @@ def test_point_estimate_hist_masked() -> None:
     )
     summarizer_class = point_est_hist.PointEstHistMaskedSummarizer
     _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict)
+    _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict | {"selected_bin": TOMOGRAPHY_ALL})
+    _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict | {"selected_bin": TOMOGRAPHY_NONE})
     _ = one_algo("PointEstimateHist", summarizer_class, summary_config_dict)
