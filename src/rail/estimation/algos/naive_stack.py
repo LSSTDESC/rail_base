@@ -92,13 +92,12 @@ class NaiveStackSummarizer(PZSummarizer):
         # Initializing the stacking pdf's
         yvals = np.zeros((1, len(self.zgrid)))
         bvals = np.zeros((self.config.n_samples, len(self.zgrid)))
-        bootstrap_matrix = self._broadcast_bootstrap_matrix()
 
         first = True
         for s, e, test_data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(
-                s, e, test_data, mask, first, bootstrap_matrix, yvals, bvals
+                s, e, test_data, mask, first, yvals, bvals
             )
             first = False
         if self.comm is not None:  # pragma: no cover
@@ -119,7 +118,6 @@ class NaiveStackSummarizer(PZSummarizer):
         data: qp.Ensemble,
         mask: np.ndarray,
         _first: bool,
-        bootstrap_matrix: np.ndarray,
         yvals: np.ndarray,
         bvals: np.ndarray,
     ) -> None:
@@ -137,12 +135,9 @@ class NaiveStackSummarizer(PZSummarizer):
         )
         # qp_d is the normalized probability of the stack, we need to know how many galaxies were
         for i in range(self.config.n_samples):
-            bootstrap_draws = bootstrap_matrix[:, i]
-            # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
-            chunk_mask = (bootstrap_draws >= start) & (bootstrap_draws < end)
-            bootstrap_draws = bootstrap_draws[chunk_mask] - start
-            zarr = np.where(squeeze_mask, pdf_vals.T, 0.0).T[bootstrap_draws]
-            bvals[i] += np.sum(zarr, axis=0)
+            rng = np.random.default_rng(seed=[self.config.seed, start])
+            bootstrap_weights = rng.poisson(lam=1.0, size=pdf_vals.shape[0])
+            bvals[i] += bootstrap_weights[squeeze_mask] @ pdf_vals[squeeze_mask]
 
 
 class NaiveStackMaskedSummarizer(NaiveStackSummarizer):

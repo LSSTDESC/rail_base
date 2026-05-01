@@ -64,7 +64,6 @@ class PointEstHistSummarizer(PZSummarizer):
         )
         assert self.zgrid is not None
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
-        bootstrap_matrix = self._broadcast_bootstrap_matrix()
         # Initiallizing the histograms
         single_hist = np.zeros(self.config.nzbins)
         hist_vals = np.zeros((self.config.n_samples, self.config.nzbins))
@@ -73,7 +72,7 @@ class PointEstHistSummarizer(PZSummarizer):
         for s, e, test_data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(
-                s, e, test_data, mask, first, bootstrap_matrix, single_hist, hist_vals
+                s, e, test_data, mask, first, single_hist, hist_vals
             )
             first = False
             del test_data
@@ -97,20 +96,19 @@ class PointEstHistSummarizer(PZSummarizer):
         test_data: qp.Ensemble,
         mask: np.ndarray,
         _first: bool,
-        bootstrap_matrix: np.ndarray,
         single_hist: np.ndarray,
         hist_vals: np.ndarray,
     ) -> None:
         assert self.zgrid is not None
         zb = test_data.ancil[self.config.point_estimate_key]
         single_hist += np.histogram(zb[mask], bins=self.zgrid)[0]
+        # get a new random seed for each chunk, but make it deterministic
+        # by using the chunk start index and the base seed together
+        rng = np.random.default_rng(seed=[self.config.seed, start])
         for i in range(self.config.n_samples):
-            bootstrap_indeces = bootstrap_matrix[:, i]
-            # Neither all of the bootstrap_draws are in this chunk nor the index starts at "start"
-            chunk_mask = (bootstrap_indeces >= start) & (bootstrap_indeces < end)
-            bootstrap_indeces = bootstrap_indeces[chunk_mask] - start
-            zarr = np.where(mask, zb, np.nan)[bootstrap_indeces]
-            hist_vals[i] += np.histogram(zarr, bins=self.zgrid)[0]
+            # poisson bootstrap
+            bootstrap_weights = rng.poisson(lam=1.0, size=zb.size)
+            hist_vals[i] += np.histogram(zb, weights=bootstrap_weights, bins=self.zgrid)[0]
 
 
 class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
