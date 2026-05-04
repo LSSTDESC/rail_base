@@ -9,7 +9,7 @@ import qp
 from ceci.config import StageParameter as Param
 
 from rail.core.data import QPHandle, TableHandle, TableLike
-from rail.core.common_params import SharedParams
+from rail.core.common_params import SharedParams, TOMOGRAPHY_ALL, TOMOGRAPHY_NONE
 from rail.estimation.informer import PzInformer
 from rail.estimation.summarizer import PZSummarizer
 
@@ -121,7 +121,7 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     interactive_function = "point_est_hist_masked_summarizer"
     config_options = PointEstHistSummarizer.config_options.copy()
     config_options.update(
-        selected_bin=Param(int, -1, msg="bin to use"),
+        selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking")
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
@@ -129,9 +129,9 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     def _setup_iterator(self) -> Generator:
         selected_bin = self.config.selected_bin
         if self.config.tomography_bins in ["none", None]:
-            selected_bin = -1
+            selected_bin = TOMOGRAPHY_NONE
 
-        if selected_bin == -1:
+        if selected_bin == TOMOGRAPHY_NONE:
             itrs = [self.input_iterator("input")]
         else:
             itrs = [
@@ -149,7 +149,10 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
                     pz_data = d
                     first = False
                 else:
-                    mask = d["class_id"] == self.config.selected_bin
+                    if selected_bin == TOMOGRAPHY_ALL:
+                        mask = d["class_id"] >= 0
+                    else:
+                        mask = d["class_id"] == selected_bin
             if mask is None:
                 mask = np.ones(
                     pz_data.npdf,  # pylint: disable=possibly-used-before-assignment
