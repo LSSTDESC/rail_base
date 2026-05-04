@@ -134,8 +134,8 @@ class NaiveStackSummarizer(PZSummarizer):
             0,
         )
         # qp_d is the normalized probability of the stack, we need to know how many galaxies were
+        rng = np.random.default_rng(seed=[self.config.seed, start])
         for i in range(self.config.n_samples):
-            rng = np.random.default_rng(seed=[self.config.seed, start])
             # This is Poisson bootstrap, a variant of regular bootstrap
             # that does not require anything to be stored or comunicated between
             # processes. For large numbers of objects this converges to the same
