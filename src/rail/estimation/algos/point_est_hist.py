@@ -106,7 +106,7 @@ class PointEstHistSummarizer(PZSummarizer):
         # by using the chunk start index and the base seed together
         rng = np.random.default_rng(seed=[self.config.seed, start])
         for i in range(self.config.n_samples):
-            # poisson bootstrap
+            # poisson bootstrap - see naive_stack.py comment for details.
             bootstrap_weights = rng.poisson(lam=1.0, size=zb.size)
             hist_vals[i] += np.histogram(zb, weights=bootstrap_weights, bins=self.zgrid)[0]
 
