@@ -7,6 +7,7 @@ from typing import Any, Generator
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
+import gc
 
 from rail.core.data import QPHandle, TableHandle, TableLike
 from rail.core.common_params import SharedParams, TOMOGRAPHY_ALL, TOMOGRAPHY_NONE
@@ -100,6 +101,7 @@ class NaiveStackSummarizer(PZSummarizer):
             self._process_chunk(
                 s, e, test_data, mask, first, bootstrap_matrix, yvals, bvals
             )
+            gc.collect()
             first = False
         if self.comm is not None:  # pragma: no cover
             bvals, yvals = self._join_histograms(bvals, yvals)

@@ -7,6 +7,7 @@ from typing import Any, Generator
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
+import gc
 
 from rail.core.common_params import SHARED_PARAMS, SharedParams
 from rail.core.data import PqHandle, QPHandle, TableHandle, TableLike
@@ -75,6 +76,7 @@ class TrueNZHistogrammer(RailStage):
         for s, e, data, mask in iterator:
             print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(s, e, data, mask, first, single_hist)
+            gc.collect()
             first = False
         if self.comm is not None:  # pragma: no cover
             single_hist = self.comm.reduce(single_hist)
