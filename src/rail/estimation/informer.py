@@ -11,6 +11,7 @@ from typing import Any, Generator
 import numpy as np
 import qp
 import tables_io
+import gc
 
 from rail.core.common_params import SHARED_PARAMS, SharedParams
 from rail.core.data import DataHandle, ModelHandle, QPHandle, TableHandle, TableLike
@@ -208,6 +209,7 @@ class PzInformer(RailStage):
             print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(s, e, test_data, truth_data, first)
             first = False
+            gc.collect()
         self._finalize_run()
 
     def _initialize_run(self) -> None:

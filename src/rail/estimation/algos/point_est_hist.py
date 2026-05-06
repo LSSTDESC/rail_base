@@ -7,6 +7,7 @@ from typing import Any, Generator
 import numpy as np
 import qp
 from ceci.config import StageParameter as Param
+import gc
 
 from rail.core.data import QPHandle, TableHandle, TableLike
 from rail.core.common_params import SharedParams, TOMOGRAPHY_ALL, TOMOGRAPHY_NONE
@@ -75,6 +76,7 @@ class PointEstHistSummarizer(PZSummarizer):
                 s, e, test_data, mask, first, single_hist, hist_vals
             )
             first = False
+            gc.collect()
             del test_data
         if self.comm is not None:  # pragma: no cover
             hist_vals, single_hist = self._join_histograms(hist_vals, single_hist)

@@ -9,6 +9,7 @@ import qp
 from ceci.config import StageParameter as Param
 from scipy.special import digamma
 from scipy.stats import dirichlet
+import gc
 
 from rail.core.data import QPHandle
 from rail.core.common_params import SharedParams
@@ -111,6 +112,7 @@ class VarInfStackSummarizer(PZSummarizer):
         for s, e, test_data in iterator:
             print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             alpha_trace = self._process_chunk(s, e, test_data, first)
+            gc.collect()
             first = False
 
         if self.rank == 0:
