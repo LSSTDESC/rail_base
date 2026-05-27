@@ -33,10 +33,10 @@ Bands:
       a_env: 1.31
   - Band:
       name: lsstcam_u
-      a_env: 4.81
+      a_env: 4.78
   - Band:
       name: lsstcam_g
-      a_env: 3.64
+      a_env: 3.65
   - Band:
       name: lsstcam_r
       a_env: 2.70
