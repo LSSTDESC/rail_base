@@ -128,6 +128,19 @@ def test_catalog_tags():
 
     catalog_utils.clear()
 
+    # These params are set per-tag in the new CatalogTag system but are not
+    # part of the legacy CatalogConfigBase, so they cannot be compared against
+    # the old system (which leaves them at whatever value was set previously).
+    new_only_params = {
+        "zmin",
+        "zmax",
+        "nzbins",
+        "chunk_size",
+        "calc_summary_stats",
+        "calculated_point_estimates",
+        "recompute_point_estimates",
+    }
+
     for key in CatalogConfigBase.subclasses().keys():
         if key in ["dp1_all"]:
             continue
@@ -141,6 +154,8 @@ def test_catalog_tags():
         _band_name_dict = catalog_utils.get_active_tag().band_name_dict()
 
         for k2, v2 in sp1.items():
+            if k2 in new_only_params:
+                continue
             if isinstance(v2, list):
                 assert v2 == sp2[k2], f"For {key}:{k2}"
             elif isinstance(v2, dict):
