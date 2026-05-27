@@ -32,6 +32,24 @@ Bands:
       name: comcam_y
       a_env: 1.31
   - Band:
+      name: lsstcam_u
+      a_env: 4.81
+  - Band:
+      name: lsstcam_g
+      a_env: 3.64
+  - Band:
+      name: lsstcam_r
+      a_env: 2.70
+  - Band:
+      name: lsstcam_i
+      a_env: 2.06
+  - Band:
+      name: lsstcam_z
+      a_env: 1.58
+  - Band:
+      name: lsstcam_y
+      a_env: 1.31
+  - Band:
       name: DC2LSST_u
       a_env: 4.81
   - Band:
@@ -330,6 +348,9 @@ CatalogTags:
       mag_err_column_template: "{band}_gaap1p0MagErr"
       filter_template: "comcam_{band}"
       band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      zmax: 6.0
+      nzbins: 601
+      calculated_point_estimates: ['zmode', 'zbest']
       bands:
         u:
           mag_limit: 26.5
@@ -349,6 +370,46 @@ CatalogTags:
       mag_err_column_template: "{band}_gaap1p0MagErr"
       filter_template: "comcam_{band}"
       band_list: ['g', 'r', 'i', 'z']
+      bands:
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+  - CatalogTag:
+      name: "lsstcam_gaap"
+      mag_column_template: "{band}_gaap1p0Mag"
+      mag_err_column_template: "{band}_gaap1p0MagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['u', 'g', 'r', 'i', 'z', 'y']
+      zmax: 6.0
+      nzbins: 601
+      calculated_point_estimates: ['zmode', 'zbest']
+      bands:
+        u:
+          mag_limit: 26.5
+        g:
+          mag_limit: 27.8
+        r:
+          mag_limit: 27.1
+        i:
+          mag_limit: 26.7
+        z:
+          mag_limit: 25.8
+        y:
+          mag_limit: 24.6
+  - CatalogTag:
+      name: "lsstcam_gaap_4band"
+      mag_column_template: "{band}_gaap1p0Mag"
+      mag_err_column_template: "{band}_gaap1p0MagErr"
+      filter_template: "comcam_{band}"
+      band_list: ['g', 'r', 'i', 'z']
+      zmax: 6.0
+      nzbins: 601
+      calculated_point_estimates: ['zmode', 'zbest']
       bands:
         g:
           mag_limit: 27.8
@@ -594,3 +655,109 @@ CatalogTags:
           mag_column_name: "mag_vis_euclid"
           mag_err_column_name: "mag_vis_euclid_err"
           mag_limit: 26.0
+  - CatalogTag:
+      name: "dp2_multicolor"
+      mag_column_template: "{band}"
+      mag_err_column_template: "{band}Err"
+      filter_template: "comcam_{band}"
+      ref_band: "i_gaap1p0Mag"
+      object_id_col: "objectId"
+      calculated_point_estimates: ['zmode', 'zbest']
+      hdf5_groupname: ""
+      band_list: ['u_gaap1p0Mag', 'g_gaap1p0Mag', 'r_gaap1p0Mag', 'i_gaap1p0Mag', 'z_gaap1p0Mag', 'y_gaap1p0Mag',
+                  'u_cModelMag', 'g_cModelMag', 'r_cModelMag', 'i_cModelMag', 'z_cModelMag', 'y_cModelMag']
+      bands:
+        u_gaap1p0Mag:
+          filter: comcam_u
+          mag_limit: 26.4
+        g_gaap1p0Mag:
+          filter: comcam_g
+          mag_limit: 27.8
+        r_gaap1p0Mag:
+          filter: comcam_r
+          mag_limit: 27.1
+        i_gaap1p0Mag:
+          filter: comcam_i
+          mag_limit: 26.7
+        z_gaap1p0Mag:
+          filter: comcam_z
+          mag_limit: 25.8
+        y_gaap1p0Mag:
+          filter: comcam_y
+          mag_limit: 24.6
+        u_cModelMag:
+          filter: comcam_u
+          mag_limit: 26.4
+        g_cModelMag:
+          filter: comcam_g
+          mag_limit: 27.8
+        r_cModelMag:
+          filter: comcam_r
+          mag_limit: 27.1
+        i_cModelMag:
+          filter: comcam_i
+          mag_limit: 26.7
+        z_cModelMag:
+          filter: comcam_z
+          mag_limit: 25.8
+        y_cModelMag:
+          filter: comcam_y
+          mag_limit: 24.6
+  - CatalogTag:
+      name: "dp2_morph"
+      mag_column_template: "{band}"
+      mag_err_column_template: "{band}"
+      filter_template: "comcam_{band}"
+      ref_band: "i_gaap1p0Mag"
+      object_id_col: "objectId"
+      calculated_point_estimates: ['zmode', 'zbest']
+      hdf5_groupname: ""
+      band_list: ['u_gaap1p0Mag', 'g_gaap1p0Mag', 'r_gaap1p0Mag', 'i_gaap1p0Mag', 'z_gaap1p0Mag', 'y_gaap1p0Mag',
+                  'u_cModelMag', 'g_cModelMag', 'r_cModelMag', 'i_cModelMag', 'z_cModelMag', 'y_cModelMag',
+                  'sersic_index', 'sersic_reff_major', 'sersic_reff_minor']
+      bands:
+        u_gaap1p0Mag:
+          filter: comcam_u
+          mag_limit: 26.4
+        g_gaap1p0Mag:
+          filter: comcam_g
+          mag_limit: 27.8
+        r_gaap1p0Mag:
+          filter: comcam_r
+          mag_limit: 27.1
+        i_gaap1p0Mag:
+          filter: comcam_i
+          mag_limit: 26.7
+        z_gaap1p0Mag:
+          filter: comcam_z
+          mag_limit: 25.8
+        y_gaap1p0Mag:
+          filter: comcam_y
+          mag_limit: 24.6
+        u_cModelMag:
+          filter: comcam_u
+          mag_limit: 26.4
+        g_cModelMag:
+          filter: comcam_g
+          mag_limit: 27.8
+        r_cModelMag:
+          filter: comcam_r
+          mag_limit: 27.1
+        i_cModelMag:
+          filter: comcam_i
+          mag_limit: 26.7
+        z_cModelMag:
+          filter: comcam_z
+          mag_limit: 25.8
+        y_cModelMag:
+          filter: comcam_y
+          mag_limit: 24.6
+        sersic_index:
+          filter: comcam_y
+          mag_limit: 24.6
+        sersic_reff_major:
+          filter: comcam_y
+          mag_limit: 24.6
+        sersic_reff_minor:
+          filter: comcam_y
+          mag_limit: 24.6
