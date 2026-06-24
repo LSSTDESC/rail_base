@@ -72,7 +72,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                 this_metric.metric_input_type == MetricInputType.single_ensemble
             ):  # pragma: no cover
                 if not self._input_data_type.has_dist():  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
                     continue
@@ -85,7 +85,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_dist()
                 ):  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
                     continue
@@ -98,7 +98,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                     not self._input_data_type.has_dist()
                     or not self._truth_data_type.has_point()
                 ):  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
                     continue
@@ -115,7 +115,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_point()
                 ):  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
                     continue
@@ -136,7 +136,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
                     not self._input_data_type.has_point()
                     or not self._truth_data_type.has_dist()
                 ):  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"skipping {metric} {self._input_data_type} {this_metric.metric_input_type}"
                     )
                     continue
@@ -239,7 +239,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing"
                 )
@@ -257,7 +257,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "MetricOutputType.single_value does not support parallel processing yet"
                 )
@@ -279,7 +279,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -296,7 +296,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "MetricOutputType.single_value does not support parallel processing yet"
                 )
@@ -319,7 +319,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -338,7 +338,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             this_metric.metric_output_type == MetricOutputType.single_distribution
         ):  # pragma: no cover
             if not hasattr(this_metric, "accumulate"):
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -360,7 +360,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     ) -> None:  # pragma: no cover
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -377,7 +377,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
 
         elif this_metric.metric_output_type == MetricOutputType.single_distribution:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -398,7 +398,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
     ) -> None:
         if this_metric.metric_output_type == MetricOutputType.single_value:
             if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )
@@ -417,7 +417,7 @@ class SingleEvaluator(Evaluator):  # pylint: disable=too-many-instance-attribute
             this_metric.metric_output_type == MetricOutputType.single_distribution
         ):  # pragma: no cover
             if not hasattr(this_metric, "accumulate"):
-                print(
+                self.log.warning(
                     f"{this_metric.metric_name} with output type "
                     "single_value does not support parallel processing yet"
                 )

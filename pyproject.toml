@@ -20,6 +20,7 @@ dependencies = [
     "pyyaml",
     "numpy",
     "click",
+    "structlog",
     "ceci>=2.1",
     "qp-prob>=1.0.0",
     "scipy>=1.9.0",

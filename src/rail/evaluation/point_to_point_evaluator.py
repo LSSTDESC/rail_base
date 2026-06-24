@@ -96,7 +96,7 @@ class PointToPointBinnedEvaluator(Evaluator):
     def run(self) -> None:
         self._build_config_dict()
 
-        print(f"Requested metrics: {list(self._metric_config_dict.keys())}")
+        self.log.info(f"Requested metrics: {list(self._metric_config_dict.keys())}")
         data = self._get_all_data()
         estimate_data = np.squeeze(data[0].ancil[self.config.point_estimate_key])
         reference_data = data[1][self.config.hdf5_groupname][
