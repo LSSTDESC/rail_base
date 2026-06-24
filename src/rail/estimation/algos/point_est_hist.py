@@ -71,7 +71,7 @@ class PointEstHistSummarizer(PZSummarizer):
 
         first = True
         for s, e, test_data, mask in iterator:
-            print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
+            self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(
                 s, e, test_data, mask, first, single_hist, hist_vals
             )
