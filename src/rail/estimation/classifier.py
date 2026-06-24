@@ -223,7 +223,7 @@ class PZClassifier(RailStage):
         first = True
 
         for start, end, test_data in iterator:
-            # print(f"Process {self.rank} running estimator on chunk {start} - {end}")
+            self.log.info(f"Process {self.rank} running estimator on chunk {start} - {end}")
             self._process_chunk(start, end, test_data, first)
             first = False
             # Running garbage collection manually seems to be needed

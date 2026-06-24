@@ -3,8 +3,11 @@
 from __future__ import annotations
 
 import os
+import sys
 from math import ceil
 from typing import Any, Iterable, TypeVar
+import logging
+import structlog
 import yaml
 
 from ceci.config import StageParameter as Param
@@ -274,11 +277,12 @@ class RailStage(PipelineStage):
     extra_interactive_documentation: str | None = None
 
     config_options = dict(
+        logging_level=Param(int, logging.WARNING, msg="Logging level: 10=DEBUG, 20=INFO, 30=WARNING, 40=ERROR, 50=CRITICAL"),
         output_mode=Param(
             str,
             "default",
             msg="What to do with the outputs. The options are 'default', where outputs will be written to files and some returned, and 'return', where outputs will only be returned and not written.",
-        )
+        ),
     )
 
     def __init__(self, args: Any, **kwargs: Any) -> None:
@@ -289,6 +293,8 @@ class RailStage(PipelineStage):
         self.io = StageIO(self)
         self.stage_columns: list[str] | None = None
         self.data_store = DataStore()
+        logging.getLogger(self.name).setLevel(self.config.logging_level)            
+        self.log = structlog.get_logger(self.name)
 
     @classmethod
     def make_and_connect(cls: type[S], **kwargs: Any) -> S:
@@ -383,7 +389,7 @@ class RailStage(PipelineStage):
         handle = handle_type(
             aliased_tag, path=path, data=data, creator=self.instance_name
         )
-        print(
+        self.log.info(
             f"Inserting handle into data store.  {aliased_tag}: {handle.path}, {handle.creator}"
         )
         self.data_store[aliased_tag] = handle
@@ -554,7 +560,7 @@ class RailStage(PipelineStage):
             if total_chunks_needed < self.size:  # pragma: no cover
                 self.config.chunk_size = int(ceil(self._input_length / self.size))
                 chunk_size = self.config.chunk_size
-                print(
+                self.log.warning(
                     "Warning: You are reserving more processes than needed, reducing chunk size to",
                     chunk_size,
                     "to use all of the processes",
@@ -662,7 +668,7 @@ class RailStage(PipelineStage):
                     path, columns_to_check, parent_groupname=groupname, **kwargs
                 )
             elif not data.has_path:  # pragma: no cover
-                print("The data handle does not contain data or path.")
+                self.log.warning("The data handle does not contain data or path.")
 
         else:
             # data has been read in, access the columns in the table/dictionary directly

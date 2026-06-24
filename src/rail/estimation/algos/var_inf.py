@@ -110,7 +110,7 @@ class VarInfStackSummarizer(PZSummarizer):
         self.zgrid = np.linspace(self.config.zmin, self.config.zmax, self.config.nzbins)
         first = True
         for s, e, test_data in iterator:
-            print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
+            self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             alpha_trace = self._process_chunk(s, e, test_data, first)
             gc.collect()
             first = False

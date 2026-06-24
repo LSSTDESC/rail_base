@@ -136,7 +136,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
     def run(self) -> None:
         self._build_config_dict()
 
-        print(f"Requested metrics: {list(self._metric_config_dict.keys())}")
+        self.log.info(f"Requested metrics: {list(self._metric_config_dict.keys())}")
 
         if self.config.force_exact:
             self.run_single_node()
@@ -148,7 +148,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
         for data_tuple in itr:
             chunk_start, chunk_end = data_tuple[0], data_tuple[1]
 
-            print(
+            self.log.info(
                 f"Processing {self.rank} running evaluator on chunk {chunk_start} - {chunk_end}."
             )
             self._process_chunk(data_tuple, first)
@@ -174,7 +174,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
                     if key_.find(metric) == 0:
                         matching_keys.append(key_)
                 if not matching_keys:  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"Skipping {metric} which did not cache data {list(self._cached_data.keys())}"
                     )
                     continue
@@ -285,7 +285,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
                 MetricOutputType.single_distribution,
             ]:
                 if not hasattr(this_metric, "accumulate"):  # pragma: no cover
-                    print(
+                    self.log.warning(
                         f"The metric `{metric}` does not support parallel processing yet"
                     )
                     continue
@@ -390,7 +390,7 @@ class Evaluator(RailStage):  # pylint: disable=too-many-instance-attributes
             if metric_name_ in self.config.exclude_metrics:  # pragma: no cover
                 continue
             if metric_name_ not in self._metric_dict:
-                print(
+                self.log.warning(
                     f"Unsupported metric requested: '{metric_name_}'.  "
                     f"Available metrics are: {sorted(self._metric_dict.keys())}"
                 )

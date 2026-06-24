@@ -74,7 +74,7 @@ class TrueNZHistogrammer(RailStage):
 
         first = True
         for s, e, data, mask in iterator:
-            print(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
+            self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(s, e, data, mask, first, single_hist)
             gc.collect()
             first = False
