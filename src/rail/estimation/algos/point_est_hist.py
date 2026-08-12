@@ -2,7 +2,7 @@
 A summarizer that simple makes a histogram of a point estimate
 """
 
-from typing import Any, Generator
+from typing import Any
 
 import numpy as np
 import qp
@@ -51,11 +51,6 @@ class PointEstHistSummarizer(PZSummarizer):
         self.zgrid: np.ndarray | None = None
         self.bincents: np.ndarray | None = None
 
-    def _setup_iterator(self) -> Generator:
-        itr = self.input_iterator("input")
-        for s, e, d in itr:
-            yield s, e, d, np.ones(e - s, dtype=bool)
-
     def run(self) -> None:
         handle = self.get_handle("input", allow_missing=True)
         self._input_length = handle.size()
@@ -64,22 +59,25 @@ class PointEstHistSummarizer(PZSummarizer):
             self.config.zmin, self.config.zmax, self.config.nzbins + 1
         )
         assert self.zgrid is not None
+
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         # Initiallizing the histograms
-        single_hist = np.zeros(self.config.nzbins)
-        hist_vals = np.zeros((self.config.n_samples, self.config.nzbins))
-
+        n_tomo_bins = self._get_n_tomo_bins()
+        n_objects = np.zeros((n_tomo_bins), dtype=int)
+        single_hist = np.zeros((n_tomo_bins, self.config.nzbins))
+        hist_vals = np.zeros((n_tomo_bins, self.config.n_samples, self.config.nzbins))
+        
         first = True
         for s, e, test_data, mask in iterator:
             self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
             self._process_chunk(
-                s, e, test_data, mask, first, single_hist, hist_vals
+                s, e, test_data, mask, first, single_hist, hist_vals, n_objects
             )
             first = False
             gc.collect()
             del test_data
         if self.comm is not None:  # pragma: no cover
-            hist_vals, single_hist = self._join_histograms(hist_vals, single_hist)
+            single_hist, hist_vals, n_objects = self._join_histograms(single_hist, hist_vals, n_objects)
 
         if self.rank == 0:
             sample_ens = qp.Ensemble(
@@ -100,17 +98,28 @@ class PointEstHistSummarizer(PZSummarizer):
         _first: bool,
         single_hist: np.ndarray,
         hist_vals: np.ndarray,
+        n_objects: np.ndarray,
     ) -> None:
         assert self.zgrid is not None
         zb = test_data.ancil[self.config.point_estimate_key]
-        single_hist += np.histogram(zb[mask], bins=self.zgrid)[0]
-        # get a new random seed for each chunk, but make it deterministic
-        # by using the chunk start index and the base seed together
-        rng = np.random.default_rng(seed=[self.config.seed, start])
-        for i in range(self.config.n_samples):
-            # poisson bootstrap - see naive_stack.py comment for details.
-            bootstrap_weights = rng.poisson(lam=1.0, size=zb.size)
-            hist_vals[i] += np.histogram(zb, weights=bootstrap_weights, bins=self.zgrid)[0]
+        squeeze_mask = np.squeeze(mask)
+
+        n_dim = len(squeeze_mask.shape)
+        if n_dim == 1:
+            masks = [squeeze_mask]
+        else:
+            masks = squeeze_mask
+
+        for i, mask_ in enumerate(masks):
+            n_objects[i] += mask_.sum()
+            single_hist[i] += np.histogram(zb[mask_], bins=self.zgrid)[0]
+            # get a new random seed for each chunk, but make it deterministic
+            # by using the chunk start index and the base seed together
+            rng = np.random.default_rng(seed=[self.config.seed, start])
+            for j in range(self.config.n_samples):
+                # poisson bootstrap - see naive_stack.py comment for details.
+                bootstrap_weights = rng.poisson(lam=1.0, size=zb.size)
+                hist_vals[i][j] += np.histogram(zb, weights=bootstrap_weights, bins=self.zgrid)[0]
 
 
 class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
@@ -121,44 +130,11 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
     interactive_function = "point_est_hist_masked_summarizer"
     config_options = PointEstHistSummarizer.config_options.copy()
     config_options.update(
-        selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking")
+        selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking"),
+        n_tomo_bins=Param(int, 1, msg="Number of tomographic bins"),
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
-
-    def _setup_iterator(self) -> Generator:
-        selected_bin = self.config.selected_bin
-        if self.config.tomography_bins in ["none", None]:
-            selected_bin = TOMOGRAPHY_NONE
-
-        if selected_bin == TOMOGRAPHY_NONE:
-            itrs = [self.input_iterator("input")]
-        else:
-            itrs = [
-                self.input_iterator("input"),
-                self.input_iterator("tomography_bins"),
-            ]
-
-        for it in zip(*itrs):
-            first = True
-            mask = None
-            for s, e, d in it:
-                if first:
-                    start = s
-                    end = e
-                    pz_data = d
-                    first = False
-                else:
-                    if selected_bin == TOMOGRAPHY_ALL:
-                        mask = d["class_id"] >= 0
-                    else:
-                        mask = d["class_id"] == selected_bin
-            if mask is None:
-                mask = np.ones(
-                    pz_data.npdf,  # pylint: disable=possibly-used-before-assignment
-                    dtype=bool,
-                )
-            yield start, end, pz_data, mask  # pylint: disable=possibly-used-before-assignment
 
     def summarize(
         self, input_data: qp.Ensemble, tomo_bins: TableLike | None = None, **kwargs
@@ -186,4 +162,4 @@ class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
             self.set_data("tomography_bins", tomo_bins)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        return self._do_return()

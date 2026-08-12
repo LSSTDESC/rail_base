@@ -2,7 +2,7 @@
 A summarizer that simple makes a histogram of a point estimate
 """
 
-from typing import Any, Generator
+from typing import Any
 
 import numpy as np
 import qp
@@ -49,38 +49,6 @@ class NaiveStackSummarizer(PZSummarizer):
         super().__init__(args, **kwargs)
         self.zgrid: np.ndarray | None = None
 
-    def summarize(
-        self, input_data: qp.Ensemble, **kwargs
-    ) -> QPHandle | dict[str, QPHandle]:
-        """Summarizer for NaiveStack which returns multiple items
-
-        Parameters
-        ----------
-        input_data : qp.Ensemble
-            Per-galaxy p(z), and any ancillary data associated with it
-
-        Returns
-        -------
-        QPHandle | dict[str, QPHandle]
-            Ensemble with n(z), and any ancillary data
-            Return type depends on `output_mode`
-        """
-        self.set_data("input", input_data)
-        self.run()
-        self.finalize()
-        if len(self.outputs) == 1 or self.config.output_mode != "return":
-            results = self.get_handle("output")
-        # if there is more than one output and output_mode = return, return them all as a dictionary
-        elif len(self.outputs) > 1 and self.config.output_mode == "return":
-            results = {}
-            for output in self.outputs:
-                results[output[0]] = self.get_handle(output[0])
-        return results
-
-    def _setup_iterator(self) -> Generator:
-        itr = self.input_iterator("input")
-        for s, e, d in itr:
-            yield s, e, d, np.ones(e - s, dtype=bool)
 
     def run(self) -> None:
         handle = self.get_handle("input", allow_missing=True)
@@ -91,25 +59,46 @@ class NaiveStackSummarizer(PZSummarizer):
         )
         assert self.zgrid is not None
         # Initializing the stacking pdf's
-        yvals = np.zeros((1, len(self.zgrid)))
-        bvals = np.zeros((self.config.n_samples, len(self.zgrid)))
+        n_tomo_bins = self._get_n_tomo_bins()
+        
+        n_objects = np.zeros((n_tomo_bins), dtype=int)
+        yvals = np.zeros((n_tomo_bins, len(self.zgrid)))
+        bvals = np.zeros((n_tomo_bins, self.config.n_samples, len(self.zgrid)))
 
         first = True
         for s, e, test_data, mask in iterator:
-            self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
+            self.log.info(f"Process {self.rank} running summarizer on chunk {s:,} - {e:,}")
             self._process_chunk(
-                s, e, test_data, mask, first, yvals, bvals
+                s, e, test_data, mask, first, yvals, bvals, n_objects
             )
             gc.collect()
             first = False
         if self.comm is not None:  # pragma: no cover
-            bvals, yvals = self._join_histograms(bvals, yvals)
+            bvals, yvals, n_objects = self._join_histograms(bvals, yvals, n_objects)
 
         if self.rank == 0:
             sample_ens = qp.Ensemble(
                 qp.interp, data=dict(xvals=self.zgrid, yvals=bvals)
             )
             qp_d = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=yvals))
+            i_realization=np.arange(self.config.n_samples)
+            if 'selected_bin' in self.config:
+                bin_idx = self.config.selected_bin
+            else:
+                bin_idx = TOMOGRAPHY_ALL
+            sample_ens.set_ancil(
+                dict(
+                    bin_idx=np.full((self.config.n_samples), bin_idx),                    
+                    i_realization=np.arange(self.config.n_samples),
+                )
+            )
+            qp_d.set_ancil(
+                dict(
+                    bin_idx=np.array([bin_idx]),
+                    n_objects=[np.squeeze(n_objects)],
+                )
+            )
+
             self.add_data("output", sample_ens)
             self.add_data("single_NZ", qp_d)
 
@@ -122,28 +111,34 @@ class NaiveStackSummarizer(PZSummarizer):
         _first: bool,
         yvals: np.ndarray,
         bvals: np.ndarray,
+        n_objects: np.ndarray,
     ) -> None:
         assert self.zgrid is not None
         pdf_vals = data.pdf(self.zgrid)
         squeeze_mask = np.squeeze(mask)
-        yvals += np.expand_dims(
-            np.sum(
+
+        n_dim = len(mask.shape)
+        if n_dim == 1:
+            masks = [squeeze_mask]
+        else:
+            masks = squeeze_mask
+        
+        for i, mask_ in enumerate(masks):
+            n_objects[i] += mask_.sum()
+            yvals[i] += np.sum(
                 np.where(
-                    np.isfinite(pdf_vals[squeeze_mask, :]), pdf_vals[squeeze_mask], 0.0
+                    np.isfinite(pdf_vals[mask_, :]), pdf_vals[mask_], 0.0
                 ),
-                axis=0,
-            ),
-            0,
-        )
-        # qp_d is the normalized probability of the stack, we need to know how many galaxies were
-        rng = np.random.default_rng(seed=[self.config.seed, start])
-        for i in range(self.config.n_samples):
-            # This is Poisson bootstrap, a variant of regular bootstrap
-            # that does not require anything to be stored or comunicated between
-            # processes. For large numbers of objects this converges to the same
-            # distribution as regular bootstrap.
-            bootstrap_weights = rng.poisson(lam=1.0, size=pdf_vals.shape[0])
-            bvals[i] += bootstrap_weights[squeeze_mask] @ pdf_vals[squeeze_mask]
+            )
+            # qp_d is the normalized probability of the stack, we need to know how many galaxies were
+            rng = np.random.default_rng(seed=[self.config.seed, start])
+            for j in range(self.config.n_samples):
+                # This is Poisson bootstrap, a variant of regular bootstrap
+                # that does not require anything to be stored or comunicated between
+                # processes. For large numbers of objects this converges to the same
+                # distribution as regular bootstrap.
+                bootstrap_weights = rng.poisson(lam=1.0, size=pdf_vals.shape[0])
+                bvals[i][j] += bootstrap_weights[mask_] @ pdf_vals[mask_]
 
 
 class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
@@ -153,43 +148,10 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     config_options = NaiveStackSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking"),
+        n_tomo_bins=Param(int, 1, msg="Number of tomographic bins"),        
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]
-
-    def _setup_iterator(self) -> Generator:
-        selected_bin = self.config.selected_bin
-        if self.config.tomography_bins in ["none", None]:
-            selected_bin = TOMOGRAPHY_NONE
-
-        if selected_bin == TOMOGRAPHY_NONE:
-            itrs = [self.input_iterator("input")]
-        else:
-            itrs = [
-                self.input_iterator("input"),
-                self.input_iterator("tomography_bins"),
-            ]
-
-        for it in zip(*itrs):
-            first = True
-            mask = None
-            for s, e, d in it:
-                if first:
-                    start = s
-                    end = e
-                    pz_data = d
-                    first = False
-                else:
-                    if selected_bin == TOMOGRAPHY_ALL:
-                        mask = d["class_id"] >= 0
-                    else:
-                        mask = d["class_id"] == selected_bin
-            if mask is None:
-                mask = np.ones(
-                    pz_data.npdf,  # pylint: disable=possibly-used-before-assignment
-                    dtype=bool,
-                )
-            yield start, end, pz_data, mask  # pylint: disable=possibly-used-before-assignment
 
     def summarize(
         self, input_data: qp.Ensemble, tomo_bins: TableLike | None = None, **kwargs
@@ -217,4 +179,4 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
             self.set_data("tomography_bins", tomo_bins)
         self.run()
         self.finalize()
-        return self.get_handle("output")
+        return self._do_return()

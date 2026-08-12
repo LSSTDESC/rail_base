@@ -53,7 +53,7 @@ class EqualCountClassifier(PZClassifier):
             perc2 = (ii + 1) / self.config.n_tom_bins
             ind = (cum / cum[-1] > perc1) & (cum / cum[-1] <= perc2)
             useind = sortind[ind]
-            bin_index[useind] = int(ii + 1)
+            bin_index[useind] = int(ii)
 
         if self.config.object_id_col != "":
             # below is commented out and replaced by a redundant line
@@ -65,5 +65,5 @@ class EqualCountClassifier(PZClassifier):
             obj_id = np.arange(npdf)
             self.config.object_id_col = "row_index"
 
-        class_id = {self.config.object_id_col: obj_id, "class_id": bin_index}
+        class_id = {self.config.object_id_col: obj_id, "tomo_bin_index": bin_index}
         self.add_data("output", class_id)
