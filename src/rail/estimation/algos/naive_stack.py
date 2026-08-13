@@ -130,6 +130,7 @@ class NaiveStackSummarizer(PZSummarizer):
                 np.where(
                     np.isfinite(pdf_vals[mask_, :]), pdf_vals[mask_], 0.0
                 ),
+                axis=0,
             )
             # qp_d is the normalized probability of the stack, we need to know how many galaxies were
             rng = np.random.default_rng(seed=[self.config.seed, start])
