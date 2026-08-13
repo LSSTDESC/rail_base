@@ -60,7 +60,7 @@ class NaiveStackSummarizer(PZSummarizer):
         assert self.zgrid is not None
         # Initializing the stacking pdf's
         n_tomo_bins = self._get_n_tomo_bins()
-        
+
         n_objects = np.zeros((n_tomo_bins), dtype=int)
         yvals = np.zeros((n_tomo_bins, len(self.zgrid)))
         bvals = np.zeros((n_tomo_bins, self.config.n_samples, len(self.zgrid)))
@@ -82,23 +82,24 @@ class NaiveStackSummarizer(PZSummarizer):
             )
             qp_d = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=yvals))
             i_realization=np.arange(self.config.n_samples)
-            if 'selected_bin' in self.config:
-                bin_idx = self.config.selected_bin
+            if n_tomo_bins > 1:
+                bin_idx = np.arange(self.config.selected_bin, n_tomo_bins)
+            elif 'selected_bin' in self.config:
+                bin_idx = [self.config.selected_bin]
             else:
-                bin_idx = TOMOGRAPHY_ALL
+                bin_idx = [TOMOGRAPHY_ALL]
             sample_ens.set_ancil(
                 dict(
-                    bin_idx=np.full((self.config.n_samples), bin_idx),                    
-                    i_realization=np.arange(self.config.n_samples),
+                    bin_idx=np.repeat(bin_idx, self.config.n_samples),
+                    i_realization=np.tile(i_realization, n_tomo_bins),
                 )
             )
             qp_d.set_ancil(
                 dict(
-                    bin_idx=np.array([bin_idx]),
-                    n_objects=[np.squeeze(n_objects)],
+                    bin_idx=np.squeeze(np.array(bin_idx)),
+                    n_objects=np.squeeze(np.array(n_objects)),
                 )
             )
-
             self.add_data("output", sample_ens)
             self.add_data("single_NZ", qp_d)
 
@@ -117,12 +118,12 @@ class NaiveStackSummarizer(PZSummarizer):
         pdf_vals = data.pdf(self.zgrid)
         squeeze_mask = np.squeeze(mask)
 
-        n_dim = len(mask.shape)
+        n_dim = len(squeeze_mask.shape)
         if n_dim == 1:
             masks = [squeeze_mask]
         else:
             masks = squeeze_mask
-        
+
         for i, mask_ in enumerate(masks):
             n_objects[i] += mask_.sum()
             yvals[i] += np.sum(
@@ -148,7 +149,7 @@ class NaiveStackMaskedSummarizer(NaiveStackSummarizer):
     config_options = NaiveStackSummarizer.config_options.copy()
     config_options.update(
         selected_bin=Param(int, TOMOGRAPHY_NONE, msg=f"bin to use, or {TOMOGRAPHY_ALL} for all bins >=0 or {TOMOGRAPHY_NONE} for no masking"),
-        n_tomo_bins=Param(int, 1, msg="Number of tomographic bins"),        
+        n_tomo_bins=Param(int, 1, msg="Number of tomographic bins"),
     )
     inputs = [("input", QPHandle), ("tomography_bins", TableHandle)]
     outputs = [("output", QPHandle), ("single_NZ", QPHandle)]

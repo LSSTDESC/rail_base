@@ -27,6 +27,7 @@ class TrueNZHistogrammer(RailStage):
         nzbins=SharedParams.copy_param("nzbins"),
         redshift_col=SharedParams.copy_param("redshift_col"),
         selected_bin=Param(int, -1, msg="Which tomography bin to consider"),
+        n_tomo_bins=Param(int, 1, msg="Number of tomographic bins"),
         chunk_size=SharedParams.copy_param("chunk_size"),
         hdf5_groupname=SharedParams.copy_param("hdf5_groupname"),
     )
@@ -46,6 +47,9 @@ class TrueNZHistogrammer(RailStage):
             self.input_iterator("tomography_bins", groupname=""),
         ]
 
+        n_tomo_bins = self.config.n_tomo_bins
+        selected_bin = self.config.selected_bin
+
         for it in zip(*itrs):
             first = True
             mask = None
@@ -56,10 +60,19 @@ class TrueNZHistogrammer(RailStage):
                     pz_data = d
                     first = False
                 else:
-                    if self.config.selected_bin < 0:
+                    try:
+                        bin_assignments = d['class_id'] - 1
+                    except KeyError:
+                        bin_assignments = d['tomo_bin_index']
+                    if n_tomo_bins > 1:
+                        all_masks = []
+                        for i in range(selected_bin, selected_bin+n_tomo_bins):
+                            all_masks.append(bin_assignments == i)
+                        mask = np.squeeze(np.vstack(all_masks))
+                    elif self.config.selected_bin < 0:
                         mask = np.ones(e - s, dtype=bool)
                     else:
-                        mask = d["class_id"] == self.config.selected_bin
+                        mask = bin_assignments== self.config.selected_bin
             yield start, end, pz_data, mask  # pylint: disable=possibly-used-before-assignment
 
     def run(self) -> None:
@@ -70,7 +83,7 @@ class TrueNZHistogrammer(RailStage):
         assert self.zgrid is not None
         self.bincents = 0.5 * (self.zgrid[1:] + self.zgrid[:-1])
         # Initiallizing the histograms
-        single_hist = np.zeros(self.config.nzbins)
+        single_hist = np.zeros((self.config.n_tomo_bins, self.config.nzbins), dtype=int)
 
         first = True
         for s, e, data, mask in iterator:
@@ -82,11 +95,11 @@ class TrueNZHistogrammer(RailStage):
             single_hist = self.comm.reduce(single_hist)
 
         if self.rank == 0:
-            n_total = single_hist.sum()
+            n_total = single_hist.sum(axis=1)
             qp_d = qp.Ensemble(
                 qp.hist,
                 data=dict(bins=self.zgrid, pdfs=np.atleast_2d(single_hist)),
-                ancil=dict(n_total=np.array([n_total], dtype=int)),
+                ancil=dict(n_total=n_total),
             )
             self.add_data("true_NZ", qp_d)
 
@@ -100,9 +113,15 @@ class TrueNZHistogrammer(RailStage):
         single_hist: np.ndarray,
     ) -> None:
         squeeze_mask = np.squeeze(mask)
-        zb = data[self.config.redshift_col][squeeze_mask]
-        assert self.zgrid is not None
-        single_hist += np.histogram(zb, bins=self.zgrid)[0]
+        n_dim = len(squeeze_mask.shape)
+        if n_dim == 1:
+            masks = [squeeze_mask]
+        else:
+            masks = squeeze_mask
+        for i, mask_ in enumerate(masks):
+            zb = data[self.config.redshift_col][mask_]
+            assert self.zgrid is not None
+            single_hist[i] += np.histogram(zb, bins=self.zgrid)[0]
 
     def histogram(self, catalog: TableLike, tomo_bins: TableLike, **kwargs) -> PqHandle:
         """The main interface method for ``TrueNZHistogrammer``.

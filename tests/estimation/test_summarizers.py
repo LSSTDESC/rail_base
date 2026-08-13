@@ -75,6 +75,45 @@ def one_mask_algo(
     return [summary_ens, summary_2_ens]
 
 
+def one_multi_algo(
+    key: str, summarizer_class: type[RailStage], summary_kwargs: dict[str, Any]
+) -> list[qp.Ensemble]:
+    """
+    A basic test of running an summaizer subclass
+    Run summarize
+    """
+    # DS.__class__.allow_overwrite = True
+    # DS.clear()
+    # test_data = DS.read_file("test_data", QPHandle, testdata)
+    # tomo_bins = DS.read_file("tomo_bins", TableHandle, tomobins)
+    test_data = QPHandle("test_data", path=testdata)
+    tomo_bins = TableHandle("tomo_bins", path=tomobins)
+    summary_kwargs = summary_kwargs.copy()
+
+    summarizer = summarizer_class.make_stage(name=key, **summary_kwargs)
+    summary_ens = summarizer.summarize(test_data, tomo_bins)
+    os.remove(
+        summarizer.get_output(summarizer.get_aliased_tag("output"), final_name=True)
+    )
+    os.remove(
+        summarizer.get_output(summarizer.get_aliased_tag("single_NZ"), final_name=True)
+    )
+
+    summarizer_2 = summarizer_class.make_stage(name=f"{key}_2", **summary_kwargs)
+    summary_2_ens = summarizer_2.summarize(test_data, None)
+    os.remove(
+        summarizer_2.get_output(summarizer_2.get_aliased_tag("output"), final_name=True)
+    )
+    os.remove(
+        summarizer_2.get_output(
+            summarizer_2.get_aliased_tag("single_NZ"), final_name=True
+        )
+    )
+
+    return [summary_ens, summary_2_ens]
+
+
+
 def test_naive_stack() -> None:
     """Basic end to end test for the Naive stack informer to estimator stages"""
     naive_stack_informer_stage = naive_stack.NaiveStackInformer.make_stage()
@@ -146,3 +185,27 @@ def test_point_estimate_hist_masked() -> None:
     _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict | {"selected_bin": TOMOGRAPHY_ALL})
     _ = one_mask_algo("PointEstimateHist", summarizer_class, summary_config_dict | {"selected_bin": TOMOGRAPHY_NONE})
     _ = one_algo("PointEstimateHist", summarizer_class, summary_config_dict)
+
+
+def test_naive_stack_multi() -> None:
+    """Basic end to end test for the Naive stack informer to estimator stages"""
+    summary_config_dict = dict(
+        chunk_size=5,
+        selected_bin=0,
+        n_tomo_bins=5,
+    )
+    summarizer_class = naive_stack.NaiveStackMaskedSummarizer
+    _ = one_multi_algo("NaiveStack", summarizer_class, summary_config_dict)
+
+
+def test_point_estimate_hist_multi() -> None:
+    """Basic end to end test for the point estimate histogram informer to estimator
+    stages
+    """
+    summary_config_dict = dict(
+        chunk_size=5,
+        selected_bin=0,
+        n_tomo_bins=5,
+    )
+    summarizer_class = point_est_hist.PointEstHistMaskedSummarizer
+    _ = one_multi_algo("PointEstimateHist", summarizer_class, summary_config_dict)

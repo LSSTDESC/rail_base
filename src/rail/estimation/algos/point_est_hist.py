@@ -66,7 +66,7 @@ class PointEstHistSummarizer(PZSummarizer):
         n_objects = np.zeros((n_tomo_bins), dtype=int)
         single_hist = np.zeros((n_tomo_bins, self.config.nzbins))
         hist_vals = np.zeros((n_tomo_bins, self.config.n_samples, self.config.nzbins))
-        
+
         first = True
         for s, e, test_data, mask in iterator:
             self.log.info(f"Process {self.rank} running estimator on chunk {s:,} - {e:,}")
@@ -85,6 +85,25 @@ class PointEstHistSummarizer(PZSummarizer):
             )
             qp_d = qp.Ensemble(
                 qp.hist, data=dict(bins=self.zgrid, pdfs=np.atleast_2d(single_hist))
+            )
+            i_realization=np.arange(self.config.n_samples)
+            if n_tomo_bins > 1:
+                bin_idx = np.arange(self.config.selected_bin, n_tomo_bins)
+            elif 'selected_bin' in self.config:
+                bin_idx = [self.config.selected_bin]
+            else:
+                bin_idx = [TOMOGRAPHY_ALL]
+            sample_ens.set_ancil(
+                dict(
+                    bin_idx=np.repeat(bin_idx, self.config.n_samples),
+                    i_realization=np.tile(i_realization, n_tomo_bins),
+                )
+            )
+            qp_d.set_ancil(
+                dict(
+                    bin_idx=np.squeeze(np.array(bin_idx)),
+                    n_objects=np.squeeze(np.array(n_objects)),
+                )
             )
             self.add_data("output", sample_ens)
             self.add_data("single_NZ", qp_d)

@@ -33,7 +33,7 @@ def test_true_nz() -> None:
     check_ens = qp.read(out_hist.path)
     assert check_ens.ancil["n_total"][0] == 10
 
-    check_vals = [0, 5, 0, 0, 0]
+    check_vals = [5, 0, 0, 0, 5]
 
     for i in range(5):
         nz_hist = TrueNZHistogrammer.make_stage(
@@ -52,3 +52,30 @@ def test_true_nz() -> None:
         os.remove(
             nz_hist.get_output(nz_hist.get_aliased_tag("true_NZ"), final_name=True)
         )
+
+
+def test_true_nz_multi() -> None:
+    # DS.clear()
+    # true_nz = DS.read_file("true_nz", path=true_nz_file, handle_class=TableHandle)
+    # tomo_bins = DS.read_file("tomo_bins", path=tomo_file, handle_class=TableHandle)
+    true_nz = TableHandle("true_nz", path=true_nz_file)
+    tomo_bins = TableHandle("tomo_bins", path=tomo_file)
+
+    nz_hist = TrueNZHistogrammer.make_stage(
+        name="true_nz",
+        hdf5_groupname="photometry",
+        redshift_col="redshift",
+        selected_bin=0,
+        n_tomo_bins=5,
+        zmin=0.0,
+        zmax=3.0,
+        nzbins=301,
+    )
+    out_hist = nz_hist.histogram(true_nz, tomo_bins)
+
+    check_ens = qp.read(out_hist.path)
+    assert check_ens.ancil["n_total"].sum() == 10
+
+    os.remove(
+        nz_hist.get_output(nz_hist.get_aliased_tag("true_NZ"), final_name=True)
+    )
