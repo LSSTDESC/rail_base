@@ -95,13 +95,13 @@ class UniformBinningClassifier(PZClassifier):
         bin_index[overflow_mask] = self.config.no_assign
 
         if self.config.object_id_col != "":
-            # below is commented out and replaced by a redundant line
-            # because the data doesn't have ID yet
-            # obj_id = data[self.config.object_id_col]
-            obj_id = np.arange(data.npdf)
+            try:
+                obj_id = data.ancil['id']
+            except (KeyError, IndexError):
+                obj_id = start + np.arange(data.npdf)
         elif self.config.object_id_col == "":
             # ID set to row index
-            obj_id = np.arange(data.npdf)
+            obj_id = start + np.arange(data.npdf)
             self.config.object_id_col = "row_index"
 
         class_id = {
