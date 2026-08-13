@@ -162,9 +162,9 @@ class PZSummarizer(RailStage):
                     first = False
                 else:
                     try:
-                        bin_assignments = d['class_id']
+                        bin_assignments = np.squeeze(d['class_id'] - 1)
                     except KeyError:
-                        bin_assignments = d['tomo_bin_index']
+                        bin_assignments = np.squeeze(d['tomo_bin_index'])
                     if n_tomo_bins > 1:
                         all_masks = []
                         for i in range(selected_bin, selected_bin+n_tomo_bins):

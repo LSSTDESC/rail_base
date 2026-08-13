@@ -89,7 +89,7 @@ def one_multi_algo(
     test_data = QPHandle("test_data", path=testdata)
     tomo_bins = TableHandle("tomo_bins", path=tomobins)
     summary_kwargs = summary_kwargs.copy()
-
+    
     summarizer = summarizer_class.make_stage(name=key, **summary_kwargs)
     summary_ens = summarizer.summarize(test_data, tomo_bins)
     os.remove(
