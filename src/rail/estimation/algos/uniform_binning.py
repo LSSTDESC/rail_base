@@ -79,35 +79,33 @@ class UniformBinningClassifier(PZClassifier):
         # binning options
         if len(self.config.zbin_edges) >= 2:
             # this overwrites all other key words
-            # linear binning defined by zmin, zmax, and n_tom_bins
-            bin_index = np.digitize(zb, self.config.zbin_edges)
-            # assign -99 to objects not in any bin:
-            bin_index[bin_index == 0] = self.config.no_assign
-            bin_index[bin_index == len(self.config.zbin_edges)] = self.config.no_assign
+            # linear binning defined by zmin, zmax, and n_tom_bins            
+            use_bins = self.config.zbin_edges
         else:
-            # linear binning defined by zmin, zmax, and n_tom_bins
-            bin_index = np.digitize(
-                zb,
-                np.linspace(
-                    self.config.zmin, self.config.zmax, self.config.n_tom_bins + 1
-                ),
-            )
-            # assign -99 to objects not in any bin:
-            bin_index[bin_index == 0] = self.config.no_assign
-            bin_index[bin_index == (self.config.n_tom_bins + 1)] = self.config.no_assign
+            # linear binning defined by zmin, zmax, and n_tom_bins            
+            use_bins = np.linspace(self.config.zmin, self.config.zmax, self.config.n_tom_bins + 1)
+
+        bin_index = np.digitize(zb, use_bins)
+
+        underflow_mask = bin_index == 0
+        overflow_mask = bin_index == (self.config.n_tom_bins + 1)
+        bin_index = bin_index - 1
+        # assign guard value to overflows and underflows
+        bin_index[underflow_mask] = self.config.no_assign
+        bin_index[overflow_mask] = self.config.no_assign
 
         if self.config.object_id_col != "":
-            # below is commented out and replaced by a redundant line
-            # because the data doesn't have ID yet
-            # obj_id = data[self.config.object_id_col]
-            obj_id = np.arange(data.npdf)
+            try:
+                obj_id = data.ancil['id']
+            except (KeyError, IndexError):
+                obj_id = start + np.arange(data.npdf)
         elif self.config.object_id_col == "":
             # ID set to row index
-            obj_id = np.arange(data.npdf)
+            obj_id = start + np.arange(data.npdf)
             self.config.object_id_col = "row_index"
 
         class_id = {
             self.config.object_id_col: obj_id,  # pylint: disable=possibly-used-before-assignment
-            "class_id": bin_index,
+            "tomo_bin_index": bin_index,
         }
         self._do_chunk_output(class_id, start, end, first)

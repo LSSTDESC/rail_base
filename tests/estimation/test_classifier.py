@@ -55,26 +55,26 @@ def test_UniformBinningClassifier_binsize() -> None:
     out_data = output_data.data
 
     # check length:
-    assert len(out_data["class_id"]) == len(out_data["row_index"])
+    assert len(out_data["tomo_bin_index"]) == len(out_data["row_index"])
 
     # check that the assignment is as expected:
-    assert (np.isin(np.unique(out_data["class_id"]), [1, 2, -99])).all()
+    assert (np.isin(np.unique(out_data["tomo_bin_index"]), [0, 1, -99])).all()
 
     zb = input_data.data.ancil["zmode"]
-    if 1 in out_data["class_id"]:
+    if 0 in out_data["tomo_bin_index"]:
         assert (
-            (zb[out_data["class_id"] == 1] >= 0.0)
-            & (zb[out_data["class_id"] == 1] < 1.0)
+            (zb[out_data["tomo_bin_index"] == 0] >= 0.0)
+            & (zb[out_data["tomo_bin_index"] == 0] < 1.0)
         ).all()
-    if 2 in out_data["class_id"]:
+    if 1 in out_data["tomo_bin_index"]:
         assert (
-            (zb[out_data["class_id"] == 2] >= 1.0)
-            & (zb[out_data["class_id"] == 2] < 2.0)
+            (zb[out_data["tomo_bin_index"] == 1] >= 1.0)
+            & (zb[out_data["tomo_bin_index"] == 1] < 2.0)
         ).all()
-    if -99 in out_data["class_id"]:
+    if -99 in out_data["tomo_bin_index"]:
         assert (
-            (zb[out_data["class_id"] == -99] < 0.0)
-            | (zb[out_data["class_id"] == -99] >= 2.0)
+            (zb[out_data["tomo_bin_index"] == -99] < 0.0)
+            | (zb[out_data["tomo_bin_index"] == -99] >= 2.0)
         ).all()
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 
@@ -136,21 +136,21 @@ def test_EqualCountClassifier_nobj() -> None:
     out_data = output_data.data
 
     # check that there are equal number of object in each bin modulo Ngal%Nbins
-    assert (np.isin(np.unique(out_data["class_id"]), [1, 2, -99])).all()
+    assert (np.isin(np.unique(out_data["tomo_bin_index"]), [0, 1, -99])).all()
 
-    Ngal = sum(out_data["class_id"] != -99)
+    Ngal = sum(out_data["tomo_bin_index"] != -99)
     exp_Ngal_perbin = int(Ngal / 2)
     # check that each bin does contain number of objects consistent with expected number
     # exp_Ngal_perbin + 1 to account for the cases where Ngal%Nbins!=0
-    assert sum(out_data["class_id"] == 1) in [exp_Ngal_perbin, exp_Ngal_perbin + 1]
-    assert sum(out_data["class_id"] == 2) in [exp_Ngal_perbin, exp_Ngal_perbin + 1]
+    assert sum(out_data["tomo_bin_index"] == 0) in [exp_Ngal_perbin, exp_Ngal_perbin + 1]
+    assert sum(out_data["tomo_bin_index"] == 1) in [exp_Ngal_perbin, exp_Ngal_perbin + 1]
 
     # check no assignment is correct
-    if Ngal < len(out_data["class_id"]):
+    if Ngal < len(out_data["tomo_bin_index"]):
         zb = input_data.data.ancil["zmode"]
         assert (
-            (zb[out_data["class_id"] == -99] < 0.0)
-            | (zb[out_data["class_id"] == -99] >= 2.0)
+            (zb[out_data["tomo_bin_index"] == -99] < 0.0)
+            | (zb[out_data["tomo_bin_index"] == -99] >= 2.0)
         ).all()
     os.remove(tomo.get_output(tomo.get_aliased_tag("output"), final_name=True))
 

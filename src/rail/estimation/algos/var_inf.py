@@ -81,14 +81,7 @@ class VarInfStackSummarizer(PZSummarizer):
         self.set_data("input", input_data)
         self.run()
         self.finalize()
-        if len(self.outputs) == 1 or self.config.output_mode != "return":
-            results = self.get_handle("output")
-        # if there is more than one output and output_mode = return, return them all as a dictionary
-        elif len(self.outputs) > 1 and self.config.output_mode == "return":
-            results = {}
-            for output in self.outputs:
-                results[output[0]] = self.get_handle(output[0])
-        return results
+        self._do_return()
 
     def _setup_iterator(self) -> Iterable:
         input_handle = self.get_handle("input", allow_missing=True)

@@ -20,7 +20,7 @@ class KDEBinOverlap(RailStage):
         redshift_col=SharedParams.copy_param("redshift_col"),
         bin_name=Param(
             str,
-            "class_id",
+            "tomo_bin_index",
             required=False,
             msg="Groupname for the tomographic bin index in the hdf5 handle",
         ),
