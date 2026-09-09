@@ -7,9 +7,8 @@ from rail.utils.path_utils import find_rail_file
 
 @pytest.fixture(name="get_evaluation_files", scope="package")
 def get_evaluation_files(request: pytest.FixtureRequest) -> tuple[str, str]:
-    try:
-        possible_local_file = "output_fzboost.hdf5"
-    except:
+
+    possible_local_file = "output_fzboost.hdf5"
         
     if os.path.exists(possible_local_file):
         pdfs_file = os.path.abspath(possible_local_file)
