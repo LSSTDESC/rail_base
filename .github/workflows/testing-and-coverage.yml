@@ -12,13 +12,29 @@ on:
     branches: [ main ]
 
 jobs:
-  build:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download file
+        run: curl -L -o  https://portal.nersc.gov/cfs/lsst/PZ/output_fzboost.hdf5
 
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output_fzboost
+          path: src/rail/examples_data/evaluation_data/data/output_fzboost.hdf5
+
+  build:
+    needs: download
     runs-on: ubuntu-latest 
     strategy:
       matrix:
         python-version: ['3.11', '3.12', '3.13']
     steps:
+    - name: Download artifact
+      uses: actions/download-artifact@v4
+      with:
+        name: output_fzboost
     - uses: actions/checkout@v3
       with:
         fetch-tags: true
