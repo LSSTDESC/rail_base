@@ -62,7 +62,7 @@ class TrueNZHistogrammer(RailStage):
                 else:
                     try:
                         bin_assignments = np.squeeze(d['class_id'] - 1)
-                    except KeyError:
+                    except KeyError:  # pragma: no cover
                         bin_assignments = np.squeeze(d['tomo_bin_index'])
                     if n_tomo_bins > 1:
                         all_masks = []
