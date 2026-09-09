@@ -11,7 +11,21 @@ on:
   workflow_dispatch:
 
 jobs:
+  download:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Download file
+        run: |
+          curl -L -o output_fzboost.hdf5 https://s3df.slac.stanford.edu/people/echarles/package_test_data/rail/output_fzboost.hdf5
+
+      - name: Upload as artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: output_fzboost
+          path: output_fzboost.hdf5
+
   build:
+    needs: download
 
     runs-on: ubuntu-latest
     strategy:
@@ -19,57 +33,61 @@ jobs:
         python-version: ['3.11', '3.12', '3.13']
 
     steps:
-    - uses: actions/checkout@v3
-    - name: Set up Python ${{ matrix.python-version }}
-      uses: actions/setup-python@v4
-      with:
-        python-version: ${{ matrix.python-version }}
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        python -m pip install --upgrade pip
-        pip install .
-        pip install .[dev]
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
-    - name: Run unit tests with pytest
-      run: |
-        python -m pytest tests
+      - name: Download artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: output_fzboost
+      - uses: actions/checkout@v3
+      - name: Set up Python ${{ matrix.python-version }}
+        uses: actions/setup-python@v4
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install dependencies
+        run: |
+          sudo apt-get update
+          python -m pip install --upgrade pip
+          pip install .
+          pip install .[dev]
+          if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+      - name: Run unit tests with pytest
+        run: |
+          python -m pytest tests
 
-    - name: Send status to Slack app (RAIL CI Reporter)
-      if: ${{ failure() && github.event_name != 'workflow_dispatch' }}
-      id: slack
-      uses: slackapi/slack-github-action@v1.24.0
-      with:
-        # For posting a rich message using Block Kit
-        payload: |
-          {
-            "blocks": [
-              {
-                "type": "header",
-                "text": {
-                  "type": "plain_text",
-                  "text": "${{ github.repository }}"
+      - name: Send status to Slack app (RAIL CI Reporter)
+        if: ${{ failure() && github.event_name != 'workflow_dispatch' }}
+        id: slack
+        uses: slackapi/slack-github-action@v1.24.0
+        with:
+          # For posting a rich message using Block Kit
+          payload: |
+            {
+              "blocks": [
+                {
+                  "type": "header",
+                  "text": {
+                    "type": "plain_text",
+                    "text": "${{ github.repository }}"
+                  }
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}:"
+                  }
+                },
+                {
+                  "type": "divider"
+                },
+                {
+                  "type": "section",
+                  "text": {
+                    "type": "mrkdwn",
+                    "text": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
+                  }
                 }
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "GitHub Action build result: *${{ job.status }}* :${{ job.status }}:"
-                }
-              },
-              {
-                "type": "divider"
-              },
-              {
-                "type": "section",
-                "text": {
-                  "type": "mrkdwn",
-                  "text": "${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}"
-                }
-              }
-            ]
-          }
-      env:
-        SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
-        SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK
+              ]
+            }
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+          SLACK_WEBHOOK_TYPE: INCOMING_WEBHOOK

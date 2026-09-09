@@ -5,6 +5,8 @@ Utility functions for the rail.interactive module.
 import collections
 import functools
 import inspect
+import os
+import structlog
 import sys
 import types
 from collections.abc import Callable
@@ -27,6 +29,7 @@ from rail.utils.interactive.docstring_utils import (
     create_interactive_docstring,
 )
 
+the_logger = structlog.get_logger("initialize_utils")
 
 @dataclass
 class VirtualModule:
@@ -199,6 +202,14 @@ def _attatch_interactive_function(
     """
     stage_definition = _get_stage_definition(stage_name)
     function_name = stage_definition.interactive_function
+    if function_name is None:  # pragma: no cover
+        if os.environ.get('RAIL_INTERACTIVE_ALLOW_FAILURE', False):
+            the_logger.warn(f"Stage {stage_name} does not have an interactive function")
+            return
+        else:
+            raise ValueError(
+                f"Stage {stage_name} does not have an interactive function"
+            )
     virtual_module_name = _get_stage_module(stage_name, interactive=True)
     virtual_module = stage_module_dict[virtual_module_name]
 

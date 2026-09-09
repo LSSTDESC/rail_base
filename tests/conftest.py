@@ -7,11 +7,13 @@ from rail.utils.path_utils import find_rail_file
 
 @pytest.fixture(name="get_evaluation_files", scope="package")
 def get_evaluation_files(request: pytest.FixtureRequest) -> tuple[str, str]:
-    possible_local_file = "./examples_data/evaluation_data/data/output_fzboost.hdf5"
+
+    possible_local_file = "output_fzboost.hdf5"
+        
     if os.path.exists(possible_local_file):
         pdfs_file = os.path.abspath(possible_local_file)
     else:
-        pdfs_file = "examples_data/evaluation_data/data/output_fzboost.hdf5"
+        pdfs_file = "./output_fzboost.hdf5"
         try:
             os.makedirs(os.path.dirname(pdfs_file))
         except FileExistsError:

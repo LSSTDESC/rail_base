@@ -2,6 +2,8 @@
 RailStages"""
 
 import inspect
+import os
+import structlog
 import sysconfig
 import textwrap
 from collections import defaultdict
@@ -20,6 +22,8 @@ from rail.utils.interactive.base_utils import (
     _get_stage_definition,
 )
 from rail.utils.path_utils import RAILDIR, unfind_rail_file
+
+the_logger = structlog.get_logger("docstring_utils")
 
 # INTERACTIVE_DO: is there any case where an interactive function might not return? no, right?
 DOCSTRING_FORMAT = """
@@ -806,6 +810,17 @@ def create_interactive_docstring(stage_name: str) -> str:
     epf_docstring = getattr(
         stage_definition, stage_definition.entrypoint_function
     ).__doc__
+    if epf_docstring is None:  # pragma: no cover
+        if os.environ.get('RAIL_INTERACTIVE_ALLOW_FAILURE', False):
+            the_logger.warn(
+                f"Stage {stage_name}.{stage_definition.entrypoint_function} does not have a docstring"
+            )
+            epf_docstring = "\n"
+        else:
+            raise ValueError(
+                f"Stage {stage_name}.{stage_definition.entrypoint_function} does not have a docstring"
+            )
+
     epf_docstring = textwrap.dedent(
         "    " + epf_docstring
     )  # need to handle the first line lacking indent
