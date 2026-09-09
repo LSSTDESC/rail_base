@@ -16,7 +16,7 @@ jobs:
     steps:
       - name: Download file
         run: |
-          mkdir -p c/rail/examples_data/evaluation_data/data
+          mkdir -p src/rail/examples_data/evaluation_data/data
           curl -L -o src/rail/examples_data/evaluation_data/data/output_fzboost.hdf5 https://s3df.slac.stanford.edu/people/echarles/package_test_data/rail/output_fzboost.hdf5
 
       - name: Upload as artifact
