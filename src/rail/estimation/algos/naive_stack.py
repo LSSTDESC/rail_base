@@ -78,7 +78,7 @@ class NaiveStackSummarizer(PZSummarizer):
 
         if self.rank == 0:
             sample_ens = qp.Ensemble(
-                qp.interp, data=dict(xvals=self.zgrid, yvals=bvals)
+                qp.interp, data=dict(xvals=self.zgrid, yvals=np.vstack(bvals))
             )
             qp_d = qp.Ensemble(qp.interp, data=dict(xvals=self.zgrid, yvals=yvals))
             i_realization=np.arange(self.config.n_samples)
