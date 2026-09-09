@@ -16,14 +16,13 @@ jobs:
     steps:
       - name: Download file
         run: |
-          mkdir -p src/rail/examples_data/evaluation_data/data
-          curl -L -o src/rail/examples_data/evaluation_data/data/output_fzboost.hdf5 https://s3df.slac.stanford.edu/people/echarles/package_test_data/rail/output_fzboost.hdf5
+          curl -L -o output_fzboost.hdf5 https://s3df.slac.stanford.edu/people/echarles/package_test_data/rail/output_fzboost.hdf5
 
       - name: Upload as artifact
         uses: actions/upload-artifact@v4
         with:
           name: output_fzboost
-          path: src/rail/examples_data/evaluation_data/data/output_fzboost.hdf5
+          path: output_fzboost.hdf5
 
   build:
     needs: download
