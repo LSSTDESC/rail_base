@@ -561,9 +561,8 @@ class RailStage(PipelineStage):
                 self.config.chunk_size = int(ceil(self._input_length / self.size))
                 chunk_size = self.config.chunk_size
                 self.log.warning(
-                    "Warning: You are reserving more processes than needed, reducing chunk size to",
-                    chunk_size,
-                    "to use all of the processes",
+                    "Warning: You are reserving more processes than needed, reducing chunk "
+                    f"size to {chunk_size} to use all of the processes",
                 )
 
             kwcopy = dict(
