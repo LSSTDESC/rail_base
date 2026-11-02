@@ -196,7 +196,8 @@ class RailPipeline(MiniPipeline):
             stages_config_dict = stages_config or {}
 
         # loop through stages
-        for key, exec_cfg in pipe.stage_execution_config.items():
+        for key in pipe.stage_names:
+            exec_cfg = pipe.get_stage_execution_config(key)
             stage_cfg = stages_config_dict.get(key) or {}
             nprocess = stage_cfg.get("nprocess")
 
