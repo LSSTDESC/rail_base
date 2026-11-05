@@ -138,7 +138,7 @@ class PointEstHistSummarizer(PZSummarizer):
             for j in range(self.config.n_samples):
                 # poisson bootstrap - see naive_stack.py comment for details.
                 bootstrap_weights = rng.poisson(lam=1.0, size=zb.size)
-                hist_vals[i][j] += np.histogram(zb, weights=bootstrap_weights, bins=self.zgrid)[0]
+                hist_vals[i][j] += np.histogram(np.squeeze(zb), weights=bootstrap_weights, bins=self.zgrid)[0]
 
 
 class PointEstHistMaskedSummarizer(PointEstHistSummarizer):
