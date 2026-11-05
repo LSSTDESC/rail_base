@@ -81,7 +81,7 @@ class VarInfStackSummarizer(PZSummarizer):
         self.set_data("input", input_data)
         self.run()
         self.finalize()
-        self._do_return()
+        return self._do_return()
 
     def _setup_iterator(self) -> Iterable:
         input_handle = self.get_handle("input", allow_missing=True)
