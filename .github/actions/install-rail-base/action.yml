@@ -1,0 +1,32 @@
+name: 'Install rail_base'
+description: >
+  Install rail_base and its dependencies using install_rail.py from
+  LSSTDESC/rail_setup (rail-packages=none installs only the pz-rail base
+  without any algorithm packages), then installs the local checkout on top.
+
+runs:
+  using: 'composite'
+  steps:
+    - name: System dependencies and pip upgrade
+      shell: bash
+      run: |
+        sudo apt-get update
+        python -m pip install --upgrade pip
+
+    - name: Download install_rail.py
+      shell: bash
+      run: |
+        curl -fsSL -o install_rail.py \
+          https://raw.githubusercontent.com/LSSTDESC/rail_setup/main/install_rail.py
+
+    - name: Install base rail dependencies via install_rail.py
+      shell: bash
+      run: |
+        python install_rail.py --rail-packages none --install-devtools no
+
+    - name: Install local rail_base and dev extras
+      shell: bash
+      run: |
+        pip install .
+        pip install .[dev]
+        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi

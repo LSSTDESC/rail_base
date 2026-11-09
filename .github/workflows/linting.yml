@@ -18,13 +18,8 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: '3.12'
-    - name: Install dependencies
-      run: |
-        sudo apt-get update
-        python -m pip install --upgrade pip
-        pip install .
-        pip install .[dev]
-        if [ -f requirements.txt ]; then pip install -r requirements.txt; fi
+    - name: Install rail_base
+      uses: ./.github/actions/install-rail-base
     - name: Analyze code with linter
       run: |
         pylint -rn -sn --recursive=y ./src
