@@ -7,11 +7,10 @@ description: >
 runs:
   using: 'composite'
   steps:
-    - name: System dependencies and pip upgrade
+    - name: System dependencies
       shell: bash
       run: |
         sudo apt-get update
-        python -m pip install --upgrade pip
 
     - name: Download install_rail.py
       shell: bash
@@ -22,7 +21,16 @@ runs:
     - name: Install base rail dependencies via install_rail.py
       shell: bash
       run: |
-        python install_rail.py --rail-packages none --install-devtools no
+        python install_rail.py \
+          --install-conda mamba \
+          --env-name rail_ci \
+          --rail-packages none \
+          --install-devtools no
+
+    - name: Add conda environment to PATH
+      shell: bash
+      run: |
+        echo "${HOME}/mambaforge/envs/rail_ci/bin" >> $GITHUB_PATH
 
     - name: Install local rail_base and dev extras
       shell: bash
